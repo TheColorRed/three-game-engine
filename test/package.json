@@ -1,0 +1,20 @@
+{
+  "name": "test-game",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npx webpack serve --progress"
+  },
+  "dependencies": {
+    "@engine/core": "1.0.0",
+    "@engine/common": "1.0.0",
+    "@engine/input": "1.0.0",
+    "rxjs": "^7.5.6"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.3.1",
+    "webpack": "5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.10.0"
+  }
+}

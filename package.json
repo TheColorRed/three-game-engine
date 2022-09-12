@@ -1,0 +1,14 @@
+{
+  "name": "game-engine",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "npm run start --workspace=test"
+  },
+  "workspaces": [
+    "test",
+    "packages/core",
+    "packages/common",
+    "packages/input",
+    "packages/objects"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "baseUrl": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "preserveSymlinks": false,
+    // "paths": {
+    //   "@engine/core":["../packages/core"],
+    //   "@engine/common":["../packages/common"],
+    //   "@engine/input":["../packages/input"],
+    // }
+  },
+  "files": [
+    "./global.d.ts"
+  ],
+  "include": ["./src/**/*.ts"]
+}

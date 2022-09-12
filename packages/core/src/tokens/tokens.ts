@@ -6,6 +6,8 @@ export const TOKEN_LISTENER_GLOBAL = 'token:listener:global';
 export const TOKEN_LISTENER_LOCAL = 'token:listener:local';
 export const TOKEN_GAME_OBJECT = 'token:gameObject';
 export const TOKEN_DEBOUNCE = 'token:debounce';
+export const TOKEN_OBJECT_CHILD = 'token:object-child';
+export const TOKEN_OBJECT_CHILDREN = 'token:object-children';
 
 export const GAME_CAMERA = 'game:camera';
 export const GAME_SCENE = 'game:scene';

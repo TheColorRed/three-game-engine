@@ -1,5 +1,5 @@
 import { Camera, GameObjectRef } from '@engine/common';
-import { OnUpdate, Sprite, Transform, Vector3 } from '@engine/core';
+import { LiveList, ObjectChildren, OnUpdate, Sprite, Transform, Vector3 } from '@engine/core';
 import { ButtonDown, Key, KeyDown, Mouse, MouseButton } from '@engine/input';
 import { Prefab, Scene } from '@engine/objects';
 import Paddle from '../sprites/paddleBlue.png';
@@ -12,6 +12,9 @@ import { Bullet } from './Bullet.prefab';
   position: Vector3.zero
 })
 export class Player implements OnUpdate {
+
+  @ObjectChildren(Bullet)
+  private bullets!: LiveList<Bullet>;
 
   constructor(
     private readonly scene: Scene,
@@ -28,7 +31,9 @@ export class Player implements OnUpdate {
   // @Repeat(0.25)
   createBullet() {
     const bullet = this.scene.instantiate(Bullet, this.gameObject.position);
-    this.transform.addChild(bullet);
+
+    console.log(this.bullets);
+    // this.transform.addChild(bullet);
   }
 
   start() {

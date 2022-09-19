@@ -33,10 +33,10 @@ export class Reflection {
     item(...args);
   }
 
-  static call<V, T extends { [key: string]: any; } = object>(test: (value: V) => boolean, cb: (value: V) => void, token?: string, target?: T, prop?: string): void;
+  static call<V, T extends { [key: string]: any; } = object>(test: (value: V) => boolean, cb: (value: V) => void | boolean, token?: string, target?: T, prop?: string): void;
   static call<V, T extends { [key: string]: any; } = object>(test: (value: V) => boolean, token?: string, target?: T, prop?: string): void;
   static call<V, T extends { [key: string]: any; } = object>(...args:
-    [test: (value?: V) => boolean, cb: (value?: V) => void, token?: string, target?: T, prop?: string] |
+    [test: (value?: V) => boolean, cb: (value?: V) => void | boolean, token?: string, target?: T, prop?: string] |
     [test: (value?: V) => boolean, token?: string, target?: T, prop?: string]
   ) {
     const test = args[0];
@@ -45,11 +45,14 @@ export class Reflection {
     const target = args.length === 5 ? args[3] : args[2] as T;
     const prop = args.length === 5 ? args[4] : args[3] as string;
     const data = Reflection.get<V | undefined>(token ?? '', target, prop);
-    data?.forEach(action => {
+    if (typeof data?.[Symbol.iterator] !== 'function') {
+      return;
+    }
+    for (let action of data ?? []) {
       if (test(action) && typeof target !== 'undefined' && typeof prop === 'string') {
         if (args.length === 5) cb(action);
         else target[prop]();
       }
-    });
+    }
   }
 }

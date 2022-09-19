@@ -1,5 +1,5 @@
 import { Object3D } from 'three';
-import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
+// import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 
 export interface ModelLoader {
   loadFile(): void;
@@ -27,9 +27,9 @@ export class FBXModelLoader implements ModelLoader {
   ) { }
 
   loadFile() {
-    const loader = new FBXLoader();
-    loader.loadAsync(this.path).then(value => {
-      console.log(value);
-    });
+    // const loader = new FBXLoader();
+    // loader.loadAsync(this.path).then(value => {
+    //   console.log(value);
+    // });
   }
 }

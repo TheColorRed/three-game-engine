@@ -1,20 +1,22 @@
-import { Vector3 } from '@engine/core';
-import { Object3D } from 'three';
+import { ObjectList, Three, Vector3 } from '@engine/core';
 
 export interface GameObject {
-  // [key: string]: any;
   readonly gameObjectType: 'gameObject' | 'camera';
   name: string;
   markedForDeletion: boolean;
   isActive: boolean;
   position: Vector3;
+  tag: string;
+  object3d: Three.Object3D;
   /** @internal */
   started: boolean;
   /** @internal */
+  startPosition: Three.Vector3;
+  /** @internal */
   methods: string[];
-  tag: string;
-  object3d: Object3D;
-  start?(): void;
-  update?(): void;
-  destroy?(): boolean;
+  /** @internal */
+  children: ObjectList<GameObject>;
+  onStart?(): void;
+  onUpdate?(): void;
+  onDestroy?(): boolean;
 }

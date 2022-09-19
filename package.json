@@ -9,6 +9,10 @@
     "packages/core",
     "packages/common",
     "packages/input",
-    "packages/objects"
-  ]
+    "packages/objects",
+    "packages/physics"
+  ],
+  "devDependencies": {
+    "webidl2ts": "^1.0.4"
+  }
 }

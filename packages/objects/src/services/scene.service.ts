@@ -1,24 +1,23 @@
-import { Engine, Injectable, Type, Vector3 } from '@engine/core';
-import { Color, Object3D, Scene as ThreeScene } from 'three';
+import { Engine, Injectable, Three, Type, Vector3 } from '@engine/core';
 import { GameObject } from '../game-object';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: 'game' })
 export class Scene {
 
-  scene: ThreeScene;
+  scene: Three.Scene;
 
   constructor() {
-    this.scene = new ThreeScene();
-    this.scene.background = new Color('#000');
+    this.scene = new Three.Scene();
+    this.scene.background = new Three.Color('#000');
   }
 
-  add(item: Object3D) {
+  add(item: Three.Object3D) {
     this.scene.add(item);
   }
 
-  instantiate<T>(object: Type<T>, position = Vector3.zero) {
+  instantiate<T>(object: Type<T>, position = Vector3.zero): T {
     const item = Engine.instantiate(object) as GameObject;
     item.position = position;
-    return item;
+    return item as T;
   }
 }

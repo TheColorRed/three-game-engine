@@ -1,12 +1,12 @@
-import { Engine, Injectable, Reflection, Vector2 } from '@engine/core';
+import { Engine, Injectable, OnDestroy, Reflection, Vector2 } from '@engine/core';
 import type { GameObject } from '@engine/objects';
 import { fromEvent, of, switchMap, tap } from 'rxjs';
 import { MouseButton, MouseData } from '../decorators';
 import { TOKEN_MOUSE_DOWN, TOKEN_MOUSE_PRESS, TOKEN_MOUSE_UP } from '../tokens';
 import { ButtonState } from './keyboard.service';
 
-@Injectable({ providedIn: 'root' })
-export class Mouse {
+@Injectable({ providedIn: 'game' })
+export class Mouse implements OnDestroy {
 
   private mouseX = 0;
   private mouseY = 0;
@@ -14,7 +14,7 @@ export class Mouse {
   mousedown = MouseButton.None;
   mouseup = MouseButton.None;
   mousepress = MouseButton.None;
-  keyboardDown$ = fromEvent<MouseEvent>(window, 'mousedown')
+  mouseDown$ = fromEvent<MouseEvent>(Engine.canvas, 'mousedown')
     .pipe(
       tap(i => {
         i.preventDefault();
@@ -24,7 +24,7 @@ export class Mouse {
       })
     )
     .subscribe();
-  keyboardUp$ = fromEvent<MouseEvent>(window, 'mouseup')
+  mouseUp$ = fromEvent<MouseEvent>(Engine.canvas, 'mouseup')
     .pipe(
       tap(i => {
         i.preventDefault();
@@ -45,12 +45,25 @@ export class Mouse {
     )),
   ).subscribe();
 
+  mousePressed$ = Engine.updated$.pipe(
+    tap(() => {
+      this.isMouseDown && this.triggerMouse('press');
+    })
+  ).subscribe();
+
   get position() {
     return new Vector2(this.mouseX, this.mouseY);
   }
 
   constructor() {
     document.body.addEventListener('contextmenu', i => i.preventDefault());
+  }
+
+  onDestroy() {
+    this.mouseMove$.unsubscribe();
+    this.mouseUp$.unsubscribe();
+    this.mouseDown$.unsubscribe();
+    this.mousePressed$.unsubscribe();
   }
 
   triggerMouse(state: ButtonState) {

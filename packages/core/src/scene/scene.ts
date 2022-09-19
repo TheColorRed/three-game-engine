@@ -3,7 +3,7 @@ import { Object3D, Scene as ThreeScene } from 'three';
 import { Sprite } from '../2d';
 import { GameCamera } from '../camera';
 import { Type } from '../di';
-import { Engine } from '../Engine';
+import { Engine } from '../engine';
 
 export interface SceneHierarchy {
 

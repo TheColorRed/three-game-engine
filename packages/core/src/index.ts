@@ -1,19 +1,22 @@
 import 'reflect-metadata';
+import * as Three from 'three';
 export * from './2d';
 export * from './3d';
+export * from './area';
 export * from './camera';
 export * from './decorators';
 export * from './di';
-export * from './Engine';
+export * from './engine';
 export * from './game';
-export * from './live-list';
+export * from './object-list';
 export * from './position';
 export * from './resource';
 export * from './scene';
 export * from './tokens';
 export * from './transform.service';
 export * from './vector';
+export { Three };
 
-export interface OnUpdate { update(): void; };
-export interface OnStart { start(): void; };
-export interface OnDestroy { destroy(): void; };
+export interface OnUpdate { onUpdate(): void; };
+export interface OnStart { onStart(): void; };
+export interface OnDestroy { onDestroy(): void; };

@@ -1,4 +1,4 @@
-import { Reflection, TOKEN_ONCE } from '@engine/core';
+import { Reflection, TIME_ONCE } from '@engine/core';
 
 /**
  * Runs a function once after it has been created.
@@ -11,6 +11,6 @@ import { Reflection, TOKEN_ONCE } from '@engine/core';
  */
 export function Once(delay: number) {
   return function (target: any, prop: string, descriptor: PropertyDescriptor) {
-    Reflection.set(TOKEN_ONCE, delay, target, prop);
+    Reflection.set(TIME_ONCE, delay, target, prop);
   };
 }

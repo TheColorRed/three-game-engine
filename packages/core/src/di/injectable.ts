@@ -2,7 +2,7 @@ import { TOKEN_INJECTABLE } from '../tokens/tokens';
 import { Type } from './types';
 
 export interface InjectableOptions {
-  providedIn: 'root' | 'local';
+  providedIn: 'game' | 'local';
 }
 
 export function Injectable(options?: Partial<InjectableOptions>) {

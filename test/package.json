@@ -5,10 +5,13 @@
     "start": "npx webpack serve --progress"
   },
   "dependencies": {
-    "@engine/core": "1.0.0",
     "@engine/common": "1.0.0",
+    "@engine/core": "1.0.0",
     "@engine/input": "1.0.0",
-    "rxjs": "^7.5.6"
+    "@engine/objects": "1.0.0",
+    "@engine/physics": "1.0.0",
+    "rxjs": "^7.5.6",
+    "three": "^0.143.0"
   },
   "devDependencies": {
     "html-webpack-plugin": "^5.5.0",

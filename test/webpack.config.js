@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { NormalModuleReplacementPlugin } = require('webpack');
 
 /**
  * @type {import('webpack').Configuration}
@@ -8,6 +9,15 @@ module.exports = {
   entry: './src/index.ts',
   mode: 'development',
   devtool: 'inline-source-map',
+  performance: {
+    maxAssetSize: 1024 * 1024 * 10,
+    maxEntrypointSize: 1024 * 1024 * 5,
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
+  },
   module: {
     rules: [
       {
@@ -21,17 +31,30 @@ module.exports = {
       }
     ],
   },
-  plugins: [new HtmlWebpackPlugin({
-    title: 'Test Game',
-    template:'./src/public/index.html'
-  })],
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Test Game',
+      template: './src/public/index.html'
+    }),
+    new NormalModuleReplacementPlugin(
+      /environments\/environment\.ts/,
+      './environments/prod.environment.ts'
+    )
+  ],
   resolve: {
     extensions: ['.ts', '.js'],
+    fallback: {
+      "fs": require.resolve("browserify-fs"),
+      "path": require.resolve("path-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "util": require.resolve("util/"),
+      "buffer": require.resolve("buffer/")
+    }
   },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-  },
+  // output: {
+  //   filename: 'bundle.js',
+  //   path: path.resolve(__dirname, 'dist'),
+  // },
   devServer: {
     static: {
       directory: path.join(__dirname, 'public'),

@@ -19,4 +19,8 @@ export class Sprite {
       )
       .subscribe();
   }
+
+  destroy() {
+    console.log('destroy');
+  }
 }

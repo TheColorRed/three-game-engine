@@ -1,6 +1,6 @@
 import { Engine, Injectable } from '@engine/core';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: 'game' })
 export class Time {
   /** The amount of time in seconds that has passed since the game started. */
   get time() { return Engine.time; }

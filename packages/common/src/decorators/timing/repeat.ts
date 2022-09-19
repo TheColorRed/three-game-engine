@@ -1,9 +1,9 @@
-import { Reflection, TOKEN_REPEAT } from '@engine/core';
+import { Reflection, TIME_REPEAT } from '@engine/core';
 /**
  * Repeats a function indefinitely or until the function returns false or the number of times has been reached.
  * @param interval How often the function should be called.
  * @param delay How long to wait before the first time is called.
- * @param times How many times the action should repeat, defaults to Infinity
+ * @param times How many times the action should repeat, defaults to Infinity.
  * @example
  * \@Repeat(1)
  * repeat(count: number) {
@@ -11,7 +11,7 @@ import { Reflection, TOKEN_REPEAT } from '@engine/core';
  * }
  */
 export function Repeat(interval: number, delay = 0, times = Infinity) {
-  return function (target: any, prop: string, descriptor: PropertyDescriptor) {
-    Reflection.set(TOKEN_REPEAT, { interval, delay, times }, target, prop);
+  return function (target: any, prop: string) {
+    Reflection.set(TIME_REPEAT, { interval, delay, times }, target, prop);
   };
 }

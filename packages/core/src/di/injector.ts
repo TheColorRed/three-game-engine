@@ -1,7 +1,7 @@
 import { TOKEN_INJECTABLE, TOKEN_INJECTION } from '../tokens/tokens';
 import { Type } from './types';
 
-export type ProvidedIn = 'root' | 'local';
+export type ProvidedIn = 'game' | 'local';
 
 export class Injector {
   private static container = new Map<string, any>();
@@ -9,7 +9,7 @@ export class Injector {
   static resolve<T>(target: Type<T>): T {
     const injectable = Reflect.getMetadata(TOKEN_INJECTABLE, target);
     // If the service is provided in the root, then make a singleton.
-    if (injectable === 'root') {
+    if (injectable === 'game') {
       // If the instance has already been created return it.
       if (Injector.container.has(target.name)) {
         return Injector.container.get(target.name);

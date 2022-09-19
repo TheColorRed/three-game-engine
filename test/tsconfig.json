@@ -8,16 +8,12 @@
     "esModuleInterop": true,
     "strict": true,
     "moduleResolution": "node",
-    "sourceMap": true,
-    "preserveSymlinks": false,
-    // "paths": {
-    //   "@engine/core":["../packages/core"],
-    //   "@engine/common":["../packages/common"],
-    //   "@engine/input":["../packages/input"],
-    // }
+    "sourceMap": true
   },
   "files": [
     "./global.d.ts"
   ],
-  "include": ["./src/**/*.ts"]
+  "include": [
+    "./src/**/*.ts"
+  ]
 }

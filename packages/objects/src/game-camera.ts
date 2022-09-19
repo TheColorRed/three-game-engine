@@ -1,7 +1,7 @@
-import { Camera } from 'three';
+import { Three } from '@engine/core';
 import { GameObject } from './game-object';
 
 export interface GameCamera extends GameObject {
-  readonly camera: Camera;
+  readonly camera: Three.Camera;
   get aspect(): number;
 }

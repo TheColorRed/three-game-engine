@@ -1,14 +1,15 @@
 
 import { GameObjectRef } from '@engine/common';
 import type { GameCamera, GameObject } from '@engine/objects';
-import { animationFrames, concat, filter, first, from, Observable, switchAll, switchMap, tap, timer, toArray } from 'rxjs';
+import { animationFrames, concat, filter, first, from, Observable, Subject, switchAll, switchMap, tap, timer, toArray } from 'rxjs';
+
 import { WebGLRenderer } from 'three';
 import { Injector } from './di/injector';
 import { Type } from './di/types';
 import { Game } from './game';
 import { Resource } from './resource';
 import { GameScene } from './scene';
-import { TOKEN_INJECTABLE, TOKEN_LISTENER_GLOBAL } from './tokens/tokens';
+import { GAME_OBJECT_CHILDREN, TOKEN_INJECTABLE } from './tokens/tokens';
 
 export class Engine {
 
@@ -31,11 +32,17 @@ export class Engine {
   });
   static canvas = this.renderer.domElement;
 
+  private static updated = new Subject<void>();
+  static updated$ = this.updated.asObservable();
+
   static get activeCamera() {
     return this.gameObjects.find(i => i.gameObjectType === 'camera' && i.isActive === true) as GameCamera | undefined;
   };
   static activeScene: GameScene;
   static game: Game;
+  private static stats: Stats;
+  static #production = true;
+  static get production() { return this.#production; }
 
   static start(gameEntryPoint: new () => object) {
 
@@ -48,23 +55,26 @@ export class Engine {
       timer(0, 0)
     )
       .pipe(
+        tap(() => this.updateTiming()),
+        // tap(() => console.log(this.activeScene.scene.children.length)),
         switchMap(() => from(this.gameObjects).pipe(
           tap(i => this.startGameObject(i)),
-          // tap(() => window.dispatchEvent(new Event('updateTime'))),
-          // tap(i => this.timeManager.update()),
-          tap(i => this.gameUpdate(i)),
+          tap(i => this.updateGameObject(i)),
           toArray(),
         )),
         switchAll(),
         tap(i => {
+          this.updated.next();
           this.destroyGameObject(i);
-          this.gameTiming();
-          // this.renderGame();
         }),
       )
       .subscribe();
+
+    // Render the game
     animationFrames().pipe(
-      tap(() => this.renderGame())
+      tap(() => this.stats && this.stats.begin()),
+      tap(() => this.renderGame()),
+      tap(() => this.stats && this.stats.end()),
     ).subscribe();
   }
 
@@ -80,6 +90,11 @@ export class Engine {
         throw new Error('There is no main scene defined.');
       }
 
+      this.#production = this.game.production;
+      if (this.production === false) {
+        console.log('Production:', this.production);
+      }
+
       // If the entry scene is not included in the registered scene list add it.
       if (!this.game.registeredScenes.includes(this.game.mainScene)) {
         this.game.registeredScenes.push(this.game.mainScene);
@@ -87,7 +102,13 @@ export class Engine {
 
       // Create an instance of the main scene and load its hierarchy.
       this.activeScene = new this.game.mainScene(true);
-
+      if (this.game.stats === true || (typeof this.game.stats === 'undefined' && !this.production)) {
+        import('stats.js').then(stats => {
+          this.stats = new stats.default();
+          this.stats.showPanel(0);
+          document.body.appendChild(this.stats.dom);
+        });
+      }
       sub.complete();
     });
   }
@@ -103,15 +124,6 @@ export class Engine {
         window.addEventListener('resize', this.updateRendererSize.bind(this));
       })
     );
-
-    // from(Resource.resources.values()).pipe(
-    //   switchMap(resource => timer(100, 100).pipe(
-    //     takeWhile(i => resource.loaded === false),
-    //     tap(() => console.log('hi'))
-    //   )),
-    //   toArray(),
-    //   tap(console.log)
-    // ).subscribe();
   }
 
   private static updateRendererSize() {
@@ -170,33 +182,58 @@ export class Engine {
     }
   }
 
-  private static startGameObject(obj: GameObject) {
-    if (obj.started === false) {
-      obj.start?.();
+  static destroyLocalService(gameObject: GameObject & { [key: string]: any; }) {
+    for (let [key, obj] of Object.entries(gameObject)) {
+      if (typeof obj === 'object') {
+        const isInjectable = Reflect.hasMetadata(TOKEN_INJECTABLE, obj.constructor);
+        const meta = Reflect.getMetadata(TOKEN_INJECTABLE, obj.constructor);
+        if (meta === 'local' && isInjectable && typeof gameObject[key].onDestroy === 'function') {
+          gameObject[key].onDestroy();
+        }
+        if (isInjectable) {
+          this.destroyLocalService(obj);
+        }
+      }
     }
   }
 
-  private static gameUpdate(obj: GameObject) {
-    obj.update?.();
+  private static startGameObject(obj: GameObject) {
+    if (obj.started === false) {
+      obj.onStart?.();
+    }
   }
 
-  private static gameTiming() {
+  private static updateGameObject(obj: GameObject) {
+    obj.onUpdate?.();
+  }
+
+  private static updateTiming() {
     const now = Date.now();
     this._time = (this._lastTime - this._start) / 1000;
-    this._delta = now - this._lastTime;
+    this._delta = (now - this._lastTime) / 1000;
     this._lastTime = now;
     this._frames++;
   }
 
   private static destroyGameObject(obj: GameObject) {
-    if (obj.destroy?.()) {
+    if (obj.onDestroy?.()) {
+      this.deleteAllGameObjectRefs(obj);
       const idx = this.gameObjects.indexOf(obj);
-      if (idx > -1) {
-        const obj = this.gameObjects[idx];
-        this.gameObjects.splice(idx, 1);
-        const listeners = Reflect.getMetadata(TOKEN_LISTENER_GLOBAL, window);
-        // console.log('l', listeners);
+      if (idx > -1) this.gameObjects.splice(idx, 1);
+    }
+  }
+
+  private static deleteAllGameObjectRefs(obj: GameObject) {
+    for (let gameObject of this.gameObjects) {
+      gameObject.children.setDirty();
+      for (let method in gameObject) {
+        let meta = Reflect.getMetadata(GAME_OBJECT_CHILDREN, gameObject, method);
+        if (typeof meta !== 'undefined') {
+          (gameObject as any)[method].setDirty();
+        }
       }
+      // gameObject.children.remove(obj);
+      // gameObject.children = gameObject.children.filter(i => i !== obj);
     }
   }
 }

@@ -8,7 +8,9 @@
     "three": "^0.143.0"
   },
   "devDependencies": {
-    "@types/three": "^0.143.1"
+    "@types/stats.js": "^0.17.0",
+    "@types/three": "^0.143.1",
+    "stats.js": "^0.17.0"
   },
   "version": "1.0.0"
 }

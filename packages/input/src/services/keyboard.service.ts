@@ -1,77 +1,117 @@
-import { Engine, Injectable } from '@engine/core';
+import { Engine, Injectable, OnDestroy, Reflection } from '@engine/core';
 import type { GameObject } from '@engine/objects';
-import { fromEvent, tap } from 'rxjs';
+import { auditTime, filter, from, fromEvent, Subscription, switchMap, tap } from 'rxjs';
 import { Key } from '../decorators';
-import { TOKEN_BUTTON_DOWN, TOKEN_BUTTON_PRESS, TOKEN_BUTTON_UP, TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '../tokens';
+import { TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '../tokens';
 
-export type ButtonState = 'up' | 'down' | 'press';
+export type ButtonState = 'up' | 'down' | 'press' | 'release';
 
-@Injectable({ providedIn: 'root' })
-export class Keyboard {
+@Injectable({ providedIn: 'game' })
+export class Keyboard implements OnDestroy {
 
-  private isKeyDown = false;
-  keydown = Key.None;
-  keyup = Key.None;
-  keypress = Key.None;
+  private keyState = new Map<Key, ButtonState>();
+
   keyboardDown$ = fromEvent<KeyboardEvent>(window, 'keydown')
     .pipe(
-      tap(i => {
-        i.preventDefault();
-        this.keydown = Key[i.code as keyof typeof Key];
-        this.isKeyDown === false && this.triggerKey('down');
-        this.isKeyDown = true;
-      })
-    )
-    .subscribe();
+      tap(e => {
+        // Allows the developer console to open if in non-production mode.
+        if (Engine.production === false && e.code !== 'F12') {
+          e.preventDefault();
+        }
+        // Don't allow the developer console to open.
+        else if (Engine.production === true) {
+          e.preventDefault();
+        }
+      }),
+      // If the key hasn't been added the key state manage add it.
+      tap(e => !this.keyState.has(this.getKey(e)) && this.keyState.set(this.getKey(e), 'down')),
+      // If the last state for the key was "release" set to "down".
+      tap(e => this.keyState.get(this.getKey(e)) === 'release' && this.keyState.set(this.getKey(e), 'down')),
+      switchMap(e => from(this.keyState.entries())
+        .pipe(
+          // Only allow the key to go through if it is in the "down" state.
+          filter(([key, state]) => key === this.getKey(e) && state === 'down'),
+          tap(([key]) => this.triggerKey(key)),
+          // Change the state to "press" so "down" doesn't fire again till "up" is set.
+          tap(([key]) => this.keyState.set(key, 'press'))
+        )
+      )
+    );
+
   keyboardUp$ = fromEvent<KeyboardEvent>(window, 'keyup')
     .pipe(
-      tap(i => {
-        i.preventDefault();
-        this.keyup = Key[i.code as keyof typeof Key];
-        this.triggerKey('up');
-        this.keypress = Key.None;
-        this.keydown = Key.None;
-        this.keyup = Key.None;
-        this.isKeyDown = false;
-      })
-    )
-    .subscribe();
+      tap(e => e.preventDefault()),
+      switchMap(e => from(this.keyState.entries())
+        .pipe(
+          tap(([key]) => key === this.getKey(e) && this.keyState.set(key, 'up')),
+          filter(([key]) => key === this.getKey(e)),
+          tap(([key]) => this.triggerKey(key)),
+          tap(([key]) => this.keyState.set(key, 'release'))
+        )
+      ),
+    );
 
-  triggerKey(type: ButtonState) {
-    const key = type === 'up' ? this.keyup :
-      type === 'down' ? this.keydown :
-        type === 'press' ? this.keydown : undefined;
-    if (typeof key !== 'undefined') this.keyboardEvent(key, type);
+  keyboardPress$ = Engine.updated$.pipe(
+    auditTime(1),
+    switchMap(() => this.keyState.entries()),
+    filter(([, state]) => state === 'press'),
+    // tap(([key, state]) => console.log('p', key, state.state)),
+    tap(([key]) => this.triggerKey(key))
+  );
+
+  private readonly keyboardDownSub: Subscription;
+  private readonly keyboardPressSub: Subscription;
+  private readonly keyboardUpSub: Subscription;
+
+  constructor() {
+    this.keyboardDownSub = this.keyboardDown$.subscribe();
+    this.keyboardPressSub = this.keyboardPress$.subscribe();
+    this.keyboardUpSub = this.keyboardUp$.subscribe();
   }
 
-  private keyboardEvent(key: Key, type: ButtonState) {
+  onDestroy() {
+    this.keyboardDownSub.unsubscribe();
+    this.keyboardPressSub.unsubscribe();
+    this.keyboardUpSub.unsubscribe();
+  }
+
+  isKeyDown(key: Key) {
+    return this.keyState.get(key) === 'down';
+  }
+
+  isKeyPressed(key: Key) {
+    return this.keyState.get(this.getKey(key)) === 'press';
+  }
+
+  isKeyReleased(key: Key) {
+    return this.keyState.get(key) === 'release';
+  }
+
+  triggerKey(key: Key) {
     for (let obj of Engine.gameObjects) {
       for (let method of obj.methods || []) {
-        this.execKey(key, type, obj, method);
-        this.execButton(key, type, obj, method);
+        this.execKeyboardEvent(key, obj, method);
       }
     }
   }
 
-  private execKey(key: Key, type: ButtonState, obj: GameObject & { [key: string]: any; }, method: string) {
-    const keyToken = type === 'down' ? TOKEN_KEYDOWN :
-      type === 'up' ? TOKEN_KEYUP :
-        type === 'press' ? TOKEN_KEYPRESS :
+  private execKeyboardEvent(key: Key, obj: GameObject & { [key: string]: any; }, method: string) {
+    const state = this.keyState.get(key);
+    if (typeof state === 'undefined') return;
+    const keyToken = state === 'down' ? TOKEN_KEYDOWN :
+      state === 'up' ? TOKEN_KEYUP :
+        state === 'press' ? TOKEN_KEYPRESS :
           undefined;
-    const methodKey = Reflect.getMetadata(keyToken, obj, method);
-    if (typeof methodKey !== 'undefined' && methodKey === key && typeof obj[method] === 'function') {
-      obj[method]();
-    }
+    Reflection.call<Key>(
+      action => typeof obj[method] === 'function' &&
+        this.getKey(action)?.toString().toLocaleLowerCase() === key?.toString().toLocaleLowerCase(),
+      keyToken ?? '', obj, method
+    );
   }
 
-  private execButton(key: Key, type: ButtonState, obj: GameObject & { [key: string]: any; }, method: string) {
-    const buttonToken = type === 'down' ? TOKEN_BUTTON_DOWN :
-      type === 'up' ? TOKEN_BUTTON_UP :
-        type === 'press' ? TOKEN_BUTTON_PRESS :
-          undefined;
-    const methodKey = Reflect.getMetadata(buttonToken, obj, method);
-    if (typeof methodKey !== 'undefined' && methodKey === key && typeof obj[method] === 'function') {
-      obj[method]();
-    }
+  private getKey(e: KeyboardEvent | Key) {
+    const v = e instanceof KeyboardEvent ? e.code : e;
+    const indexOfS = Object.values(Key).indexOf(v as unknown as Key);
+    return Object.keys(Key)[indexOfS] as Key;
   }
 }

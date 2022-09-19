@@ -2,8 +2,10 @@ import { GameScene } from './scene';
 
 export interface GameOptions {
   main: new () => object;
+  production: boolean;
   scenes?: (new () => object)[];
   aspect?: number | `${number}x${number}`;
+  stats?: boolean;
 }
 
 export interface Game {
@@ -11,8 +13,10 @@ export interface Game {
   mainScene: new (activate?: boolean) => GameScene;
   aspect: number;
   fixedSize: boolean;
+  production: boolean;
   width?: number;
   height?: number;
+  stats?: boolean;
 }
 
 export function Game(options: GameOptions) {
@@ -24,6 +28,8 @@ export function Game(options: GameOptions) {
       fixedSize: boolean;
       width = 0;
       height = 0;
+      production = options.production;
+      stats = options.stats;
 
       constructor() {
         super();

@@ -1,14 +1,14 @@
 import { ListenerRef } from '@engine/common';
-import { Engine, EventToken, Injectable, TOKEN_LISTENER_GLOBAL } from '@engine/core';
+import { Engine, EventToken, Injectable, LISTENER_GLOBAL } from '@engine/core';
 import { BehaviorSubject, filter, from, switchMap, tap } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: 'game' })
 export class GameRef {
 
   private readonly _trigger = new BehaviorSubject<string>('');
 
   private get listeners() {
-    return Reflect.getMetadata(TOKEN_LISTENER_GLOBAL, window) as ListenerRef[] || [];
+    return Reflect.getMetadata(LISTENER_GLOBAL, window) as ListenerRef[] || [];
   }
 
   constructor() {

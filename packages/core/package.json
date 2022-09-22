@@ -12,5 +12,8 @@
     "@types/three": "^0.143.1",
     "stats.js": "^0.17.0"
   },
+  "optionalDependencies": {
+    "@engine/physics": "1.0.0"
+  },
   "version": "1.0.0"
 }

@@ -1,4 +1,4 @@
-import { GameScene } from './scene';
+import type { GameScene } from './scene';
 
 export interface GameOptions {
   main: new () => object;
@@ -6,6 +6,7 @@ export interface GameOptions {
   scenes?: (new () => object)[];
   aspect?: number | `${number}x${number}`;
   stats?: boolean;
+  gizmos?: boolean;
 }
 
 export interface Game {
@@ -14,8 +15,9 @@ export interface Game {
   aspect: number;
   fixedSize: boolean;
   production: boolean;
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
+  gizmos: boolean;
   stats?: boolean;
 }
 
@@ -30,6 +32,7 @@ export function Game(options: GameOptions) {
       height = 0;
       production = options.production;
       stats = options.stats;
+      gizmos = options.gizmos ?? false;
 
       constructor() {
         super();

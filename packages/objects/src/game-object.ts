@@ -1,4 +1,4 @@
-import { ObjectList, Three, Vector3 } from '@engine/core';
+import { Euler, ObjectList, Three, Vector3 } from '@engine/core';
 
 export interface GameObject {
   readonly gameObjectType: 'gameObject' | 'camera';
@@ -6,6 +6,7 @@ export interface GameObject {
   markedForDeletion: boolean;
   isActive: boolean;
   position: Vector3;
+  rotation: Euler;
   tag: string;
   object3d: Three.Object3D;
   /** @internal */

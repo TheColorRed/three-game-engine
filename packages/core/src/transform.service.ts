@@ -4,7 +4,7 @@ import { Three } from '.';
 import { Injectable } from './di';
 import { ObjectList } from './object-list';
 import { GAME_OBJECT_CHILDREN } from './tokens';
-import { Vector3 } from './vector';
+import { Vector3 } from './transforms/vector';
 
 export enum Direction {
   North, South, East, West,

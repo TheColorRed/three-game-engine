@@ -1,5 +1,5 @@
 // import { Engine, OrthographicCamera } from '@engine/core';
-import { Engine, ObjectList, Three, Vector2, Vector3 } from '@engine/core';
+import { Engine, Euler, ObjectList, OnStart, Three, Vector2, Vector3 } from '@engine/core';
 import { GameObject } from '../game-object';
 
 export type CameraType = 'orthographic' | 'perspective';
@@ -16,7 +16,7 @@ export interface CameraOptions {
 
 export function Camera(options?: CameraOptions) {
   return function (target: new () => object) {
-    return class GameCamera extends target implements GameObject, GameCamera {
+    return class GameCamera extends target implements GameObject, GameCamera, OnStart {
       readonly gameObjectType = 'camera';
       readonly camera!: Three.Camera;
 
@@ -54,15 +54,12 @@ export function Camera(options?: CameraOptions) {
       get aspect() {
         return this.#aspectRatio;
       }
-      /** The position of the camera. */
-      get position() {
-        const { x, y, z } = this.camera.position;
-        return new Vector3(x, y, z);
-      }
-      set position(value: Vector3) {
-        const { x, y, z } = value;
-        this.camera.position.set(x ?? 0, y ?? 0, z ?? 0);
-      }
+
+      get position() { return Vector3.fromThree(this.object3d?.position); }
+      set position(value: Vector3) { this.object3d?.position.set(...value.toArray()); }
+
+      get rotation() { return Euler.fromThree(this.object3d?.rotation); }
+      set rotation(value: Euler) { this.object3d?.rotation.set(...value.toArray()); }
 
       constructor() {
         super();
@@ -85,6 +82,10 @@ export function Camera(options?: CameraOptions) {
         const top = this.#height / 2;
         const bottom = this.#height / -2;
         return { left, right, top, bottom };
+      }
+
+      onStart() {
+        this.started = true;
       }
     };
   };

@@ -11,19 +11,19 @@ export interface MouseData {
 
 export function ButtonUp(key: MouseButton, mouseTarget: MouseTarget = 'self') {
   return (target: any, prop: string) => {
-    Injector.resolve(Mouse);
+    Injector.create(Mouse);
     Reflection.set(TOKEN_MOUSE_UP, { key, mouseTarget }, target, prop);
   };
 }
 export function ButtonDown(key: MouseButton, mouseTarget: MouseTarget = 'self') {
   return (target: any, prop: string) => {
-    Injector.resolve(Mouse);
+    Injector.create(Mouse);
     Reflection.set(TOKEN_MOUSE_DOWN, { key, mouseTarget }, target, prop);
   };
 }
 export function ButtonPress(key: MouseButton, mouseTarget: MouseTarget = 'self') {
   return (target: any, prop: string) => {
-    Injector.resolve(Mouse);
+    Injector.create(Mouse);
     Reflection.set(TOKEN_MOUSE_PRESS, { key, mouseTarget }, target, prop);
   };
 }

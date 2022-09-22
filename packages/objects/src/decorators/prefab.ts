@@ -1,4 +1,5 @@
-import { Engine, GAME_OBJECT, GAME_OBJECT_CHILDREN, ObjectList, Reflection, Spacial, Sprite, Three, TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN, Vector3 } from '@engine/core';
+import { Engine, Euler, GAME_OBJECT, GAME_OBJECT_CHILDREN, Injector, ObjectList, PHYSICS_RIGIDBODY, Reflection, Spacial, Sprite, Three, TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN, Vector3 } from '@engine/core';
+import { World } from '@engine/physics';
 import { auditTime, map, Subscription, take, takeWhile, tap, timer } from 'rxjs';
 import { GameObject } from '../game-object';
 
@@ -27,18 +28,11 @@ export function Prefab(options?: GameObjectOptions) {
 
       #subscriptions: Subscription[] = [];
 
-      get position() {
-        return new Vector3(
-          this.object3d.position.x,
-          this.object3d.position.y,
-          this.object3d.position.z
-        );
-      }
-      set position(value: Vector3) {
-        this.object3d.position.setX(value.x);
-        this.object3d.position.setY(value.y);
-        this.object3d.position.setZ(value.z ?? 0);
-      }
+      get position() { return Vector3.fromThree(this.object3d?.position); }
+      set position(value: Vector3) { this.object3d?.position.set(...value.toArray()); }
+
+      get rotation() { return Euler.fromThree(this.object3d?.rotation); }
+      set rotation(value: Euler) { this.object3d?.rotation.set(...value.toArray()); }
 
       constructor(...args: any[]) {
         super(...args);
@@ -53,7 +47,8 @@ export function Prefab(options?: GameObjectOptions) {
         this.started = true;
         const p = this.object3d.position;
         this.startPosition.set(p.x, p.y, p.z);
-        typeof super.start === 'function' && super.start();
+        typeof super.onStart === 'function' && super.onStart();
+        this.#addPhysicsBodies();
         this.#invokeRepeat();
         this.#invokeOnce();
         this.#watchChildren();
@@ -124,6 +119,16 @@ export function Prefab(options?: GameObjectOptions) {
             () => { timer(delay * 1000).subscribe(() => super[method]()); },
             TIME_ONCE, target.prototype, method
           );
+        });
+      }
+
+      #addPhysicsBodies() {
+        import('@engine/physics').then(physics => {
+          if (!physics) return;
+          if (Reflect.hasMetadata(PHYSICS_RIGIDBODY, target)) {
+            const world = Injector.create(physics.World).get(physics.World) as World;
+            world.add(this);
+          }
         });
       }
 

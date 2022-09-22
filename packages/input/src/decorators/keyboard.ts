@@ -30,7 +30,7 @@ export enum Key {
  */
 export function KeyUp(...keys: Key[]) {
   return (target: any, prop: string) => {
-    Injector.resolve(Keyboard);
+    Injector.create(Keyboard);
     Reflect.defineMetadata(TOKEN_KEYUP, keys, target, prop);
   };
 }
@@ -46,7 +46,7 @@ export function KeyUp(...keys: Key[]) {
  */
 export function KeyDown(...keys: Key[]) {
   return (target: any, prop: string) => {
-    Injector.resolve(Keyboard);
+    Injector.create(Keyboard);
     Reflect.defineMetadata(TOKEN_KEYDOWN, keys, target, prop);
   };
 }
@@ -62,7 +62,7 @@ export function KeyDown(...keys: Key[]) {
  */
 export function KeyPress(...keys: Key[]) {
   return (target: any, prop: string) => {
-    Injector.resolve(Keyboard);
+    Injector.create(Keyboard);
     Reflect.defineMetadata(TOKEN_KEYPRESS, keys, target, prop);
   };
 }

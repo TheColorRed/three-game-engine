@@ -12,6 +12,9 @@ export class GameObjectRef {
   get isActive() { return this.reference.isActive; }
   get position() { return this.reference.position; }
   set position(value: Vector3) { this.reference.position = value; }
+  toType() {
+    return this.reference.constructor;
+  }
   /** Destroys the game object as soon as possible. */
   destroy(): void;
   /**

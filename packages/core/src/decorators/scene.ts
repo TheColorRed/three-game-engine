@@ -1,9 +1,5 @@
-import { Spacial } from '@engine/core';
-import { Object3D, Scene as ThreeScene } from 'three';
-import { Sprite } from '../2d';
-import { GameCamera } from '../camera';
-import { Type } from '../di';
-import { Engine } from '../engine';
+import type { GameCamera, Spacial, Type } from '..';
+import { Engine, Sprite, Three } from '..';
 
 export interface SceneHierarchy {
 
@@ -20,9 +16,9 @@ export interface GameScene {
   /** @internal */
   registeredCameras: Type<GameCamera>[];
   /** @internal */
-  scene: ThreeScene;
+  scene: Three.Scene;
   activeScene: boolean;
-  addGameObject(gameObject?: Object3D | Sprite | Spacial): ThreeScene | undefined;
+  addGameObject(gameObject?: Three.Object3D | Sprite | Spacial): Three.Scene | undefined;
 }
 
 export function Scene(options?: SceneOptions) {
@@ -30,7 +26,7 @@ export function Scene(options?: SceneOptions) {
     return class extends target implements GameScene {
       registeredGameObjects = options?.hierarchy || [];
       registeredCameras = options?.cameras || [];
-      scene = new ThreeScene();
+      scene = new Three.Scene();
       activeScene = false;
 
       constructor(activate?: boolean) {
@@ -49,7 +45,7 @@ export function Scene(options?: SceneOptions) {
         this.activeScene = true;
       }
 
-      addGameObject(gameObject?: Object3D | Sprite) {
+      addGameObject(gameObject?: Three.Object3D | Sprite) {
         if (typeof gameObject === 'undefined') return;
         if (gameObject instanceof Sprite) {
           if (gameObject.object) return this.scene.add(gameObject.object);
@@ -58,7 +54,7 @@ export function Scene(options?: SceneOptions) {
         return this.scene.add(gameObject);
       }
 
-      setParent(gameObject: Object3D, parentObject: Object3D) {
+      setParent(gameObject: Three.Object3D, parentObject: Three.Object3D) {
         if (typeof gameObject === 'undefined' || typeof parentObject === 'undefined') return;
         parentObject.add(gameObject);
       }

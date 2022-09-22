@@ -1,7 +1,12 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "typeRoots": [
+      "node_modules/ammojs-typed/ammo/ambient"
+    ]
   },
   "include": [
     "./src/**/*.ts"

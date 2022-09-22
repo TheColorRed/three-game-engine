@@ -1,4 +1,4 @@
-import { Type } from '../di';
+import type { Type } from '../di';
 import { GAME_OBJECT_CHILD, GAME_OBJECT_CHILDREN } from '../tokens';
 
 export interface ObjectChildOptions<T> {
@@ -14,6 +14,7 @@ export interface ObjectChildrenOptions<T> extends ObjectChildOptions<T> {
   /** Whether or not to do a recursive search. */
   deep?: boolean;
 }
+
 /**
  * Gets the first child that matches the search criteria.
  * @param find The first found child within the game object.

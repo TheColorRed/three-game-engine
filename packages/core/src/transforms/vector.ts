@@ -1,4 +1,4 @@
-import { Three } from '.';
+import { Three } from '..';
 
 /**
  * A vector containing 3 dimensions.
@@ -58,6 +58,11 @@ export class Vector3 {
 
   toArray(): [number, number, number] {
     return [this.x, this.y, this.z];
+  }
+
+  static fromThree(vector?: Three.Vector3) {
+    if (vector) return new Vector3(vector.x, vector.y, vector.z);
+    return Vector3.zero;
   }
 
   static rotate(axis: { x?: number, y?: number, z?: number; }): Vector3;

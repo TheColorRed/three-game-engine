@@ -1,5 +1,5 @@
-import { GameObjectRef, Repeat, Time } from '@engine/common';
-import { OnUpdate, Sprite, Transform, Vector2 } from '@engine/core';
+import { GameObjectRef, Time } from '@engine/common';
+import { Debug, OnStart, OnUpdate, Sprite, Transform, Vector2 } from '@engine/core';
 import { Key, Keyboard, KeyPress, Mouse } from '@engine/input';
 import { Prefab, Scene } from '@engine/objects';
 import { Rigidbody } from '@engine/physics';
@@ -10,10 +10,10 @@ import { Bullet } from './bullet.prefab';
 @Prefab({
   name: 'Player',
   object: new Sprite(Paddle),
-  position: new Vector2(0, -10)
+  position: new Vector2(0, 0)
 })
-@Rigidbody()
-export class Player implements OnUpdate {
+@Rigidbody({ mass: 1, shape: { type: 'cube', size: { width: 10, height: 5, depth: 1 } } })
+export class Player implements OnUpdate, OnStart {
 
   // @ObjectChildren({ type: Bullet })
   // private bullets!: ObjectList<Bullet>;
@@ -36,7 +36,7 @@ export class Player implements OnUpdate {
   // @AutoBurst(2, 2, 0.05)
   // @Debounce(0.05)
   // @RoundRobin(1, 2, 3)
-  @Repeat(1)
+  // @Repeat(1)
   createBullet() {
     let bullet1!: Bullet, bullet2!: Bullet, bullet3!: Bullet;
     bullet1 = this.scene.instantiate(Bullet, this.gameObject.position);
@@ -53,6 +53,14 @@ export class Player implements OnUpdate {
     }
   }
 
+  onStart() {
+    console.log('start');
+    Debug.drawBox(
+      this.transform.position.x,
+      this.transform.position.y,
+      5, 1);
+  }
+
   @KeyPress(Key.Left, Key.A)
   onLeft() { this.transform.translate(Vector2.left, this.time.delta * this.hSpeed); }
 
@@ -60,14 +68,14 @@ export class Player implements OnUpdate {
     // if (this.keyboard.isKeyPressed(Key.Left) || this.keyboard.isKeyPressed(Key.A)) {
     //   this.transform.translate(Vector2.left, this.time.delta * this.hSpeed);
     // }
-    if (this.keyboard.isKeyPressed(Key.Right) || this.keyboard.isKeyPressed(Key.D)) {
-      this.transform.translate(Vector2.right, this.time.delta * this.hSpeed);
-    }
-    if (this.keyboard.isKeyPressed(Key.Up) || this.keyboard.isKeyPressed(Key.W)) {
-      this.transform.translate(Vector2.up, this.time.delta * this.hSpeed);
-    }
-    if (this.keyboard.isKeyPressed(Key.Down) || this.keyboard.isKeyPressed(Key.S)) {
-      this.transform.translate(Vector2.down, this.time.delta * this.hSpeed);
-    }
+    // if (this.keyboard.isKeyPressed(Key.Right) || this.keyboard.isKeyPressed(Key.D)) {
+    //   this.transform.translate(Vector2.right, this.time.delta * this.hSpeed);
+    // }
+    // if (this.keyboard.isKeyPressed(Key.Up) || this.keyboard.isKeyPressed(Key.W)) {
+    //   this.transform.translate(Vector2.up, this.time.delta * this.hSpeed);
+    // }
+    // if (this.keyboard.isKeyPressed(Key.Down) || this.keyboard.isKeyPressed(Key.S)) {
+    //   this.transform.translate(Vector2.down, this.time.delta * this.hSpeed);
+    // }
   }
 }

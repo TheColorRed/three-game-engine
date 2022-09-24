@@ -1,53 +1,40 @@
-import { Engine, Euler, GAME_OBJECT, GAME_OBJECT_CHILDREN, Injector, ObjectList, PHYSICS_RIGIDBODY, Reflection, Spacial, Sprite, Three, TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN, Vector3 } from '@engine/core';
+import { Engine, Euler, GAME_OBJECT, GAME_OBJECT_CHILDREN, Injector, ObjectList, PHYSICS_RIGIDBODY, Reflection, Spacial, Sprite, TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN, Vector3 } from '@engine/core';
+import { GameObject } from '@engine/objects';
 import { World } from '@engine/physics';
-import { auditTime, map, Subscription, take, takeWhile, tap, timer } from 'rxjs';
-import { GameObject } from '../game-object';
+import { auditTime, map, take, takeWhile, tap, timer } from 'rxjs';
+
+
 
 export interface GameObjectOptions {
   name?: string;
   object?: Sprite | Spacial;
   position?: Vector3;
+  rotation?: Euler;
   tag?: string;
 }
 
+// export declare class GameObjectComponent extends GameObject { }
+
+
+
 export function Prefab(options?: GameObjectOptions) {
-  return function <T extends { new(...args: any[]): any; }>(target: T) {
-    Reflect.defineMetadata(GAME_OBJECT, target, target);
-    return class GamePrefab extends target implements GameObject {
-
-      readonly gameObjectType = 'gameObject';
-      name = options?.name || 'GameObject';
-      markedForDeletion = false;
-      isActive = true;
-      started = false;
-      methods: string[] = [];
-      object3d = options?.object?.object?.clone(true) ?? new Three.Object3D();
-      tag = options?.tag ?? '';
-      children: ObjectList<GameObject> = new ObjectList(this);
-      startPosition = new Three.Vector3();
-
-      #subscriptions: Subscription[] = [];
-
-      get position() { return Vector3.fromThree(this.object3d?.position); }
-      set position(value: Vector3) { this.object3d?.position.set(...value.toArray()); }
-
-      get rotation() { return Euler.fromThree(this.object3d?.rotation); }
-      set rotation(value: Euler) { this.object3d?.rotation.set(...value.toArray()); }
-
-      constructor(...args: any[]) {
-        super(...args);
-        this.methods = Reflect.ownKeys(target.prototype) as string[];
+  return function <T extends { new(...args: any[]): any; }>(target: T): any {
+    Reflect.defineMetadata(GAME_OBJECT, { target, options }, target);
+    return class GameObjectComponent extends GameObject {
+      constructor() {
+        super(target, options);
+        this.methods = Reflect.ownKeys(this.target.prototype) as string[];
         Engine.activeScene.addGameObject(this.object3d);
         this.position = options?.position ?? Vector3.zero;
       }
       /**
        * Run the GameObject's start.
        */
-      onStart() {
-        this.started = true;
-        const p = this.object3d.position;
-        this.startPosition.set(p.x, p.y, p.z);
-        typeof super.onStart === 'function' && super.onStart();
+      override onStart() {
+        super.onStart();
+        const p = this.object3d?.position;
+        this.startPosition.set(p?.x ?? 0, p?.y ?? 0, p?.z ?? 0);
+        typeof this.instance.onStart === 'function' && this.instance.onStart();
         this.#addPhysicsBodies();
         this.#invokeRepeat();
         this.#invokeOnce();
@@ -58,18 +45,18 @@ export function Prefab(options?: GameObjectOptions) {
       /**
        * Run the GameObject's updates.
        */
-      onUpdate() {
+      override onUpdate() {
         if (this.isActive === false || this.started === false) return;
-        typeof super.onUpdate === 'function' && super.onUpdate();
+        typeof this.instance.onUpdate === 'function' && this.instance.onUpdate();
       }
       /**
        * Runs the GameObject's destroy method.
        */
-      onDestroy() {
+      override onDestroy() {
         if (this.markedForDeletion === true) {
           this.children.forEach((child) => child.onDestroy?.());
-          typeof super.onDestroy === 'function' && super.onDestroy();
-          this.object3d.parent?.remove(this.object3d);
+          typeof this.instance.onDestroy === 'function' && this.instance.onDestroy();
+          this.object3d?.parent?.remove(this.object3d);
           // this.destroyServices(this);
           Engine.destroyLocalService(this);
           this.#removeSubscriptions();
@@ -80,22 +67,22 @@ export function Prefab(options?: GameObjectOptions) {
 
       #removeSubscriptions() {
         Object.keys(this).forEach(method => {
-          const meta = Reflect.getMetadata(GAME_OBJECT_CHILDREN, target.prototype, method);
-          if (typeof meta !== 'undefined' && this[method] instanceof ObjectList) {
-            this[method].destroy();
+          const meta = Reflect.getMetadata(GAME_OBJECT_CHILDREN, this.target.prototype, method);
+          if (typeof meta !== 'undefined' && this.instance[method] instanceof ObjectList) {
+            this.instance[method].destroy();
           }
         });
-        this.#subscriptions.forEach(e => e?.unsubscribe());
+        this.subscriptions.forEach(e => e?.unsubscribe());
         this.children.destroy();
       }
 
       #invokeRepeat() {
         this.methods.forEach(method => {
           Reflection.call<{ delay?: number; interval?: number; times?: number; }>(
-            i => typeof i.delay === 'number' && typeof i.interval === 'number' && typeof i.times === 'number' && typeof super[method] === 'function',
+            i => typeof i.delay === 'number' && typeof i.interval === 'number' && typeof i.times === 'number' && typeof this.instance[method] === 'function',
             i => {
               const t = timer(i.delay! * 1000, i.interval! * 1000)
-                .pipe(map<number, boolean>(i => super[method](i)));
+                .pipe(map<number, boolean>(i => this.instance[method](i)));
 
               const sub = (
                 (i.times !== Infinity && i.times! > 0) ?
@@ -104,20 +91,20 @@ export function Prefab(options?: GameObjectOptions) {
                   // Run until the callback returns false.
                   t.pipe(takeWhile(i => i !== false))
               ).subscribe();
-              this.#subscriptions.push(sub);
+              this.subscriptions.push(sub);
             },
-            TIME_REPEAT, target.prototype, method
+            TIME_REPEAT, this.target.prototype, method
           );
         });
       }
 
       #invokeOnce() {
         this.methods.forEach(method => {
-          const delay = Reflect.getMetadata(TIME_ONCE, target.prototype, method);
+          const delay = Reflect.getMetadata(TIME_ONCE, this.target.prototype, method);
           Reflection.call(
-            v => typeof super[method] === 'function',
-            () => { timer(delay * 1000).subscribe(() => super[method]()); },
-            TIME_ONCE, target.prototype, method
+            v => typeof this.instance[method] === 'function',
+            () => { timer(delay * 1000).subscribe(() => this.instance[method]()); },
+            TIME_ONCE, this.target.prototype, method
           );
         });
       }
@@ -125,7 +112,7 @@ export function Prefab(options?: GameObjectOptions) {
       #addPhysicsBodies() {
         import('@engine/physics').then(physics => {
           if (!physics) return;
-          if (Reflect.hasMetadata(PHYSICS_RIGIDBODY, target)) {
+          if (Reflect.hasMetadata(PHYSICS_RIGIDBODY, this.target)) {
             const world = Injector.create(physics.World).get(physics.World) as World;
             world.add(this);
           }
@@ -133,11 +120,11 @@ export function Prefab(options?: GameObjectOptions) {
       }
 
       #watchChildren() {
-        const props = Object.keys(this) as string[];
+        const props = Object.keys(this.instance) as string[];
         for (let prop of props) {
-          let meta = Reflect.getMetadata(GAME_OBJECT_CHILDREN, target.prototype, prop);
+          let meta = Reflect.getMetadata(GAME_OBJECT_CHILDREN, this.target.prototype, prop);
           if (typeof meta !== 'undefined') {
-            this[prop] = new ObjectList(this, meta);
+            this.instance[prop] = new ObjectList(this, meta);
           }
         }
       }
@@ -145,21 +132,21 @@ export function Prefab(options?: GameObjectOptions) {
       #startTimers() {
         this.methods.forEach(method => {
           // Start any randomly timers
-          const random = Reflect.getMetadata(TIME_RANDOMLY, target.prototype, method);
+          const random = Reflect.getMetadata(TIME_RANDOMLY, this.target.prototype, method);
           if (typeof random !== 'undefined') {
-            super[method]();
+            this.instance[method]();
           }
 
           // Start choice times
-          const choice = Reflect.getMetadata(TIME_CHOICE, target.prototype, method);
+          const choice = Reflect.getMetadata(TIME_CHOICE, this.target.prototype, method);
           if (typeof choice !== 'undefined') {
-            super[method]();
+            this.instance[method]();
           }
 
           // Start round robin times
-          const roundRobin = Reflect.getMetadata(TIME_ROUND_ROBIN, target.prototype, method);
+          const roundRobin = Reflect.getMetadata(TIME_ROUND_ROBIN, this.target.prototype, method);
           if (typeof roundRobin !== 'undefined') {
-            super[method]();
+            this.instance[method]();
           }
         });
       }
@@ -167,7 +154,7 @@ export function Prefab(options?: GameObjectOptions) {
       #startAutoBurst() {
         this.methods.forEach(method => {
           Reflection.call<{ duration: number; rest: number; speed: number; limit: number; }>(
-            v => typeof super[method] === 'function',
+            v => typeof this.instance[method] === 'function',
             v => {
               let isResting = false;
               let time = Date.now();
@@ -176,7 +163,7 @@ export function Prefab(options?: GameObjectOptions) {
                 auditTime(v.speed * 1000),
                 tap(() => {
                   if (!isResting) {
-                    super[method]();
+                    this.instance[method]();
                     if (Math.abs(Date.now() - time) >= v.duration * 1000) {
                       isResting = true;
                       time = Date.now();
@@ -191,9 +178,9 @@ export function Prefab(options?: GameObjectOptions) {
                 takeWhile(() => called < v.limit)
               ).subscribe();
 
-              this.#subscriptions.push(sub);
+              this.subscriptions.push(sub);
             },
-            TIME_AUTO_BURST, target.prototype, method
+            TIME_AUTO_BURST, this.target.prototype, method
           );
         });
       };

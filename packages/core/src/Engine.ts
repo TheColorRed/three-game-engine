@@ -1,8 +1,7 @@
 
-import { GameObjectRef } from '@engine/common';
-import type { GameCamera, GameObject } from '@engine/objects';
+import { CameraService, GameObject } from '@engine/objects';
 import { World } from '@engine/physics';
-import { animationFrames, concat, filter, finalize, first, from, Observable, Subject, switchAll, switchMap, tap, timer, toArray } from 'rxjs';
+import { animationFrames, concat, filter, finalize, first, from, Observable, of, Subject, switchAll, switchMap, tap, timer, toArray } from 'rxjs';
 
 import { WebGLRenderer } from 'three';
 import type { Game, GameScene } from '.';
@@ -10,7 +9,7 @@ import { Debug } from './debug';
 import { Injector } from './di/injector';
 import { Type } from './di/types';
 import { Resource } from './resource';
-import { GAME_OBJECT_CHILDREN, TOKEN_INJECTABLE } from './tokens/tokens';
+import { GAME_OBJECT_CHILDREN, PHYSICS_RIGIDBODY, TOKEN_INJECTABLE } from './tokens/tokens';
 
 export class Engine {
 
@@ -34,14 +33,18 @@ export class Engine {
   static #updated = new Subject<void>();
   static updated$ = this.#updated.asObservable();
 
-  static get activeCamera() {
-    return this.gameObjects.find(i => i.gameObjectType === 'camera' && i.isActive === true) as GameCamera | undefined;
-  };
+  // static get activeCamera() {
+  //   const cam = this.gameObjects.find(i => i.gameObjectType === 'camera' && i.isActive === true) as GameCamera | undefined;
+  //   // console.log(cam);
+  //   return cam;
+  // };
   static activeScene: GameScene;
   static game: Game;
   static #stats: Stats;
   static #production = true;
   static get production() { return this.#production; }
+  static camera: CameraService;
+  static readyToRender = false;
 
   static start(gameEntryPoint: new () => object) {
 
@@ -52,9 +55,14 @@ export class Engine {
       this.#initializeGame(gameEntryPoint),
       this.#initializePhysics(),
       this.#initializeGameObjects(),
+      of(true).pipe(tap(() => {
+        Debug.log('Initializing camera service..');
+        this.camera = Injector.create(CameraService).get(CameraService) as CameraService;
+      }), tap(() => this.readyToRender = true)),
       timer(0, 0)
     )
       .pipe(
+        // tap(() => console.log(Engine.gameObjects)),
         tap(() => this.#updateTiming()),
         // tap(() => console.log(this.activeScene.scene.children.length)),
         switchMap(() => from(this.gameObjects).pipe(
@@ -72,6 +80,7 @@ export class Engine {
 
     // Render the game
     animationFrames().pipe(
+      filter(() => this.readyToRender === true),
       tap(() => this.#stats && this.#stats.begin()),
       tap(() => this.#renderGame()),
       tap(() => this.#stats && this.#stats.end()),
@@ -149,8 +158,9 @@ export class Engine {
 
   static #renderGame() {
     const activeScene = this.gameScenes.find(i => i.activeScene === true);
-    if (typeof this.activeCamera !== 'undefined' && typeof activeScene !== 'undefined') {
-      this.renderer.render(activeScene.scene, this.activeCamera.camera);
+    // console.log(this.camera.main);
+    if (typeof this.camera.main !== 'undefined' && typeof activeScene !== 'undefined') {
+      this.renderer.render(activeScene.scene, (this.camera.main as any).camera);
     }
   }
 
@@ -166,38 +176,39 @@ export class Engine {
 
   static instantiate<T>(item: Type<T>): T {
     const gameObject = Injector.create(item).get(item) as GameObject;
-    this.#setGameObjectInstances(gameObject, gameObject);
-    this.#startGameObjectInstances(gameObject, gameObject);
+    // this.#setGameObjectInstances(gameObject, gameObject);
+    // this.#startGameObjectInstances(gameObject, gameObject);
 
     this.gameObjects.push(gameObject);
     return gameObject as unknown as T;
   }
 
-  static #setGameObjectInstances(gameObject: GameObject, searchObj: object) {
-    const entries = Object.entries(searchObj);
-    for (let [key, obj] of entries) {
-      if (typeof obj === 'object') {
-        const isInjectable = Reflect.hasMetadata(TOKEN_INJECTABLE, obj.constructor);
-        if (isInjectable && obj instanceof GameObjectRef) {
-          obj.reference = gameObject;
-        }
-        if (isInjectable) {
-          this.#setGameObjectInstances(gameObject, obj);
-        }
-      }
-    }
-  }
+  // static #setGameObjectInstances(gameObject: GameObject, searchObj: object) {
+  //   const entries = Object.entries(searchObj);
+  //   for (let [key, obj] of entries) {
+  //     if (typeof obj === 'object') {
+  //       const isInjectable = Reflect.hasMetadata(TOKEN_INJECTABLE, obj.constructor);
+  //       if (isInjectable && obj instanceof GameObjectRef) {
+  //         console.log('here i am');
+  //         obj.reference = gameObject;
+  //       }
+  //       if (isInjectable) {
+  //         this.#setGameObjectInstances(gameObject, obj);
+  //       }
+  //     }
+  //   }
+  // }
 
-  static #startGameObjectInstances(gameObject: GameObject, searchObj: object) {
-    for (let [key, obj] of Object.entries(gameObject)) {
-      if (typeof obj === 'object') {
-        const isInjectable = Reflect.hasMetadata(TOKEN_INJECTABLE, obj.constructor);
-        if (isInjectable && typeof obj.onStart === 'function') {
-          obj.onStart();
-        }
-      }
-    }
-  }
+  // static #startGameObjectInstances(gameObject: GameObject, searchObj: object) {
+  //   for (let [key, obj] of Object.entries(gameObject)) {
+  //     if (typeof obj === 'object') {
+  //       const isInjectable = Reflect.hasMetadata(TOKEN_INJECTABLE, obj.constructor);
+  //       if (isInjectable && typeof obj.onStart === 'function') {
+  //         obj.onStart();
+  //       }
+  //     }
+  //   }
+  // }
 
   static destroyLocalService(gameObject: GameObject & { [key: string]: any; }) {
     for (let [key, obj] of Object.entries(gameObject)) {
@@ -216,13 +227,13 @@ export class Engine {
 
   static #startGameObject(obj: GameObject) {
     if (obj.started === false) {
-      obj.onStart?.();
+      obj.onStart();
     }
   }
 
   static #updateGameObject(obj: GameObject) {
     if (obj.started === true) {
-      obj.onUpdate?.();
+      obj.onUpdate();
     }
   }
 
@@ -236,6 +247,11 @@ export class Engine {
 
   static #destroyGameObject(obj: GameObject) {
     if (obj.onDestroy?.()) {
+      const p = Reflect.getMetadata(PHYSICS_RIGIDBODY, obj.constructor);
+      if (typeof p !== 'undefined') {
+        const world = Injector.get(World);
+        world?.remove(obj);
+      }
       this.#deleteAllGameObjectRefs(obj);
       const idx = this.gameObjects.indexOf(obj);
       if (idx > -1) this.gameObjects.splice(idx, 1);

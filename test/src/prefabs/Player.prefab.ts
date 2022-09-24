@@ -1,5 +1,5 @@
 import { GameObjectRef, Time } from '@engine/common';
-import { Debug, OnStart, OnUpdate, Sprite, Transform, Vector2 } from '@engine/core';
+import { OnStart, OnUpdate, Sprite, Transform, Vector2, Vector3 } from '@engine/core';
 import { Key, Keyboard, KeyPress, Mouse } from '@engine/input';
 import { Prefab, Scene } from '@engine/objects';
 import { Rigidbody } from '@engine/physics';
@@ -10,9 +10,9 @@ import { Bullet } from './bullet.prefab';
 @Prefab({
   name: 'Player',
   object: new Sprite(Paddle),
-  position: new Vector2(0, 0)
+  position: new Vector3(0, 10, 0)
 })
-@Rigidbody({ mass: 1, shape: { type: 'cube', size: { width: 10, height: 5, depth: 1 } } })
+@Rigidbody({ shape: { type: 'cube', size: { width: 5, height: 1, depth: 1 } } })
 export class Player implements OnUpdate, OnStart {
 
   // @ObjectChildren({ type: Bullet })
@@ -28,7 +28,8 @@ export class Player implements OnUpdate, OnStart {
     private readonly keyboard: Keyboard,
     private readonly time: Time,
     private readonly gameObject: GameObjectRef,
-    private readonly transform: Transform
+    private readonly transform: Transform,
+    // private readonly rigidbody: RigidbodyRef<'cube'>,
   ) { }
 
   @KeyPress(Key.Space, Key.B)
@@ -54,11 +55,13 @@ export class Player implements OnUpdate, OnStart {
   }
 
   onStart() {
-    console.log('start');
-    Debug.drawBox(
-      this.transform.position.x,
-      this.transform.position.y,
-      5, 1);
+    // this.gameObject.destroy(1);
+    // Debug.drawBox(
+    //   this.transform.position.x,
+    //   this.transform.position.y,
+    //   this.rigidbody.options.shape.size.width,
+    //   this.rigidbody.options.shape.size.height
+    // );
   }
 
   @KeyPress(Key.Left, Key.A)

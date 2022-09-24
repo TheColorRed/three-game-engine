@@ -1,7 +1,7 @@
 import { Debug, Euler, Injectable, PHYSICS_RIGIDBODY, Vector3 } from '@engine/core';
 import { GameObject } from '@engine/objects';
 import Ammo from 'ammojs-typed';
-import { from, Observable, of, switchMap, tap, timer } from 'rxjs';
+import { auditTime, from, Observable, of, switchMap, tap, timer } from 'rxjs';
 import { RigidbodyOptions } from './decorators';
 
 @Injectable({ providedIn: 'game' })
@@ -17,7 +17,7 @@ export class World {
   worldSteps$ = timer(1 / 60, 0)
     .pipe(
       tap(() => this.dynamicWorld.stepSimulation(1 / 60, 10)),
-      // auditTime(250),
+      auditTime(50),
       switchMap(() => from(this.bodies).pipe(
         tap(([obj, body]) => {
           const state = body.getMotionState();
@@ -31,6 +31,7 @@ export class World {
             const rz = this.globalTransform.getRotation().z();
             obj.position = new Vector3(px, py, pz);
             obj.rotation = new Euler(rx, ry, rz);
+            // console.log(obj.position.toArray());
           }
         })
       ))
@@ -40,13 +41,30 @@ export class World {
     return this._worldCreated;
   }
 
+  /**
+   * Removes a game object from the physics world.
+   * @param gameObject The game object to remove.
+   */
+  remove(gameObject: GameObject) {
+    const idx = this.bodies.findIndex(([go]) => go === gameObject);
+    if (idx > -1) {
+      const body = this.bodies[idx][1];
+      this.dynamicWorld.removeRigidBody(body);
+      this.bodies.splice(idx, 1);
+    }
+  }
+
+  /**
+   * Adds a game object into the physics world.
+   * @param gameObject The game object to add.
+   */
   add(gameObject: GameObject) {
-    const opts = Reflect.getMetadata(PHYSICS_RIGIDBODY, gameObject.constructor) as RigidbodyOptions;
-    const goTrans = gameObject.position;
-    console.log(gameObject.name, goTrans.toArray());
+    const opts = Reflect.getMetadata(PHYSICS_RIGIDBODY, gameObject.instance.constructor) as RigidbodyOptions;
+    const goPos = gameObject.position;
+    // console.log(gameObject.name, goTrans.toArray());
 
     const transform = new this.Ammo.btTransform();
-    transform.setOrigin(new this.Ammo.btVector3(...goTrans.toArray()));
+    transform.setOrigin(new this.Ammo.btVector3(...goPos.toArray()));
 
     const motionState = new this.Ammo.btDefaultMotionState(transform);
     const shape = this.createShape(opts);
@@ -65,6 +83,7 @@ export class World {
         return new this.Ammo.btSphereShape(options.shape.radius);
       case 'cube':
         var { width, height, depth } = options.shape.size;
+        console.log(options.shape.size);
         return new this.Ammo.btBoxShape(new this.Ammo.btVector3(width, height, depth));
       case 'cone':
         var { radius, height } = options.shape.size;

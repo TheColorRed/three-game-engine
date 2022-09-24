@@ -7,7 +7,7 @@ export class Injector<T> {
 
   constructor(
     private readonly instance: T,
-    private readonly injections: Injector<T>[]
+    private readonly injections: any[]
   ) { }
 
   private static container = new Map<Type<any>, Injector<any>>();
@@ -37,16 +37,6 @@ export class Injector<T> {
     return ref?.instance;
   }
 
-  /**
-   * Get a service within the injectable.
-   * @param item The item to search for.
-   * @returns
-   */
-  get<T>(item: Type<T>): T | undefined {
-    if (this.instance instanceof item) return this.instance;
-    return this.injections.find(i => i.instance instanceof item)?.instance as T;
-  }
-
   static #create<T>(target: Type<T>, isSingleton: boolean) {
     const tokens = Reflect.getMetadata(TOKEN_INJECTION, target) || [];
     const injections = tokens.map((token: Type<any>) => Injector.create(token).get(token));
@@ -57,5 +47,35 @@ export class Injector<T> {
     }
 
     return injector;
+  }
+
+  /**
+   * Get a service within the injectable.
+   * @param item The item to search for.
+   * @returns
+   */
+  get<T>(item: Type<T>): T | undefined {
+    if (this.instance instanceof item) return this.instance;
+    return (this.injections.find(i => i.instance instanceof item)?.instance as T) ?? Injector.get(item);
+  }
+
+  getAll<T>(item: Type<T>): T[] {
+    const found: T[] = [];
+    function find(instance: any) {
+      if (instance instanceof item) found.push(instance);
+      const keys = Object.entries<object>(instance);
+      for (let [key, obj] of keys) {
+        if (typeof obj === 'object') {
+          const isInjectable = Reflect.hasMetadata(TOKEN_INJECTABLE, obj.constructor);
+          if (isInjectable) find(obj);
+        }
+      }
+    }
+    this.injections.forEach(i => find(i));
+    return found;
+  }
+
+  each(cb: (value: object, index: number, array: object[]) => void) {
+    this.injections.forEach(cb);
   }
 }

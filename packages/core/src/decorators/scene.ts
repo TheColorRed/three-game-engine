@@ -45,10 +45,10 @@ export function Scene(options?: SceneOptions) {
         this.activeScene = true;
       }
 
-      addGameObject(gameObject?: Three.Object3D | Sprite) {
+      addGameObject(gameObject?: Three.Object3D | Three.Sprite) {
         if (typeof gameObject === 'undefined') return;
-        if (gameObject instanceof Sprite) {
-          if (gameObject.object) return this.scene.add(gameObject.object);
+        if (gameObject instanceof Three.Sprite) {
+          if (gameObject) return this.scene.add(gameObject);
           return;
         }
         return this.scene.add(gameObject);

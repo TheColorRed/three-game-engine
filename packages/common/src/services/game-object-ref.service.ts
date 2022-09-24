@@ -23,6 +23,7 @@ export class GameObjectRef {
    */
   destroy(time: number): void;
   destroy(time = 0) {
+    console.log('here', this.reference);
     timer(time * 1000)
       .pipe(
         tap(() => this.reference.markedForDeletion = true),

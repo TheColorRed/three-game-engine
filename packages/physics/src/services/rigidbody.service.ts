@@ -1,18 +1,11 @@
-// declare module 'ammo-debug-drawer' {
-//   class AmmoDebugDrawer {
-
-//   }
-// }
-
 import { GameObjectRef } from '@engine/common';
 import { Injectable, OnStart, PHYSICS_RIGIDBODY } from '@engine/core';
-import { RigidbodyOptions, RigidbodyShape } from '../decorators';
-// @ts-ignore
+import type { RigidbodyOptions, RigidbodyShape } from '../decorators';
 
-export type A = Extract<RigidbodyShape, { type: string; }>;
+export type Shapes = RigidbodyShape['type'];
 
 @Injectable()
-export class RigidbodyRef<T> implements OnStart {
+export class RigidbodyRef<T extends Shapes> implements OnStart {
 
   options!: { shape: Extract<RigidbodyShape, { type: T; }>; } & RigidbodyOptions;
 

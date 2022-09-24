@@ -13,6 +13,9 @@ export const GAME_OBJECT_CHILDREN = 'game-object:object-children';
 // Physics Tokens
 export const PHYSICS_RIGIDBODY = 'physics:rigidbody';
 
+// Path Tokens
+export const PATH = 'path';
+
 // Timing Tokens
 export const TIME_AUDIT = 'time:audit';
 export const TIME_RANDOMLY = 'time:randomly';

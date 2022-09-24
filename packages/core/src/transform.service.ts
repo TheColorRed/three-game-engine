@@ -31,17 +31,18 @@ export class Transform {
    * @param parent The parent object.
    */
   setParent(parent: GameObject) {
-    parent.object3d.add(this.object3d);
+    parent.object3d?.add(this.object3d);
   }
   /**
    * Adds an item as a child of the current object.
    * @param child The item to add as a child.
    */
   addChild(child: GameObject) {
+    if (!child.object3d) return;
     const ref = this.gameObject.reference;
 
     // Make the three.js instance a child.
-    ref.object3d.add(child.object3d);
+    ref.object3d?.add(child.object3d);
     // Update the object list on the prefab instance.
     ref.children.setDirty();
 

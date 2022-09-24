@@ -2,5 +2,6 @@
   "typescript.preferences.importModuleSpecifier": "relative",
   "cSpell.words": [
     "ammojs"
-  ]
+  ],
+  "typescript.tsdk": "node_modules\\typescript\\lib"
 }

@@ -1,69 +1,62 @@
 // import { Engine, OrthographicCamera } from '@engine/core';
-import { Engine, Euler, ObjectList, OnStart, Three, Vector2, Vector3 } from '@engine/core';
-import { GameObject } from '../game-object';
+import { Engine, Three, Vector2, Vector3 } from '@engine/core';
+import { GameObject, GameObjectOptions } from '@engine/objects';
 
 export type CameraType = 'orthographic' | 'perspective';
+export interface GameCamera extends GameObject {
+  readonly camera: Three.Camera;
+  get aspect(): number;
+}
 
-export interface CameraOptions {
-  position: Vector3;
+export interface CameraOptions extends GameObjectOptions {
+  isMainCamera?: boolean;
   size?: Vector2 | number;
   projection?: CameraType;
-  name?: string;
   near?: number,
   far?: number;
-  tag?: string | 'MainCamera';
 }
 
 export function Camera(options?: CameraOptions) {
-  return function (target: new () => object) {
-    return class GameCamera extends target implements GameObject, GameCamera, OnStart {
-      readonly gameObjectType = 'camera';
+  return function (target: new () => object): any {
+    return class GameCameraComponent extends GameObject implements GameCamera {
+      override readonly gameObjectType = 'camera';
       readonly camera!: Three.Camera;
 
-      tag = options?.tag ?? 'MainCamera';
-      name = options?.name || 'GameObject';
-      markedForDeletion = false;
-      isActive = true;
-      started = false;
-      methods: string[] = [];
-      object3d = this.camera;
-      children: ObjectList<any> = new ObjectList(this);
-      startPosition = new Three.Vector3();
-
       readonly #aspectRatio = Engine.game.aspect ?? 1.7777777777777777;
-      readonly #size = options?.size && typeof options.size === 'object' ?
-        options.size.x :
-        typeof options?.size === 'number' ?
-          options.size : 5;
-
-      readonly #width = typeof options?.size === 'number' ?
-        options.size :
-        options?.size instanceof Vector3 ?
-          options.size.x : 5;
-
-      readonly #height = typeof options?.size === 'number' ?
-        this.#size / this.#aspectRatio :
-        options?.size instanceof Vector3 ?
-          options.size.y :
-          this.#size * this.#aspectRatio;
+      readonly #size;
+      readonly #width;
+      readonly #height;
 
       /** Whether or not this is the main camera. */
-      get isMainCamera() {
-        return this.tag === 'MainCamera';
-      }
+      readonly isMainCamera;
       get aspect() {
         return this.#aspectRatio;
       }
 
-      get position() { return Vector3.fromThree(this.object3d?.position); }
-      set position(value: Vector3) { this.object3d?.position.set(...value.toArray()); }
-
-      get rotation() { return Euler.fromThree(this.object3d?.rotation); }
-      set rotation(value: Euler) { this.object3d?.rotation.set(...value.toArray()); }
-
       constructor() {
-        super();
+        super(target, options);
+
+        this.#size = options?.size && typeof options.size === 'object' ?
+          options.size.x :
+          typeof options?.size === 'number' ?
+            options.size : 5;
+
+        this.#width = typeof options?.size === 'number' ?
+          options.size :
+          options?.size instanceof Vector3 ?
+            options.size.x : 5;
+
+        this.#height = typeof options?.size === 'number' ?
+          this.#size / this.#aspectRatio :
+          options?.size instanceof Vector3 ?
+            options.size.y :
+            this.#size * this.#aspectRatio;
+
         const dim = this.#cameraDimensions();
+
+        // Engine.camera.main;
+
+        this.isMainCamera = options?.isMainCamera ?? false;
 
         // create the Three camera
         this.camera = options?.projection === 'orthographic' || typeof options?.projection === 'undefined' ?
@@ -71,8 +64,8 @@ export function Camera(options?: CameraOptions) {
           new Three.PerspectiveCamera(60, this.#width / this.#height, 0.1, 1000);
 
         // Set the initial position of the camera
-        this.position = options?.position ?? Vector3.zero;
-        this.startPosition = this.position.three();
+        // this.position = options?.position ?? Vector3.zero;
+        // this.startPosition = this.position.three();
       }
 
       #cameraDimensions() {
@@ -84,8 +77,11 @@ export function Camera(options?: CameraOptions) {
         return { left, right, top, bottom };
       }
 
-      onStart() {
-        this.started = true;
+      // onStart() {
+      //   this.started = true;
+      // }
+      override onUpdate() {
+        // console.log(this.markedForDeletion);
       }
     };
   };

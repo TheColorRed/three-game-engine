@@ -13,6 +13,7 @@
     "packages/physics"
   ],
   "devDependencies": {
-    "webidl2ts": "^1.0.4"
+    "webidl2ts": "^1.0.4",
+    "typescript": "beta"
   }
 }

@@ -1,4 +1,4 @@
-import { TIME_CHOICE } from '@engine/core';
+import { TIME_CHOICE } from '@engine/common';
 
 /**
  * Randomly chooses a given number to wait until it calls the next choice.

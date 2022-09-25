@@ -1,4 +1,5 @@
-import { Reflection, TIME_AUTO_BURST, TIME_BURST } from '@engine/core';
+import { TIME_AUTO_BURST, TIME_BURST } from '@engine/common';
+import { Reflection } from '@engine/core';
 
 /**
  * Executes a method for a defined duration then stops for a defined duration.

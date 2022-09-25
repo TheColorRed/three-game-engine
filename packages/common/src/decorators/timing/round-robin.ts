@@ -1,4 +1,4 @@
-import { TIME_ROUND_ROBIN } from '@engine/core';
+import { TIME_ROUND_ROBIN } from '@engine/common';
 
 /**
  * Calls each item from left to right, and once the last item is called starts over.

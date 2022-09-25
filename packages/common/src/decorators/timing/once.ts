@@ -1,4 +1,5 @@
-import { Reflection, TIME_ONCE } from '@engine/core';
+import { TIME_ONCE } from '@engine/common';
+import { Reflection } from '@engine/core';
 
 /**
  * Runs a function once after it has been created.

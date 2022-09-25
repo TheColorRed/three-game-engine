@@ -1,4 +1,4 @@
-import { TIME_RANDOMLY } from '@engine/core';
+import { TIME_RANDOMLY } from '@engine/common';
 
 /**
  * Randomly calls a method between a min and max interval.

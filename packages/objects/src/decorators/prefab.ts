@@ -1,9 +1,8 @@
-import { Engine, Euler, GAME_OBJECT, GAME_OBJECT_CHILDREN, Injector, ObjectList, PHYSICS_RIGIDBODY, Reflection, Spacial, Sprite, TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN, Vector3 } from '@engine/core';
-import { GameObject } from '@engine/objects';
-import { World } from '@engine/physics';
+import { TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN } from '@engine/common';
+import { Engine, Euler, Injector, ObjectList, Reflection, Spacial, Sprite, Vector3 } from '@engine/core';
+import { GameObject, GAME_OBJECT, GAME_OBJECT_CHILDREN } from '@engine/objects';
+import { PHYSICS_RIGIDBODY, World } from '@engine/physics';
 import { auditTime, map, take, takeWhile, tap, timer } from 'rxjs';
-
-
 
 export interface GameObjectOptions {
   name?: string;

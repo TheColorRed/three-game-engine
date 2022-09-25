@@ -1,4 +1,4 @@
-import { TIME_AUDIT } from '@engine/core';
+import { TIME_AUDIT } from '@engine/common';
 
 /**
  * Stops a method from getting called too frequently.

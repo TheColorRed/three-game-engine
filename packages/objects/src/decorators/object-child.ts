@@ -1,5 +1,5 @@
 import type { Type } from '@engine/core';
-import { GAME_OBJECT_CHILD, GAME_OBJECT_CHILDREN } from '@engine/core';
+import { GAME_OBJECT_CHILD, GAME_OBJECT_CHILDREN } from '@engine/objects';
 
 export interface ObjectChildOptions<T> {
   /** The game objects type. */

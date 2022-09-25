@@ -1,4 +1,4 @@
-import { PHYSICS_RIGIDBODY } from '@engine/core';
+import { PHYSICS_RIGIDBODY } from '@engine/physics';
 
 export type RigidbodyShape = { type: 'sphere', radius: number; } |
 { type: 'cube', size: { width: number, height: number, depth: number; }; } |

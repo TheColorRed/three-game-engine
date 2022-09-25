@@ -1,10 +1,10 @@
 
-import { CameraManager, GameCamera, GameObject, GameScene, SceneHierarchy, SceneManager } from '@engine/objects';
-import { World } from '@engine/physics';
+import { CameraManager, GameCamera, GameObject, GameScene, GAME_OBJECT_CHILDREN, SceneHierarchy, SceneManager } from '@engine/objects';
+import { PHYSICS_RIGIDBODY, World } from '@engine/physics';
 import { animationFrames, concat, filter, finalize, first, from, Observable, of, Subject, switchAll, switchMap, tap, timer, toArray } from 'rxjs';
 
 import type { Game } from '@engine/core';
-import { Debug, GAME_OBJECT_CHILDREN, Injector, PHYSICS_RIGIDBODY, Resource, TOKEN_INJECTABLE, Type } from '@engine/core';
+import { Debug, Injector, Resource, TOKEN_INJECTABLE, Type } from '@engine/core';
 import { WebGLRenderer } from 'three';
 
 export class Engine {

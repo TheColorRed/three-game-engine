@@ -1,0 +1,1 @@
+export const PHYSICS_RIGIDBODY = 'physics:rigidbody';

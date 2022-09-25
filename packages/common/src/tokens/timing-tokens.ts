@@ -1,0 +1,9 @@
+export const TIME_AUDIT = 'time:audit';
+export const TIME_RANDOMLY = 'time:randomly';
+export const TIME_CHOICE = 'time:choice';
+export const TIME_ROUND_ROBIN = 'time:round-robin';
+export const TIME_DEBOUNCE = 'time:debounce';
+export const TIME_AUTO_BURST = 'time:debounce';
+export const TIME_BURST = 'time:debounce';
+export const TIME_REPEAT = 'time:repeat';
+export const TIME_ONCE = 'time:once';

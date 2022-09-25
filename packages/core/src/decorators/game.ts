@@ -1,4 +1,4 @@
-import type { GameScene } from './scene';
+import type { GameScene } from '@engine/objects';
 
 export interface GameOptions {
   main: new () => object;

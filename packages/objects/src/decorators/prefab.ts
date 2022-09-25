@@ -13,10 +13,6 @@ export interface GameObjectOptions {
   tag?: string;
 }
 
-// export declare class GameObjectComponent extends GameObject { }
-
-
-
 export function Prefab(options?: GameObjectOptions) {
   return function <T extends { new(...args: any[]): any; }>(target: T): any {
     Reflect.defineMetadata(GAME_OBJECT, { target, options }, target);
@@ -24,7 +20,8 @@ export function Prefab(options?: GameObjectOptions) {
       constructor() {
         super(target, options);
         this.methods = Reflect.ownKeys(this.target.prototype) as string[];
-        Engine.activeScene.addGameObject(this.object3d);
+        // const sceneManger = Injector.get(SceneManager)
+        // sceneManger?.add(this.object3d);
         this.position = options?.position ?? Vector3.zero;
       }
       /**

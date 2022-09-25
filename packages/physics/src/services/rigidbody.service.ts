@@ -1,6 +1,6 @@
 import { GameObjectRef } from '@engine/common';
 import { Injectable, OnStart, PHYSICS_RIGIDBODY } from '@engine/core';
-import type { RigidbodyOptions, RigidbodyShape } from '../decorators';
+import type { RigidbodyOptions, RigidbodyShape } from '@engine/physics';
 
 export type Shapes = RigidbodyShape['type'];
 

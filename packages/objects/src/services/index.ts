@@ -1,2 +1,3 @@
-export * from './camera.service';
-export * from './scene.service';
+export * from './camera-manager.service';
+export * from './scene-manager.service';
+export * from './transform.service';

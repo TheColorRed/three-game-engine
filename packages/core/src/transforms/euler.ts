@@ -1,4 +1,4 @@
-import { Three } from '..';
+import { Three } from '@engine/core';
 export class Euler {
 
   readonly x: number;

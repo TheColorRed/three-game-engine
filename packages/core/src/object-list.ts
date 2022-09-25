@@ -1,7 +1,7 @@
+import { Engine } from '@engine/core';
 import type { ObjectChildrenOptions } from '@engine/objects';
 import { GameObject } from '@engine/objects';
 import { Subscription, tap } from 'rxjs';
-import { Engine } from '.';
 
 /**
  * A list of game objects.

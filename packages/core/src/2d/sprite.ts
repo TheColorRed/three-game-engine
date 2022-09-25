@@ -1,6 +1,6 @@
+import { SpriteResource } from '@engine/core';
 import { map, tap } from 'rxjs';
 import { Sprite as ThreeSprite } from 'three';
-import { SpriteResource } from '../resource';
 
 export class Sprite {
 

@@ -1,8 +1,7 @@
 import { Engine, Injectable, OnDestroy, Reflection } from '@engine/core';
+import { Key, TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '@engine/input';
 import type { GameObject } from '@engine/objects';
 import { auditTime, filter, from, fromEvent, Subscription, switchMap, tap } from 'rxjs';
-import { Key } from '../decorators';
-import { TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '../tokens';
 
 export type ButtonState = 'up' | 'down' | 'press' | 'release';
 

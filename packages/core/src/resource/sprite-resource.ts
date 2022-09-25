@@ -1,6 +1,6 @@
+import { Resource } from '@engine/core';
 import { Observable } from 'rxjs';
 import { SpriteMaterial, Texture, TextureLoader } from 'three';
-import { Resource } from './resource';
 
 export class SpriteResource extends Resource<string> {
 

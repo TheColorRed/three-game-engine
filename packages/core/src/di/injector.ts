@@ -1,5 +1,4 @@
-import { TOKEN_INJECTABLE, TOKEN_INJECTION } from '../tokens/tokens';
-import { Type } from './types';
+import { TOKEN_INJECTABLE, TOKEN_INJECTION, Type } from '@engine/core';
 
 export type ProvidedIn = 'game' | 'local';
 

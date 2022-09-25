@@ -1,7 +1,7 @@
 import { GameObjectRef, Time } from '@engine/common';
-import { OnStart, OnUpdate, Sprite, Transform, Vector2, Vector3 } from '@engine/core';
+import { OnStart, OnUpdate, Sprite, Vector2, Vector3 } from '@engine/core';
 import { Key, Keyboard, KeyPress, Mouse } from '@engine/input';
-import { Prefab, Scene } from '@engine/objects';
+import { Prefab, SceneManager, Transform } from '@engine/objects';
 import { Rigidbody } from '@engine/physics';
 import Paddle from '../sprites/paddleBlue.png';
 // import Paddle from '../sprites/ballBlue.png';
@@ -23,7 +23,7 @@ export class Player implements OnUpdate, OnStart {
   vSpeed = 25;
 
   constructor(
-    private readonly scene: Scene,
+    private readonly scene: SceneManager,
     private readonly mouse: Mouse,
     private readonly keyboard: Keyboard,
     private readonly time: Time,

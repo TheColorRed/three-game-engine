@@ -1,4 +1,4 @@
-import { Scene } from '@engine/core';
+import { Scene } from '@engine/objects';
 import { Ground } from '../prefabs/ground.prefab';
 import { MainCamera } from '../prefabs/main-camera.prefab';
 import { Player } from '../prefabs/player.prefab';

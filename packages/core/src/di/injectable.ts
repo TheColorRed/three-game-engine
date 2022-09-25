@@ -1,5 +1,4 @@
-import { TOKEN_INJECTABLE } from '../tokens/tokens';
-import { Type } from './types';
+import { TOKEN_INJECTABLE, Type } from '@engine/core';
 
 export interface InjectableOptions {
   providedIn: 'game' | 'local';

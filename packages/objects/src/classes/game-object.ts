@@ -1,6 +1,6 @@
 import { GameObjectRef } from '@engine/common';
 import { Euler, Injector, ObjectList, OnDestroy, OnStart, OnUpdate, Three, Vector3 } from '@engine/core';
-import { GameObjectOptions } from '@engine/objects';
+import type { GameObjectOptions } from '@engine/objects';
 import { Subscription } from 'rxjs';
 
 export abstract class GameObject<T extends { new(...args: any[]): any; } = any> implements OnStart, OnUpdate, OnDestroy {

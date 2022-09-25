@@ -1,6 +1,5 @@
 import { Injector } from '@engine/core';
-import { Keyboard } from '../services';
-import { TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '../tokens';
+import { Keyboard, TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '@engine/input';
 
 export enum Key {
   None, // Default state

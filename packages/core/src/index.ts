@@ -3,7 +3,6 @@ import * as Three from 'three';
 export * from './2d';
 export * from './3d';
 export * from './area';
-export * from './camera';
 export * from './debug';
 export * from './decorators';
 export * from './di';
@@ -11,7 +10,6 @@ export * from './engine';
 export * from './object-list';
 export * from './resource';
 export * from './tokens';
-export * from './transform.service';
 export * from './transforms';
 export { Three };
 

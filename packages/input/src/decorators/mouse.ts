@@ -1,6 +1,5 @@
 import { Injector, Reflection } from '@engine/core';
-import { TOKEN_MOUSE_DOWN, TOKEN_MOUSE_PRESS, TOKEN_MOUSE_UP } from '@engine/input';
-import { Mouse } from '../services';
+import { Mouse, TOKEN_MOUSE_DOWN, TOKEN_MOUSE_PRESS, TOKEN_MOUSE_UP } from '@engine/input';
 export enum MouseButton { None = -1, Left = 0, Right = 2, Middle = 1 }
 export type MouseTarget = 'global' | 'self';
 

@@ -1,9 +1,7 @@
 import { Engine, Injectable, OnDestroy, Reflection, Vector2 } from '@engine/core';
+import { ButtonState, MouseButton, MouseData, TOKEN_MOUSE_DOWN, TOKEN_MOUSE_PRESS, TOKEN_MOUSE_UP } from '@engine/input';
 import type { GameObject } from '@engine/objects';
 import { fromEvent, of, switchMap, tap } from 'rxjs';
-import { MouseButton, MouseData } from '../decorators';
-import { TOKEN_MOUSE_DOWN, TOKEN_MOUSE_PRESS, TOKEN_MOUSE_UP } from '../tokens';
-import { ButtonState } from './keyboard.service';
 
 @Injectable({ providedIn: 'game' })
 export class Mouse implements OnDestroy {

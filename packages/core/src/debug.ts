@@ -1,4 +1,4 @@
-import { Engine, Three } from '.';
+import { Engine, Three } from '@engine/core';
 
 export class Debug {
   static log(...message: any[]) {
@@ -20,6 +20,6 @@ export class Debug {
 
     const geometry = new Three.BufferGeometry().setFromPoints(points);
     const box = new Three.Line(geometry, material);
-    Engine.activeScene.scene.add(box);
+    Engine.sceneManager.activeScene?.addGameObject(box);
   }
 }

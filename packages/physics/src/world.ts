@@ -1,8 +1,8 @@
 import { Debug, Euler, Injectable, PHYSICS_RIGIDBODY, Vector3 } from '@engine/core';
 import { GameObject } from '@engine/objects';
+import { RigidbodyOptions } from '@engine/physics';
 import Ammo from 'ammojs-typed';
 import { auditTime, from, Observable, of, switchMap, tap, timer } from 'rxjs';
-import { RigidbodyOptions } from './decorators';
 
 @Injectable({ providedIn: 'game' })
 export class World {

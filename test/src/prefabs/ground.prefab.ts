@@ -1,6 +1,6 @@
 import { GameObjectRef } from '@engine/common';
-import { OnStart, Sprite, Transform, Vector3 } from '@engine/core';
-import { Prefab } from '@engine/objects';
+import { OnStart, Sprite, Vector3 } from '@engine/core';
+import { Prefab, Transform } from '@engine/objects';
 import { Rigidbody } from '@engine/physics';
 import ground from '../sprites/paddleRed.png';
 

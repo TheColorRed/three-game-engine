@@ -3,6 +3,7 @@
   "main": "./src/index",
   "dependencies": {
     "@engine/core": "1.0.0",
+    "@engine/objects": "1.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.6"
   },

@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { NormalModuleReplacementPlugin } = require('webpack');
+const { NormalModuleReplacementPlugin, IgnorePlugin } = require('webpack');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 /**
  * @type {import('webpack').Configuration}
@@ -39,7 +40,12 @@ module.exports = {
     new NormalModuleReplacementPlugin(
       /environments\/environment\.ts/,
       './environments/prod.environment.ts'
-    )
+    ),
+    new CircularDependencyPlugin({
+      exclude: /node_modules/,
+      failOnError: true,
+      allowAsyncCycles: true,
+    })
   ],
   resolve: {
     extensions: ['.ts', '.js'],

@@ -1,4 +1,4 @@
-import { TOKEN_BUTTON_DOWN, TOKEN_BUTTON_PRESS, TOKEN_BUTTON_UP } from '@engine/input';
+import { TOKEN_BUTTON_DOWN, TOKEN_BUTTON_PRESS, TOKEN_BUTTON_UP } from '../tokens';
 
 export function InputUp(key: string) {
   return (target: any, prop: string) => {

@@ -1,3 +1,3 @@
-export const TOKEN_MOUSE_UP = 'token:mouse:up';
-export const TOKEN_MOUSE_DOWN = 'token:mouse:down';
-export const TOKEN_MOUSE_PRESS = 'token:mouse:press';
+export const MOUSE_UP = 'mouse:up';
+export const MOUSE_DOWN = 'mouse:down';
+export const MOUSE_PRESS = 'mouse:press';

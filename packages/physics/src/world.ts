@@ -1,11 +1,13 @@
-import { Debug, Euler, Injectable, Vector3 } from '@engine/core';
-import { GameObject } from '@engine/objects';
-import { PHYSICS_RIGIDBODY, RigidbodyOptions } from '@engine/physics';
+import { Debug, Euler, GameObject, Injectable, Three, Vector3 } from '@engine/core';
 import Ammo from 'ammojs-typed';
-import { auditTime, from, Observable, of, switchMap, tap, timer } from 'rxjs';
+import { from, Observable, of, switchMap, tap, timer } from 'rxjs';
+import { PhysicsMaterialOptions, RigidbodyOptions } from './decorators';
+import { PHYSICS_MATERIAL, PHYSICS_RIGIDBODY } from './tokens';
 
 @Injectable({ providedIn: 'game' })
 export class World {
+
+  readonly worldGravity = new Vector3(0, -9.81, 0);
 
   private _worldCreated = false;
   private Ammo!: typeof Ammo;
@@ -17,21 +19,21 @@ export class World {
   worldSteps$ = timer(1 / 60, 0)
     .pipe(
       tap(() => this.dynamicWorld.stepSimulation(1 / 60, 10)),
-      auditTime(50),
+      // auditTime(50),
       switchMap(() => from(this.bodies).pipe(
         tap(([obj, body]) => {
           const state = body.getMotionState();
           if (state) {
             state.getWorldTransform(this.globalTransform);
-            const px = this.globalTransform.getOrigin().x();
-            const py = this.globalTransform.getOrigin().y();
-            const pz = this.globalTransform.getOrigin().z();
-            const rx = this.globalTransform.getRotation().x();
-            const ry = this.globalTransform.getRotation().y();
-            const rz = this.globalTransform.getRotation().z();
+            const pos = this.globalTransform.getOrigin();
+            const rot = this.globalTransform.getRotation();
+            const px = pos.x(), py = pos.y(), pz = pos.z();
+            const rx = rot.x(), ry = rot.y(), rz = rot.z(), rw = rot.w();
+            // console.log(rx, ry, rz, rw);
             obj.position = new Vector3(px, py, pz);
-            obj.rotation = new Euler(rx, ry, rz);
-            // console.log(obj.position.toArray());
+            obj.rotation = Euler.fromThree(
+              new Three.Euler().setFromQuaternion(new Three.Quaternion(rx, ry, rz, rw))
+            );
           }
         })
       ))
@@ -59,22 +61,69 @@ export class World {
    * @param gameObject The game object to add.
    */
   add(gameObject: GameObject) {
-    const opts = Reflect.getMetadata(PHYSICS_RIGIDBODY, gameObject.instance.constructor) as RigidbodyOptions;
+    const opts = Reflect.getMetadata(PHYSICS_RIGIDBODY, gameObject.instance.constructor) as RigidbodyOptions | undefined;
+    if (typeof opts === 'undefined') throw new Error(`"${gameObject.name}" does not have a rigidbody.`);
+    const mat = Reflect.getMetadata(PHYSICS_MATERIAL, opts.material || {}) as PhysicsMaterialOptions | undefined;
     const goPos = gameObject.position;
-    // console.log(gameObject.name, goTrans.toArray());
+    const goQuat = gameObject.quaternion;
 
     const transform = new this.Ammo.btTransform();
+    transform.setIdentity();
     transform.setOrigin(new this.Ammo.btVector3(...goPos.toArray()));
+    transform.setRotation(new this.Ammo.btQuaternion(...goQuat.toArray()));
 
     const motionState = new this.Ammo.btDefaultMotionState(transform);
     const shape = this.createShape(opts);
     const inertia = new this.Ammo.btVector3(0, 0, 0);
 
-    const info = new this.Ammo.btRigidBodyConstructionInfo(opts.mass, motionState, shape, inertia);
+    const info = new this.Ammo.btRigidBodyConstructionInfo(opts.mass ?? 1, motionState, shape, inertia);
     const body = new this.Ammo.btRigidBody(info);
+
+    body.setAngularFactor(new this.Ammo.btVector3(...(opts.angularLock || Vector3.one).toArray()));
+    body.setLinearFactor(new this.Ammo.btVector3(...(opts.linearLock || Vector3.one).toArray()));
+
+    body.setRestitution(mat?.bounciness ?? 1);
+    body.setFriction(mat?.friction ?? 1);
+    if (opts.gravity instanceof Vector3) {
+      const gravity = new this.Ammo.btVector3(...opts.gravity.toArray());
+      body.setGravity(gravity);
+    }
+
     this.dynamicWorld.addRigidBody(body);
 
     this.bodies.push([gameObject, body]);
+  }
+
+  applyForce(gameObject: GameObject, force: Vector3) {
+    const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
+    if (go && body) {
+      body.activate(true);
+      body.applyCentralLocalForce(new this.Ammo.btVector3(...force.toArray()));
+    }
+  }
+
+  applyImpulse(gameObject: GameObject, force: Vector3) {
+    const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
+    if (go && body) {
+      body.activate(true);
+      body.applyCentralImpulse(new this.Ammo.btVector3(...force.toArray()));
+    }
+  }
+
+  setVelocity(gameObject: GameObject, velocity: Vector3) {
+    const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
+    if (go && body) {
+      body.activate(true);
+      body.setLinearVelocity(new this.Ammo.btVector3(...velocity.toArray()));
+    }
+  }
+
+  setAngularVelocity(gameObject: GameObject, velocity: Vector3) {
+    const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
+    if (go && body) {
+      body.activate(true);
+      body.setAngularVelocity(new this.Ammo.btVector3(...velocity.toArray()));
+    }
   }
 
   createShape(options: RigidbodyOptions) {
@@ -83,8 +132,7 @@ export class World {
         return new this.Ammo.btSphereShape(options.shape.radius);
       case 'cube':
         var { width, height, depth } = options.shape.size;
-        console.log(options.shape.size);
-        return new this.Ammo.btBoxShape(new this.Ammo.btVector3(width, height, depth));
+        return new this.Ammo.btBoxShape(new this.Ammo.btVector3(width * 0.5, height * 0.5, depth * 0.5));
       case 'cone':
         var { radius, height } = options.shape.size;
         return new this.Ammo.btConeShape(radius, height);
@@ -116,25 +164,11 @@ export class World {
           solver = new Ammo.btSequentialImpulseConstraintSolver();
 
         this.dynamicWorld = new this.Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-        this.dynamicWorld.setGravity(new this.Ammo.btVector3(0, -9.81, 0));
+        this.dynamicWorld.setGravity(new this.Ammo.btVector3(...this.worldGravity.toArray()));
 
         this.globalTransform = new this.Ammo.btTransform();
 
         this.worldSteps$.subscribe();
-
-        // let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(),
-        //   dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
-        //   overlappingPairCache = new Ammo.btDbvtBroadphase(),
-        //   solver = new Ammo.btSequentialImpulseConstraintSolver(),
-        //   dynamicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-        // dynamicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
-
-        // let groundShape = new Ammo.btBoxShape(new Ammo.btVector3(50, 50, 50)),
-        //   groundTransform = new Ammo.btTransform();
-
-        // groundTransform.setIdentity();
-        // groundTransform.setOrigin(new Ammo.btVector3(0, -56, 0));
-
         sub.complete();
       });
     });

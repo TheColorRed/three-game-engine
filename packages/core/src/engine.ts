@@ -1,80 +1,51 @@
-
-import { CameraManager, GameCamera, GameObject, GameScene, GAME_OBJECT_CHILDREN, SceneHierarchy, SceneManager } from '@engine/objects';
-import { PHYSICS_RIGIDBODY, World } from '@engine/physics';
-import { animationFrames, concat, filter, finalize, first, from, Observable, of, Subject, switchAll, switchMap, tap, timer, toArray } from 'rxjs';
-
-import type { Game } from '@engine/core';
-import { Debug, Injector, Resource, TOKEN_INJECTABLE, Type } from '@engine/core';
-import { WebGLRenderer } from 'three';
+import { animationFrames, concat, filter, finalize, first, Observable, of, tap, timer } from 'rxjs';
+import { GameObject } from './classes';
+import { Debug } from './debug';
+import { Game, SceneHierarchy } from './decorators';
+import { Injector, Newable, Type } from './di';
+import { Resource } from './resource';
+import { CameraManager, GameObjectManager, SceneManager } from './services';
+import { GameLoop } from './services/game-loop.service';
+import { Three } from './three';
+import { TOKEN_INJECTABLE } from './tokens';
 
 export class Engine {
 
-  static gameObjects: GameObject[] = [];
-  static gameScenes: GameScene[] = [];
-  static #time = 0;
-  static #delta = 0;
-  static #lastTime = 0;
-  static #start = Date.now();
-  static #frames = 0;
+  // static gameObjects: GameObject[] = [];
+  // static gameScenes: GameScene[] = [];
 
-  static get time() { return this.#time; }
-  static get delta() { return this.#delta; }
-  static get frames() { return this.#frames; }
-  static renderer = new WebGLRenderer({
+  static renderer = new Three.WebGLRenderer({
     alpha: true,
     antialias: true
   });
   static canvas = this.renderer.domElement;
 
-  static #updated = new Subject<void>();
-  static updated$ = this.#updated.asObservable();
-
-  // static get activeCamera() {
-  //   const cam = this.gameObjects.find(i => i.gameObjectType === 'camera' && i.isActive === true) as GameCamera | undefined;
-  //   // console.log(cam);
-  //   return cam;
-  // };
-  // static activeScene: GameScene;
   static game: Game;
   static #stats: Stats;
   static #production = true;
   static get production() { return this.#production; }
-  static cameraManager: CameraManager;
-  static sceneManager: SceneManager;
+  static camera: CameraManager = Injector.get(CameraManager)!;
+  static scene: SceneManager = Injector.get(SceneManager)!;
+  static gameObject: GameObjectManager = Injector.get(GameObjectManager)!;
   static readyToRender = false;
 
-  static start(gameEntryPoint: new () => object) {
+  static start(gameEntryPoint: Newable<object>) {
 
     document.querySelector('.container')?.appendChild(this.renderer.domElement);
+    const gameLoop = Injector.create(GameLoop).get(GameLoop)!;
 
     // Run the main game loop.
     concat(
       of(true).pipe(tap(() => {
         Debug.log('Initializing core services..');
-        this.cameraManager = Injector.create(CameraManager).get(CameraManager) as CameraManager;
-        this.sceneManager = Injector.create(SceneManager).get(SceneManager) as SceneManager;
+        this.camera = Injector.create(CameraManager).get(CameraManager)!;
+        // this.managers = new Managers();
       }), tap(() => this.readyToRender = true)),
       this.#initializeGame(gameEntryPoint),
       this.#initializePhysics(),
       this.#initializeGameObjects(),
-      timer(0, 0)
-    )
-      .pipe(
-        // tap(() => console.log(Engine.gameObjects)),
-        tap(() => this.#updateTiming()),
-        // tap(() => console.log(this.activeScene.scene.children.length)),
-        switchMap(() => from(this.gameObjects).pipe(
-          tap(i => this.#startGameObject(i)),
-          tap(i => this.#updateGameObject(i)),
-          toArray(),
-        )),
-        switchAll(),
-        tap(i => {
-          this.#updated.next();
-          this.#destroyGameObject(i);
-        }),
-      )
-      .subscribe();
+      gameLoop.loop$
+    ).subscribe();
 
     // Render the game
     animationFrames().pipe(
@@ -85,7 +56,7 @@ export class Engine {
     ).subscribe();
   }
 
-  static #initializeGame(gameEntryPoint: new () => object) {
+  static #initializeGame(gameEntryPoint: Newable<object>) {
     return new Observable(sub => {
       this.game = new gameEntryPoint() as Game;
       if (!this.game) {
@@ -102,7 +73,7 @@ export class Engine {
 
       // Create an instance of the main scene and load its hierarchy.
       // this.activeScene = new this.game.mainScene(true);
-      this.sceneManager.activeScene = new this.game.mainScene(true);
+      this.scene.activeScene = new this.game.mainScene(true);
 
       if (this.game.stats === true || (typeof this.game.stats === 'undefined' && !this.production)) {
         import('stats.js').then(stats => {
@@ -121,8 +92,7 @@ export class Engine {
       first(),
       tap(() => {
         Debug.log('Loading Game Objects...');
-        this.#loadGameCameras(this.sceneManager.activeScene?.registeredGameObjects);
-        this.#loadGameObjects(this.sceneManager.activeScene?.registeredGameObjects ?? []);
+        this.#loadGameObjects(this.scene.activeScene?.registeredGameObjects ?? []);
 
         this.#updateRendererSize();
         window.addEventListener('resize', this.#updateRendererSize.bind(this));
@@ -130,37 +100,28 @@ export class Engine {
     );
   }
 
-  static #loadGameCameras(item: GameCamera | SceneHierarchy = []) {
-    // console.log(item instanceof GameCamera);
-    if (typeof item === 'function') {
-      this.instantiate(item as Type<any>);
-    } else if (Array.isArray(item)) {
-      for (let i of item) {
-        this.#loadGameCameras(i);
-      }
-    }
-  }
-
   static #loadGameObjects(item: GameObject | SceneHierarchy = []) {
     if (typeof item === 'function') {
-      this.instantiate(item as Type<any>);
+      this.scene.instantiate(item as Type<any>);
     } else if (Array.isArray(item)) {
       for (let i of item) {
         this.#loadGameObjects(i);
       }
     }
   }
-
-
+  /**
+   * Turn on physics if the module has been included in the package.json.
+   */
   static #initializePhysics() {
-    return new Observable(sub => {
-      import('@engine/physics').then(physics => {
-        const physicsWorld = Injector.create(physics.World)
-          .get(physics.World) as World;
-        physicsWorld.create().pipe(
-          finalize(() => sub.complete())
-        ).subscribe();
-      });
+    return new Observable<void>(sub => {
+      try {
+        import('@engine/physics').then(physics => {
+          const physicsWorld = Injector.create(physics.World).get(physics.World)!;
+          physicsWorld.create().pipe(
+            finalize(() => sub.complete())
+          ).subscribe();
+        });
+      } catch (e) { }
     });
   }
 
@@ -180,18 +141,19 @@ export class Engine {
   }
 
   static #renderGame() {
-    const activeScene = this.gameScenes.find(i => i.isActive === true);
-    if (typeof this.cameraManager.activeCamera !== 'undefined' && typeof activeScene !== 'undefined') {
-      this.renderer.render(activeScene.scene, this.cameraManager.activeCamera.camera);
+    const activeScene = this.scene.gameScenes.find(i => i.isActive === true);
+    if (typeof this.camera.activeCamera !== 'undefined' && typeof activeScene !== 'undefined') {
+      // console.log(this.camera.activeCamera.camera);
+      this.renderer.render(activeScene.scene, this.camera.activeCamera.camera);
     }
   }
 
-  static instantiate<T>(item: Type<T>): T {
-    const gameObject = Injector.create(item).get(item) as GameObject;
+  // static instantiate<T>(item: Type<T>): T {
+  //   const gameObject = Injector.create(item).get(item) as GameObject;
 
-    this.gameObjects.push(gameObject);
-    return gameObject as unknown as T;
-  }
+  //   this.gameObjects.push(gameObject);
+  //   return gameObject as unknown as T;
+  // }
 
   static destroyLocalService(gameObject: GameObject & { [key: string]: any; }) {
     for (let [key, obj] of Object.entries(gameObject)) {
@@ -208,50 +170,4 @@ export class Engine {
     }
   }
 
-  static #startGameObject(obj: GameObject) {
-    if (obj.started === false) {
-      obj.onStart();
-    }
-  }
-
-  static #updateGameObject(obj: GameObject) {
-    if (obj.started === true) {
-      obj.onUpdate();
-    }
-  }
-
-  static #updateTiming() {
-    const now = Date.now();
-    this.#time = (this.#lastTime - this.#start) / 1000;
-    this.#delta = (now - this.#lastTime) / 1000;
-    this.#lastTime = now;
-    this.#frames++;
-  }
-
-  static #destroyGameObject(obj: GameObject) {
-    if (obj.onDestroy?.()) {
-      const p = Reflect.getMetadata(PHYSICS_RIGIDBODY, obj.constructor);
-      if (typeof p !== 'undefined') {
-        const world = Injector.get(World);
-        world?.remove(obj);
-      }
-      this.#deleteAllGameObjectRefs(obj);
-      const idx = this.gameObjects.indexOf(obj);
-      if (idx > -1) this.gameObjects.splice(idx, 1);
-    }
-  }
-
-  static #deleteAllGameObjectRefs(obj: GameObject) {
-    for (let gameObject of this.gameObjects) {
-      gameObject.children.setDirty();
-      for (let method in gameObject) {
-        let meta = Reflect.getMetadata(GAME_OBJECT_CHILDREN, gameObject, method);
-        if (typeof meta !== 'undefined') {
-          (gameObject as any)[method].setDirty();
-        }
-      }
-      // gameObject.children.remove(obj);
-      // gameObject.children = gameObject.children.filter(i => i !== obj);
-    }
-  }
 }

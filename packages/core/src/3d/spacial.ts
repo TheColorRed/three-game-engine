@@ -1,4 +1,4 @@
-import { Object3D } from 'three';
+import { Three } from '../three';
 // import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 
 export interface ModelLoader {
@@ -7,7 +7,7 @@ export interface ModelLoader {
 
 export class Spacial {
 
-  object!: Object3D;
+  object!: Three.Object3D;
 
   constructor(model: string) {
     let loader;

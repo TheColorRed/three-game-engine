@@ -1,4 +1,4 @@
 export * from './decorators';
-export * from './services/rigidbody.service';
+export * from './services';
 export * from './tokens';
 export * from './world';

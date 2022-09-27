@@ -1,0 +1,1 @@
+export enum MouseButton { None = -1, Left = 0, Right = 2, Middle = 1 }

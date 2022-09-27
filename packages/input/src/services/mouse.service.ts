@@ -1,10 +1,15 @@
-import { Engine, Injectable, OnDestroy, Reflection, Vector2 } from '@engine/core';
-import { ButtonState, MouseButton, MouseData, TOKEN_MOUSE_DOWN, TOKEN_MOUSE_PRESS, TOKEN_MOUSE_UP } from '@engine/input';
-import type { GameObject } from '@engine/objects';
-import { fromEvent, of, switchMap, tap } from 'rxjs';
+import { Engine, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Vector2 } from '@engine/core';
+import { GameLoop } from '@engine/core/src/services/game-loop.service';
+import { auditTime, fromEvent, of, switchMap, tap } from 'rxjs';
+import { MouseButton } from '../enums';
+import { MOUSE_DOWN, MOUSE_PRESS, MOUSE_UP } from '../tokens';
+import { ButtonState } from './keyboard.service';
 
 @Injectable({ providedIn: 'game' })
 export class Mouse implements OnDestroy {
+
+  private gameLoop = Injector.get(GameLoop)!;
+  private gom = Injector.get(GameObjectManager)!;
 
   private mouseX = 0;
   private mouseY = 0;
@@ -43,7 +48,8 @@ export class Mouse implements OnDestroy {
     )),
   ).subscribe();
 
-  mousePressed$ = Engine.updated$.pipe(
+  mousePressed$ = this.gameLoop.updated$.pipe(
+    auditTime(1),
     tap(() => {
       this.isMouseDown && this.triggerMouse('press');
     })
@@ -72,7 +78,7 @@ export class Mouse implements OnDestroy {
   }
 
   private mouseEvent(key: MouseButton, type: ButtonState) {
-    for (let obj of Engine.gameObjects) {
+    for (let obj of this.gom.gameObjects) {
       for (let method of obj.methods || []) {
         this.execMouseEvent(key, type, obj, method);
       }
@@ -80,14 +86,15 @@ export class Mouse implements OnDestroy {
   }
 
   private execMouseEvent(key: MouseButton, type: ButtonState, obj: GameObject & { [key: string]: any; }, method: string) {
-    const keyToken = type === 'down' ? TOKEN_MOUSE_DOWN :
-      type === 'up' ? TOKEN_MOUSE_UP :
-        type === 'press' ? TOKEN_MOUSE_PRESS :
+    const keyToken = type === 'down' ? MOUSE_DOWN :
+      type === 'up' ? MOUSE_UP :
+        type === 'press' ? MOUSE_PRESS :
           undefined;
-    Reflection.call<MouseData>(
-      action => action.key === key && typeof obj[method] === 'function',
-      keyToken ?? '', obj, method
-    );
+
+    const i = Reflect.getMetadata(keyToken, obj.target.prototype, method) as MouseButton[];
+    if (Array.isArray(i) && i.includes(key) && typeof obj.instance[method] === 'function') {
+      obj.instance[method]();
+    }
   }
 
 }

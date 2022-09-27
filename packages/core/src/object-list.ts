@@ -1,7 +1,9 @@
-import { Engine } from '@engine/core';
-import type { ObjectChildrenOptions } from '@engine/objects';
-import { GameObject } from '@engine/objects';
 import { Subscription, tap } from 'rxjs';
+import { GameObject } from './classes';
+import { ObjectChildrenOptions } from './decorators';
+import { Injector } from './di';
+import { GameObjectManager } from './services';
+import { GameLoop } from './services/game-loop.service';
 
 /**
  * A list of game objects.
@@ -18,9 +20,10 @@ export class ObjectList<T = GameObject> {
 
   constructor(
     private readonly gameObject: GameObject,
-    private searchCriteria?: ObjectChildrenOptions<T>
+    private readonly searchCriteria?: ObjectChildrenOptions<T>,
   ) {
-    this._watcher = Engine.updated$.pipe(tap(() => this.update())).subscribe();
+    const gameLoop = Injector.get(GameLoop)!;
+    this._watcher = gameLoop.updated$.pipe(tap(() => this.update())).subscribe();
   }
 
   /**
@@ -65,7 +68,8 @@ export class ObjectList<T = GameObject> {
     this.dirty = false;
     const itms: T[] = [];
     const current = this.gameObject.object3d;
-    for (let gameObject of Engine.gameObjects) {
+    const objManager = Injector.get(GameObjectManager) as GameObjectManager;
+    for (let gameObject of objManager.gameObjects) {
       // Skip the current game objects since it cant be a parent to itself.
       // The game object must be a child of the current game object.
       if (current !== gameObject.object3d && current === gameObject.object3d?.parent) {

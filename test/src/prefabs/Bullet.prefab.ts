@@ -1,6 +1,5 @@
-import { GameObjectRef, Once, Time } from '@engine/common';
-import { Sprite, Vector2 } from '@engine/core';
-import { Prefab, Transform } from '@engine/objects';
+import { GameObjectRef, Once, Prefab, Sprite, Time, Vector2 } from '@engine/core';
+import { Transform } from '@engine/objects';
 import bullet from '../sprites/ballBlue.png';
 
 @Prefab({

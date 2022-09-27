@@ -1,6 +1,5 @@
-import { Injector, Reflection } from '@engine/core';
-import { Mouse, TOKEN_MOUSE_DOWN, TOKEN_MOUSE_PRESS, TOKEN_MOUSE_UP } from '@engine/input';
-export enum MouseButton { None = -1, Left = 0, Right = 2, Middle = 1 }
+import { MouseButton } from '../enums';
+import { MOUSE_DOWN, MOUSE_PRESS, MOUSE_UP } from '../tokens';
 export type MouseTarget = 'global' | 'self';
 
 export interface MouseData {
@@ -8,21 +7,18 @@ export interface MouseData {
   mouseTarget: MouseTarget;
 }
 
-export function ButtonUp(key: MouseButton, mouseTarget: MouseTarget = 'self') {
+export function ButtonUp(...keys: MouseButton[]) {
   return (target: any, prop: string) => {
-    Injector.create(Mouse);
-    Reflection.set(TOKEN_MOUSE_UP, { key, mouseTarget }, target, prop);
+    Reflect.defineMetadata(MOUSE_UP, keys, target, prop);
   };
 }
-export function ButtonDown(key: MouseButton, mouseTarget: MouseTarget = 'self') {
+export function ButtonDown(...keys: MouseButton[]) {
   return (target: any, prop: string) => {
-    Injector.create(Mouse);
-    Reflection.set(TOKEN_MOUSE_DOWN, { key, mouseTarget }, target, prop);
+    Reflect.defineMetadata(MOUSE_DOWN, keys, target, prop);
   };
 }
-export function ButtonPress(key: MouseButton, mouseTarget: MouseTarget = 'self') {
+export function ButtonPress(...keys: MouseButton[]) {
   return (target: any, prop: string) => {
-    Injector.create(Mouse);
-    Reflection.set(TOKEN_MOUSE_PRESS, { key, mouseTarget }, target, prop);
+    Reflect.defineMetadata(MOUSE_PRESS, keys, target, prop);
   };
 }

@@ -1,9 +1,4 @@
-import { GameObjectRef } from '@engine/common';
-import { Three } from '@engine/core';
-import { Injectable } from '@engine/core/src/di';
-import { ObjectList } from '@engine/core/src/object-list';
-import { Vector3 } from '@engine/core/src/transforms/vector';
-import { GameObject, GAME_OBJECT_CHILDREN } from '@engine/objects';
+import { GameObject, GameObjectRef, GAME_OBJECT_CHILDREN, Injectable, ObjectList, Three, Vector3 } from '@engine/core';
 
 export enum Direction {
   North, South, East, West,

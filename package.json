@@ -7,13 +7,12 @@
   "workspaces": [
     "test",
     "packages/core",
-    "packages/common",
     "packages/input",
     "packages/objects",
     "packages/physics"
   ],
   "devDependencies": {
-    "webidl2ts": "^1.0.4",
-    "typescript": "beta"
+    "typescript": "^4.9.1-beta",
+    "webidl2ts": "^1.0.4"
   }
 }

@@ -1,16 +1,17 @@
-import type { GameScene } from '@engine/objects';
+import { GameScene } from '../classes';
+import { Newable } from '../di';
 
 export interface GameOptions {
-  main: new () => object;
+  main: Newable<object>;
   production: boolean;
-  scenes?: (new () => object)[];
+  scenes?: Newable<object>[];
   aspect?: number | `${number}x${number}`;
   stats?: boolean;
   gizmos?: boolean;
 }
 
 export interface Game {
-  registeredScenes: (new () => GameScene)[];
+  registeredScenes: Newable<GameScene>[];
   mainScene: new (activate?: boolean) => GameScene;
   aspect: number;
   fixedSize: boolean;
@@ -22,10 +23,10 @@ export interface Game {
 }
 
 export function Game(options: GameOptions) {
-  return (target: new () => object) => {
+  return (target: Newable<object>) => {
     return class extends target implements Game {
-      registeredScenes = (options?.scenes as (new () => GameScene)[]) || [];
-      mainScene = options.main as new () => GameScene;
+      registeredScenes = (options?.scenes as Newable<GameScene>[]) || [];
+      mainScene = options.main as Newable<GameScene>;
       aspect: number;
       fixedSize: boolean;
       width = 0;

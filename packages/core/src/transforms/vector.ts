@@ -1,4 +1,4 @@
-import { Three } from '@engine/core';
+import { Three } from '../three';
 
 /**
  * A vector containing 3 dimensions.

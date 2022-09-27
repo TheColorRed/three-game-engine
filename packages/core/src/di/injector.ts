@@ -1,4 +1,5 @@
-import { TOKEN_INJECTABLE, TOKEN_INJECTION, Type } from '@engine/core';
+import { TOKEN_INJECTABLE, TOKEN_INJECTION } from '../tokens';
+import { Type } from './types';
 
 export type ProvidedIn = 'game' | 'local';
 
@@ -33,7 +34,7 @@ export class Injector<T> {
    */
   static get<T>(item: Type<T>): T | undefined {
     const ref = Injector.container.get(item);
-    return ref?.instance;
+    return ref?.instance ?? this.create(item).get(item);
   }
 
   static #create<T>(target: Type<T>, isSingleton: boolean) {

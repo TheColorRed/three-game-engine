@@ -2,10 +2,10 @@
   "name": "@engine/physics",
   "main": "./src/index",
   "dependencies": {
-    "ammojs-typed": "^1.0.6",
-    "ammo.js": "0.0.10",
     "@engine/core": "1.0.0",
     "@engine/objects": "1.0.0",
+    "ammojs-typed": "^1.0.6",
+    "ammo.js": "0.0.10",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.6"
   },

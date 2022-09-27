@@ -1,10 +1,10 @@
-import { SpriteResource } from '@engine/core';
 import { map, tap } from 'rxjs';
-import { Sprite as ThreeSprite } from 'three';
+import { SpriteResource } from '../resource';
+import { Three } from '../three';
 
 export class Sprite {
 
-  object!: ThreeSprite;
+  object!: Three.Sprite;
   resource!: SpriteResource;
 
   get width() { return this.resource.width; }
@@ -14,7 +14,7 @@ export class Sprite {
     new SpriteResource(sprite).loadResource()
       .pipe(
         tap(i => this.resource = i),
-        map(i => this.object = new ThreeSprite(i.material)),
+        map(i => this.object = new Three.Sprite(i.material)),
         tap(i => i.scale.set(this.width, this.height, 0))
       )
       .subscribe();

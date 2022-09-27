@@ -1,7 +1,8 @@
-import { Engine, Injectable, OnDestroy, Reflection } from '@engine/core';
-import { Key, TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '@engine/input';
-import type { GameObject } from '@engine/objects';
+import { Engine, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Reflection } from '@engine/core';
+import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, filter, from, fromEvent, Subscription, switchMap, tap } from 'rxjs';
+import { Key } from '../enums';
+import { TOKEN_KEYDOWN, TOKEN_KEYPRESS, TOKEN_KEYUP } from '../tokens';
 
 export type ButtonState = 'up' | 'down' | 'press' | 'release';
 
@@ -9,6 +10,8 @@ export type ButtonState = 'up' | 'down' | 'press' | 'release';
 export class Keyboard implements OnDestroy {
 
   private keyState = new Map<Key, ButtonState>();
+  private gameLoop = Injector.get(GameLoop)!;
+  private gom = Injector.get(GameObjectManager)!;
 
   keyboardDown$ = fromEvent<KeyboardEvent>(window, 'keydown')
     .pipe(
@@ -50,7 +53,7 @@ export class Keyboard implements OnDestroy {
       ),
     );
 
-  keyboardPress$ = Engine.updated$.pipe(
+  keyboardPress$ = this.gameLoop.updated$.pipe(
     auditTime(1),
     switchMap(() => this.keyState.entries()),
     filter(([, state]) => state === 'press'),
@@ -87,7 +90,7 @@ export class Keyboard implements OnDestroy {
   }
 
   triggerKey(key: Key) {
-    for (let obj of Engine.gameObjects) {
+    for (let obj of this.gom.gameObjects) {
       for (let method of obj.methods || []) {
         this.execKeyboardEvent(key, obj, method);
       }

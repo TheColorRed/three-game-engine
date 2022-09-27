@@ -1,11 +1,11 @@
-import { Resource } from '@engine/core';
 import { Observable } from 'rxjs';
-import { SpriteMaterial, Texture, TextureLoader } from 'three';
+import { Three } from '../three';
+import { Resource } from './resource';
 
 export class SpriteResource extends Resource<string> {
 
-  material!: SpriteMaterial;
-  texture!: Texture;
+  material!: Three.SpriteMaterial;
+  texture!: Three.Texture;
   width!: number;
   height!: number;
 
@@ -22,10 +22,10 @@ export class SpriteResource extends Resource<string> {
         sub.complete();
         return;
       } else {
-        this.texture = new TextureLoader().load(this.resource, t => {
+        this.texture = new Three.TextureLoader().load(this.resource, t => {
           this.width = (1 / t.image.height) * t.image.width;
           this.height = 1;
-          this.material = new SpriteMaterial({
+          this.material = new Three.SpriteMaterial({
             map: this.texture,
             precision: 'highp'
           });

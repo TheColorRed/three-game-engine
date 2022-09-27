@@ -1,10 +1,11 @@
-import { Engine, Three } from '@engine/core';
+// import { Engine } from './engine';
+import { Three } from './three';
 
 export class Debug {
   static log(...message: any[]) {
-    if (Engine.production === false) {
-      console.log(...message);
-    }
+    // if (Engine.production === false) {
+    //   console.log(...message);
+    // }
   }
 
   static drawBox(x: number, y: number, width: number, height: number) {
@@ -20,6 +21,6 @@ export class Debug {
 
     const geometry = new Three.BufferGeometry().setFromPoints(points);
     const box = new Three.Line(geometry, material);
-    Engine.sceneManager.activeScene?.addGameObject(box);
+    // Engine.sceneManager.activeScene?.addGameObject(box);
   }
 }

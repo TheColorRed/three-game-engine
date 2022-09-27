@@ -1,4 +1,4 @@
-import { Three } from '@engine/core';
+import { Three } from '../three';
 export class Euler {
 
   readonly x: number;
@@ -37,7 +37,7 @@ export class Euler {
   static get zero() { return new Euler(0, 0, 0); }
   static get one() { return new Euler(1, 1, 1); }
 
-  three() {
+  toThree() {
     return new Three.Euler(this.x, this.y, this.z);
   }
 
@@ -46,7 +46,7 @@ export class Euler {
   }
 
   static fromThree(euler?: Three.Euler) {
-    if (euler) return new Euler(euler.x, euler.y, euler.z);
+    if (euler) return new Euler(euler.x ?? 0, euler.y ?? 0, euler.z ?? 0);
     return Euler.zero;
   }
 }

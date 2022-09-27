@@ -1,8 +1,8 @@
-import { GameObjectRef, Time } from '@engine/common';
-import { OnStart, OnUpdate, Sprite, Vector2, Vector3 } from '@engine/core';
-import { Key, Keyboard, KeyPress, Mouse } from '@engine/input';
-import { Prefab, SceneManager, Transform } from '@engine/objects';
-import { Rigidbody } from '@engine/physics';
+import { Euler, GameObjectRef, OnStart, OnUpdate, Prefab, SceneManager, Sprite, Time, Vector2, Vector3 } from '@engine/core';
+import { ButtonUp, Key, KeyPress, MouseButton } from '@engine/input';
+import { Transform } from '@engine/objects';
+import { Rigidbody, RigidbodyRef } from '@engine/physics';
+import { HalfBounce } from '../physics-materials/bouncy.material';
 import Paddle from '../sprites/paddleBlue.png';
 // import Paddle from '../sprites/ballBlue.png';
 import { Bullet } from './bullet.prefab';
@@ -10,9 +10,13 @@ import { Bullet } from './bullet.prefab';
 @Prefab({
   name: 'Player',
   object: new Sprite(Paddle),
-  position: new Vector3(0, 10, 0)
+  position: new Vector3(0, 10, 0),
+  rotation: new Euler(0, 0, -45)
 })
-@Rigidbody({ shape: { type: 'cube', size: { width: 5, height: 1, depth: 1 } } })
+@Rigidbody({
+  shape: { type: 'cube', size: { width: 5, height: 1, depth: 1 } },
+  material: HalfBounce,
+})
 export class Player implements OnUpdate, OnStart {
 
   // @ObjectChildren({ type: Bullet })
@@ -24,13 +28,19 @@ export class Player implements OnUpdate, OnStart {
 
   constructor(
     private readonly scene: SceneManager,
-    private readonly mouse: Mouse,
-    private readonly keyboard: Keyboard,
+    // private readonly mouse: Mouse,
+    // private readonly keyboard: Keyboard,
     private readonly time: Time,
     private readonly gameObject: GameObjectRef,
     private readonly transform: Transform,
-    // private readonly rigidbody: RigidbodyRef<'cube'>,
+    private readonly rigidbody: RigidbodyRef<'cube'>,
   ) { }
+
+  @ButtonUp(MouseButton.Left)
+  leftMouseButton() {
+    this.rigidbody.setVelocity(new Vector3(0, 10, 0));
+    // this.rigidbody.setAngularVelocity(new Vector3(0, 100, 0));
+  }
 
   @KeyPress(Key.Space, Key.B)
   // @Debounce(0.5)

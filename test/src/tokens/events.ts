@@ -1,3 +1,3 @@
-import { EventToken } from '@engine/core/src/tokens';
+import { EventToken } from '@engine/core';
 
 export const HI_TOKEN = new EventToken('game:hi');

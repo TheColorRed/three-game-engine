@@ -56,7 +56,7 @@ export class Vector3 {
     return new Three.Vector3(this.x, this.y, this.z);
   }
 
-  toArray(): [number, number, number] {
+  toArray(): [x: number, y: number, z: number] {
     return [this.x, this.y, this.z];
   }
 

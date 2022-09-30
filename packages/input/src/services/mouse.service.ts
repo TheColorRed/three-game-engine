@@ -1,4 +1,4 @@
-import { Engine, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Vector2 } from '@engine/core';
+import { GameConfig, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Vector2 } from '@engine/core';
 import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, fromEvent, of, switchMap, tap } from 'rxjs';
 import { MouseButton } from '../enums';
@@ -8,8 +8,9 @@ import { ButtonState } from './keyboard.service';
 @Injectable({ providedIn: 'game' })
 export class Mouse implements OnDestroy {
 
-  private gameLoop = Injector.get(GameLoop)!;
-  private gom = Injector.get(GameObjectManager)!;
+  private readonly gameLoop = Injector.get(GameLoop)!;
+  private readonly gom = Injector.get(GameObjectManager)!;
+  private readonly canvas = Injector.get(GameConfig)!.get('canvas');
 
   private mouseX = 0;
   private mouseY = 0;
@@ -17,7 +18,7 @@ export class Mouse implements OnDestroy {
   mousedown = MouseButton.None;
   mouseup = MouseButton.None;
   mousepress = MouseButton.None;
-  mouseDown$ = fromEvent<MouseEvent>(Engine.canvas, 'mousedown')
+  mouseDown$ = fromEvent<MouseEvent>(this.canvas, 'mousedown')
     .pipe(
       tap(i => {
         i.preventDefault();
@@ -27,7 +28,7 @@ export class Mouse implements OnDestroy {
       })
     )
     .subscribe();
-  mouseUp$ = fromEvent<MouseEvent>(Engine.canvas, 'mouseup')
+  mouseUp$ = fromEvent<MouseEvent>(this.canvas, 'mouseup')
     .pipe(
       tap(i => {
         i.preventDefault();
@@ -41,10 +42,10 @@ export class Mouse implements OnDestroy {
     )
     .subscribe();
 
-  mouseMove$ = fromEvent<MouseEvent>(Engine.canvas, 'mousemove').pipe(
-    switchMap(e => of(Engine.canvas.getBoundingClientRect()).pipe(
-      tap(r => this.mouseX = Math.min(Engine.canvas.width, Math.max(0, e.clientX - r.left))),
-      tap(r => this.mouseY = Math.min(Engine.canvas.height, Math.max(0, e.clientY - r.top)))
+  mouseMove$ = fromEvent<MouseEvent>(this.canvas, 'mousemove').pipe(
+    switchMap(e => of(this.canvas.getBoundingClientRect()).pipe(
+      tap(r => this.mouseX = Math.min(this.canvas.width, Math.max(0, e.clientX - r.left))),
+      tap(r => this.mouseY = Math.min(this.canvas.height, Math.max(0, e.clientY - r.top)))
     )),
   ).subscribe();
 

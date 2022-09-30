@@ -6,5 +6,7 @@ export * from './enums';
 export * from './services';
 export * from './tokens';
 
-Injector.create(Keyboard);
-Injector.create(Mouse);
+document.addEventListener('DOMContentLoaded', () => {
+  Injector.create(Mouse);
+  Injector.create(Keyboard);
+});

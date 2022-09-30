@@ -1,7 +1,7 @@
-import { Euler, GameObjectRef, OnStart, OnUpdate, Prefab, SceneManager, Sprite, Time, Vector2, Vector3 } from '@engine/core';
+import { GameObjectRef, OnStart, OnUpdate, Prefab, SceneManager, Sprite, Time, Vector2, Vector3 } from '@engine/core';
 import { ButtonUp, Key, KeyPress, MouseButton } from '@engine/input';
 import { Transform } from '@engine/objects';
-import { Rigidbody, RigidbodyRef } from '@engine/physics';
+import { Rigidbody2D, RigidbodyRef } from '@engine/physics';
 import { HalfBounce } from '../physics-materials/bouncy.material';
 import Paddle from '../sprites/paddleBlue.png';
 // import Paddle from '../sprites/ballBlue.png';
@@ -11,11 +11,13 @@ import { Bullet } from './bullet.prefab';
   name: 'Player',
   object: new Sprite(Paddle),
   position: new Vector3(0, 10, 0),
-  rotation: new Euler(0, 0, -45)
+  rotation: 0.90
 })
-@Rigidbody({
-  shape: { type: 'cube', size: { width: 5, height: 1, depth: 1 } },
+@Rigidbody2D({
+  shape: { type: 'box', size: { width: 1, height: 1 } },
   material: HalfBounce,
+  gravity: new Vector3(0, 0, 0),
+  // sleepThreshold: 0
 })
 export class Player implements OnUpdate, OnStart {
 

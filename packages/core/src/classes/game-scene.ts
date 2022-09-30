@@ -26,7 +26,7 @@ export abstract class GameScene<T extends object = object> {
     this.registeredCameras = options?.cameras || [];
     this.isActive = true;
     this.sceneManager = Injector.get(SceneManager) as SceneManager;
-    this.sceneManager.gameScenes.push(this);
+    this.sceneManager.scenes.push(this);
   }
 
   addGameObject(gameObject?: Three.Object3D | Three.Sprite) {
@@ -41,7 +41,7 @@ export abstract class GameScene<T extends object = object> {
    * Activates the scene and deactivates the others.
    */
   setActive() {
-    this.sceneManager.gameScenes.forEach(cam => cam.isActive = false);
+    this.sceneManager.scenes.forEach(cam => cam.isActive = false);
     this.isActive = true;
   }
 

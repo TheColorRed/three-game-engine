@@ -13,8 +13,9 @@ export interface GameObjectOptions {
   name?: string;
   object?: Sprite | Spacial;
   position?: Vector3;
-  rotation?: Euler;
+  rotation?: Euler | number;
   tag?: string;
+  is2D?: boolean;
 }
 
 export function Prefab(options?: GameObjectOptions) {

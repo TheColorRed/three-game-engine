@@ -6,7 +6,8 @@ import { MainScene } from './scenes/main.scene';
   scenes: [MainScene],
   main: MainScene,
   aspect: 16 / 9,
-  production: environment.production
+  production: environment.production,
+  gizmos: { colliders: true }
 })
 export class MainGame { }
 

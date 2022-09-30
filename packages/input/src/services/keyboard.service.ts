@@ -1,4 +1,4 @@
-import { Engine, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Reflection } from '@engine/core';
+import { GameConfig, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Reflection } from '@engine/core';
 import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, filter, from, fromEvent, Subscription, switchMap, tap } from 'rxjs';
 import { Key } from '../enums';
@@ -12,16 +12,17 @@ export class Keyboard implements OnDestroy {
   private keyState = new Map<Key, ButtonState>();
   private gameLoop = Injector.get(GameLoop)!;
   private gom = Injector.get(GameObjectManager)!;
+  private isProduction = Injector.get(GameConfig)!.get('production');
 
   keyboardDown$ = fromEvent<KeyboardEvent>(window, 'keydown')
     .pipe(
       tap(e => {
         // Allows the developer console to open if in non-production mode.
-        if (Engine.production === false && e.code !== 'F12') {
+        if (this.isProduction === false && e.code !== 'F12') {
           e.preventDefault();
         }
         // Don't allow the developer console to open.
-        else if (Engine.production === true) {
+        else if (this.isProduction === true) {
           e.preventDefault();
         }
       }),

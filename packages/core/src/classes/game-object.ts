@@ -24,30 +24,26 @@ export abstract class GameObject<T extends { new(...args: any[]): any; } = any> 
   set position(value: Vector3) { this.object3d?.position.set(...value.toArray()); }
   /** The rotation of the object in world space. */
   get rotation() {
-    const rot = this.object3d?.rotation;
-    if (this.object3d instanceof Three.Sprite) {
-      return new Euler(0, 0, this.object3d.material.rotation ?? 0);
-    } else {
-      return Euler.fromThree(rot);
-    }
+    let rot = this.object3d?.rotation;
+    return Euler.fromThree(rot);
   }
   set rotation(value: Euler) {
-    if (this.object3d instanceof Three.Sprite) {
-      this.object3d.material.rotation = Math.PI / 180 * value.z;
-    }
+    // if (this.object3d instanceof Three.Sprite) {
+    //   if (this.name === 'Player') console.log((Math.PI / 180) * value.z);
+    //   this.object3d.material.rotation = value.z * (Math.PI / 180);
+    // }
     this.object3d?.rotation.set(...value.toArray());
+    this.#updateSprite();
   }
   /** The object quaternion. */
   get quaternion() {
-    let q = this.object3d?.quaternion;
-    if (this.object3d instanceof Three.Sprite) {
-      q = new Three.Quaternion().setFromEuler(this.rotation.toThree());
-    }
+    const q = this.object3d?.quaternion;
     return Quaternion.fromThree(q);
   }
   set quaternion(value: Quaternion) {
-    this.rotation = Euler.fromThree(new Three.Euler().setFromQuaternion(value.toThree()));
-    // this.object3d?.quaternion.set(...value.toArray());
+    this.object3d?.quaternion.set(...value.toArray());
+    this.#updateSprite();
+    // this.rotation = Euler.fromThree(new Three.Euler().setFromQuaternion(value.toThree()));
   }
 
   tag: string = '';
@@ -68,13 +64,19 @@ export abstract class GameObject<T extends { new(...args: any[]): any; } = any> 
     this.object3d = options?.object?.object?.clone(true) ?? new Three.Object3D();
     this.position = options?.position ?? Vector3.zero;
 
-    this.rotation = options?.rotation ?? Euler.zero;
+    this.rotation = (typeof options?.rotation === 'number' ? new Euler(0, 0, options.rotation) : options?.rotation) ?? Euler.zero;
 
     const p = this.position;
     this.startPosition.set(p?.x ?? 0, p?.y ?? 0, p?.z ?? 0);
     // console.log(this.name, p);
 
     this.#setGameObjects(this.injector);
+  }
+
+  #updateSprite() {
+    if (this.object3d instanceof Three.Sprite) {
+      this.object3d.material.rotation = this.rotation.z;
+    }
   }
 
   onStart(): void {

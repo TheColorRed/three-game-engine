@@ -1,6 +1,7 @@
 import { GameObject } from '../classes/game-object';
 import { CameraOptions } from '../decorators/camera';
-import { Engine } from '../engine';
+import { Injector } from '../di';
+import { GameConfig } from '../services';
 import { Three } from '../three';
 import { Vector3 } from '../transforms';
 
@@ -10,7 +11,7 @@ export abstract class GameCamera<T = object> extends GameObject {
   readonly camera!: Three.Camera;
   /** Whether or not this is the main camera. */
   readonly isMainCamera;
-  readonly #aspectRatio = Engine.game.aspect ?? 1.7777777777777777;
+  readonly #aspectRatio = Injector.get(GameConfig)?.get('aspect') ?? 1.7777777777777777;
   readonly #size;
   readonly #width;
   readonly #height;

@@ -12,21 +12,32 @@ import { GameObjectManager } from './game-object-manager.service';
  */
 @Injectable({ providedIn: 'game' })
 export class SceneManager {
+  /**
+   * The root scene of the game; all other objects and scenes will be children.
+   * @internal
+   */
+  readonly rootScene = new Three.Scene();
+  /**
+   * The debug scene for showing debugging objects.
+   * @internal
+   */
+  debugScene?: Three.Scene;
   /** The scene that is currently active. */
   activeScene?: GameScene;
-  gameScenes: GameScene[] = [];
-  /** List of instantiated game scenes. */
-  // get scenes() { return Engine.gameScenes; }
+  /** A list of game scene instances. */
+  scenes: GameScene[] = [];
 
   constructor(
     private readonly gameObjectManager: GameObjectManager,
     private readonly camera: CameraManager,
-  ) {
-    // this.activeScene = new Three.Scene();
-    // this.activeScene.background = new Three.Color('#000');
-  }
-  setActiveScene(scene: GameScene) {
-    // this.scenes.forEach(s => s.isActive = false);
+  ) { }
+  /**
+   * Makes a scene enabled and optionally disables the others.
+   * @param scene The scene to enable.
+   * @param disableAll Whether or not to disable all the other scenes.
+   */
+  setActiveScene(scene: GameScene, disableAll = false) {
+    disableAll && this.scenes.forEach(s => s.isActive = false);
     scene.isActive = true;
   }
   /**
@@ -41,7 +52,6 @@ export class SceneManager {
    * @param object The game object to instantiate.
    * @param position The position of the newly created object.
    * @param rotation The rotation of the newly created object.
-   * @returns
    */
   instantiate<T>(object: Type<T>, position?: Vector3, rotation?: Euler): T {
     const item = this.gameObjectManager.instantiate(object) as GameObject;

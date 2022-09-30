@@ -6,7 +6,8 @@ export class GameObjectManager {
   gameObjects: GameObject[] = [];
 
   instantiate<T>(item: Newable<T>): T {
-    const gameObject = Injector.create(item).get(item) as GameObject;
+    const injector = Injector.create(item);
+    const gameObject = injector.get(item) as GameObject;
 
     this.gameObjects.push(gameObject);
     return gameObject as unknown as T;

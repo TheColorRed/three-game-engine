@@ -1,11 +1,17 @@
-// import { Engine } from './engine';
+import { Injector } from './di';
+import { GameConfig, SceneManager } from './services';
 import { Three } from './three';
 
 export class Debug {
+
+  static config = Injector.get(GameConfig)!;
+  static scene = Injector.get(SceneManager)!;
+
   static log(...message: any[]) {
-    // if (Engine.production === false) {
-    //   console.log(...message);
-    // }
+    const isProduction = this.config.get('production') ?? true;
+    if (isProduction === false) {
+      console.log(...message);
+    }
   }
 
   static drawBox(x: number, y: number, width: number, height: number) {
@@ -21,6 +27,8 @@ export class Debug {
 
     const geometry = new Three.BufferGeometry().setFromPoints(points);
     const box = new Three.Line(geometry, material);
-    // Engine.sceneManager.activeScene?.addGameObject(box);
+
+    this.scene.debugScene?.add(box);
+    return box;
   }
 }

@@ -47,7 +47,7 @@ export class Quaternion {
     return Quaternion.zero;
   }
 
-  toArray(): [number, number, number, number] {
+  toArray(): [x: number, y: number, z: number, w: number] {
     return [this.x, this.y, this.z, this.w];
   }
 

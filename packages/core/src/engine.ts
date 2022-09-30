@@ -4,21 +4,12 @@ import { Debug } from './debug';
 import { Game, SceneHierarchy } from './decorators';
 import { Injector, Newable, Type } from './di';
 import { Resource } from './resource';
-import { CameraManager, GameObjectManager, SceneManager } from './services';
+import { CameraManager, GameConfig, GameObjectManager, SceneManager } from './services';
 import { GameLoop } from './services/game-loop.service';
 import { Three } from './three';
 import { TOKEN_INJECTABLE } from './tokens';
 
 export class Engine {
-
-  // static gameObjects: GameObject[] = [];
-  // static gameScenes: GameScene[] = [];
-
-  static renderer = new Three.WebGLRenderer({
-    alpha: true,
-    antialias: true
-  });
-  static canvas = this.renderer.domElement;
 
   static game: Game;
   static #stats: Stats;
@@ -28,10 +19,10 @@ export class Engine {
   static scene: SceneManager = Injector.get(SceneManager)!;
   static gameObject: GameObjectManager = Injector.get(GameObjectManager)!;
   static readyToRender = false;
+  static gameConfig = Injector.get(GameConfig)!;
 
   static start(gameEntryPoint: Newable<object>) {
 
-    document.querySelector('.container')?.appendChild(this.renderer.domElement);
     const gameLoop = Injector.create(GameLoop).get(GameLoop)!;
 
     // Run the main game loop.
@@ -64,18 +55,29 @@ export class Engine {
       }
 
       // If there isn't a entry scene defined throw error.
-      if (!this.game.mainScene) {
+      if (!this.gameConfig.get('mainScene')) {
         throw new Error('There is no main scene defined.');
       }
 
-      this.#production = this.game.production;
-      Debug.log('Production:', this.production);
+      document.querySelector('.container')?.appendChild(this.gameConfig.get('canvas'));
+
+      this.#production = this.gameConfig.get('production');
+      Debug.log('Production:', this.#production);
+      if (this.#production === false) {
+        const gizmos = Object.entries(this.gameConfig.get('gizmos'));
+        const showGizmos = gizmos.some(([, enabled]) => enabled === true);
+        if (showGizmos) {
+          this.scene.debugScene = new Three.Scene();
+        }
+      }
+
 
       // Create an instance of the main scene and load its hierarchy.
       // this.activeScene = new this.game.mainScene(true);
-      this.scene.activeScene = new this.game.mainScene(true);
-
-      if (this.game.stats === true || (typeof this.game.stats === 'undefined' && !this.production)) {
+      const mainScene = this.gameConfig.get('mainScene');
+      this.scene.activeScene = new mainScene(true);
+      const stats = this.gameConfig.get('stats');
+      if (stats === true || (typeof stats === 'undefined' && !this.production)) {
         import('stats.js').then(stats => {
           this.#stats = new stats.default();
           this.#stats.showPanel(0);
@@ -126,14 +128,15 @@ export class Engine {
   }
 
   static #updateRendererSize() {
-    const aspect = this.game.aspect;
-    if (this.game.fixedSize) {
-      this.renderer.setSize(this.game.width ?? window.innerWidth, this.game.height ?? window.innerHeight);
+    const aspect = this.gameConfig.get('aspect');
+    const renderer = this.gameConfig.get('renderer');
+    if (this.gameConfig.get('fixedSize')) {
+      renderer.setSize(this.gameConfig.get('width') ?? window.innerWidth, this.gameConfig.get('height') ?? window.innerHeight);
       return;
     }
     aspect > 1 ?
-      this.renderer.setSize(window.innerWidth, window.innerWidth / aspect) :
-      this.renderer.setSize(window.innerHeight * aspect, window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerWidth / aspect) :
+      renderer.setSize(window.innerHeight * aspect, window.innerHeight);
     // aspect > 1 ?
     //   this.renderer.setViewport(0, 0, window.innerWidth, window.innerWidth / aspect) :
     //   this.renderer.setViewport(0, 0, window.innerHeight * aspect, window.innerHeight);
@@ -141,19 +144,21 @@ export class Engine {
   }
 
   static #renderGame() {
-    const activeScene = this.scene.gameScenes.find(i => i.isActive === true);
-    if (typeof this.camera.activeCamera !== 'undefined' && typeof activeScene !== 'undefined') {
-      // console.log(this.camera.activeCamera.camera);
-      this.renderer.render(activeScene.scene, this.camera.activeCamera.camera);
+    // Find all the active game scenes and add them to the root scene.
+    const activeScenes = this.scene.scenes.filter(i => i.isActive === true);
+    activeScenes.forEach(s => this.scene.rootScene.add(s.scene));
+
+    // If a debugging scene is set add it to the root scene.
+    if (this.scene.debugScene instanceof Three.Scene) {
+      this.scene.rootScene.add(this.scene.debugScene);
+    }
+
+    // Render the game
+    if (typeof this.camera.activeCamera !== 'undefined') {
+      const renderer = this.gameConfig.get('renderer');
+      renderer.render(this.scene.rootScene, this.camera.activeCamera.camera);
     }
   }
-
-  // static instantiate<T>(item: Type<T>): T {
-  //   const gameObject = Injector.create(item).get(item) as GameObject;
-
-  //   this.gameObjects.push(gameObject);
-  //   return gameObject as unknown as T;
-  // }
 
   static destroyLocalService(gameObject: GameObject & { [key: string]: any; }) {
     for (let [key, obj] of Object.entries(gameObject)) {

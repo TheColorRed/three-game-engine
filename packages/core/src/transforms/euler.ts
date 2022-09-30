@@ -41,7 +41,7 @@ export class Euler {
     return new Three.Euler(this.x, this.y, this.z);
   }
 
-  toArray(): [number, number, number] {
+  toArray(): [x: number, y: number, z: number] {
     return [this.x, this.y, this.z];
   }
 

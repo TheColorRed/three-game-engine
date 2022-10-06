@@ -1,9 +1,10 @@
-import { animationFrames, concat, filter, finalize, first, Observable, of, tap, timer } from 'rxjs';
-import { GameObject } from './classes';
+import { animationFrames, concat, EMPTY, filter, Observable, tap } from 'rxjs';
+import { GameObject } from './classes/game-object';
 import { Debug } from './debug';
-import { Game, SceneHierarchy } from './decorators';
-import { Injector, Newable, Type } from './di';
-import { Resource } from './resource';
+import { Game } from './decorators';
+import { GameModule } from './decorators/module';
+import { Injector } from './di/injector';
+import { Newable } from './di/types';
 import { CameraManager, GameConfig, GameObjectManager, SceneManager } from './services';
 import { GameLoop } from './services/game-loop.service';
 import { Three } from './three';
@@ -27,14 +28,10 @@ export class Engine {
 
     // Run the main game loop.
     concat(
-      of(true).pipe(tap(() => {
-        Debug.log('Initializing core services..');
-        this.camera = Injector.create(CameraManager).get(CameraManager)!;
-        // this.managers = new Managers();
-      }), tap(() => this.readyToRender = true)),
+      this.#initializeServices(),
+      this.#initializeModules(),
       this.#initializeGame(gameEntryPoint),
-      this.#initializePhysics(),
-      this.#initializeGameObjects(),
+      this.#setupRenderer(),
       gameLoop.loop$
     ).subscribe();
 
@@ -45,6 +42,32 @@ export class Engine {
       tap(() => this.#renderGame()),
       tap(() => this.#stats && this.#stats.end()),
     ).subscribe();
+  }
+
+  static #initializeServices() {
+    return new Observable(sub => {
+      Debug.log('Initializing core services...');
+      this.camera = Injector.create(CameraManager).get(CameraManager)!;
+
+      this.readyToRender = true;
+      sub.complete();
+    });
+  }
+
+  static #initializeModules() {
+    return new Observable(sub => {
+      Debug.log('Initializing modules...');
+      GameModule.init(this.gameConfig.imports).subscribe({ complete: () => sub.complete() });
+      // const modules: Observable<unknown>[] = [];
+      // for (let module of this.gameConfig.imports) {
+      //   if (typeof module === 'function') {
+      //     const m = new module() as GameModule | object;
+      //     if ('initModule' in m) modules.push(m.initModule());
+      //     else throw new Error(`"${Debug.getName(m)}" is not a module but is being used as such.`);
+      //   }
+      // }
+      // forkJoin(modules).pipe(finalize(() => sub.complete())).subscribe();
+    });
   }
 
   static #initializeGame(gameEntryPoint: Newable<object>) {
@@ -88,43 +111,23 @@ export class Engine {
     });
   }
 
-  static #initializeGameObjects() {
-    return timer(100, 0).pipe(
-      filter(() => Array.from(Resource.resources.values()).every(i => i.loaded === true)),
-      first(),
-      tap(() => {
-        Debug.log('Loading Game Objects...');
-        this.#loadGameObjects(this.scene.activeScene?.registeredGameObjects ?? []);
+  // static #initializeGameObjects() {
+  //   return timer(100, 0).pipe(
+  //     first(() => Array.from(Resource.resources.values()).every(i => i.loaded === true)),
+  //     tap(() => {
+  //       Debug.log('Loading Game Objects...');
+  //       this.#loadGameObjects(this.scene.activeScene?.registeredGameObjects ?? []);
 
-        this.#updateRendererSize();
-        window.addEventListener('resize', this.#updateRendererSize.bind(this));
-      })
-    );
-  }
+  //       this.#updateRendererSize();
+  //       window.addEventListener('resize', this.#updateRendererSize.bind(this));
+  //     })
+  //   );
+  // }
 
-  static #loadGameObjects(item: GameObject | SceneHierarchy = []) {
-    if (typeof item === 'function') {
-      this.scene.instantiate(item as Type<any>);
-    } else if (Array.isArray(item)) {
-      for (let i of item) {
-        this.#loadGameObjects(i);
-      }
-    }
-  }
-  /**
-   * Turn on physics if the module has been included in the package.json.
-   */
-  static #initializePhysics() {
-    return new Observable<void>(sub => {
-      try {
-        import('@engine/physics').then(physics => {
-          const physicsWorld = Injector.create(physics.World).get(physics.World)!;
-          physicsWorld.create().pipe(
-            finalize(() => sub.complete())
-          ).subscribe();
-        });
-      } catch (e) { }
-    });
+  static #setupRenderer() {
+    this.#updateRendererSize();
+    window.addEventListener('resize', this.#updateRendererSize.bind(this));
+    return EMPTY;
   }
 
   static #updateRendererSize() {

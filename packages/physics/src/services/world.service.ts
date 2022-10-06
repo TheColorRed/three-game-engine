@@ -1,8 +1,8 @@
 import { Debug, GameConfig, GameObject, Injectable, Injector, Quaternion, Three, Vector3 } from '@engine/core';
 import Ammo from 'ammojs-typed';
 import { filter, from, Observable, of, switchMap, tap, timer } from 'rxjs';
-import { PhysicsMaterialOptions, RigidbodyOptions, RigidbodyOptions2D } from './decorators';
-import { PHYSICS_MATERIAL, PHYSICS_RIGIDBODY } from './tokens';
+import { PhysicsMaterialOptions, RigidbodyOptions, RigidbodyOptions2D } from '../decorators';
+import { PHYSICS_MATERIAL, PHYSICS_RIGIDBODY } from '../tokens';
 
 @Injectable({ providedIn: 'game' })
 export class World {
@@ -116,6 +116,22 @@ export class World {
     }
   }
 
+  applyTorque(gameObject: GameObject, force: Vector3) {
+    const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
+    if (go && body) {
+      body.activate(true);
+      body.applyTorque(new this.Ammo.btVector3(...force.toArray()));
+    }
+  }
+
+  applyTorqueImpulse(gameObject: GameObject, force: Vector3) {
+    const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
+    if (go && body) {
+      body.activate(true);
+      body.applyTorqueImpulse(new this.Ammo.btVector3(...force.toArray()));
+    }
+  }
+
   setVelocity(gameObject: GameObject, velocity: Vector3) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
@@ -179,7 +195,7 @@ export class World {
     if (this._created) return of();
 
     return new Observable(sub => {
-      Debug.log('Creating Physics World...');
+      Debug.log('Creating physics world...');
       Ammo().then(Ammo => {
         this.Ammo = Ammo;
         this._created = true;

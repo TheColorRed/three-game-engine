@@ -1,10 +1,10 @@
 import { GameCamera, GameScene } from '../classes';
 import { Newable, Type } from '../di';
 
-export interface SceneHierarchy { }
+// export interface SceneHierarchy { }
 
 export interface SceneOptions {
-  hierarchy: (SceneHierarchy | Type<any>)[];
+  hierarchy: Newable<any>[];
   cameras?: Type<GameCamera>[];
 }
 

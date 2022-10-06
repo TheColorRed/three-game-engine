@@ -3,7 +3,7 @@ import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, tap } from 'rxjs';
 import { RigidbodyOptions, RigidbodyOptions2D, RigidbodyShape, RigidbodyShape2D } from '../decorators';
 import { PHYSICS_RIGIDBODY } from '../tokens';
-import { World } from '../world';
+import { World } from './world.service';
 
 export type Shapes = (RigidbodyShape | RigidbodyShape2D)['type'];
 
@@ -56,13 +56,26 @@ export class RigidbodyRef<T extends Shapes> implements OnStart {
     this.world.applyImpulse(this.gameObject.reference, force);
   }
   /**
+   * Applies a rotation amount on one or more axises over time.
+   * @param force
+   */
+  applyTorque(force: Vector3) {
+    this.world.applyTorque(this.gameObject.reference, force);
+  }
+  /**
+   * Applies a sudden impulse rotation amount on one or more axises.
+   * @param force
+   */
+  applyTorqueImpulse(force: Vector3) {
+    this.world.applyTorqueImpulse(this.gameObject.reference, force);
+  }
+  /**
    * Sets the velocity for the game object.
    * @param velocity The velocity to set on each axis.
    */
   setVelocity(velocity: Vector3) {
     this.world.setVelocity(this.gameObject.reference, velocity);
   }
-
   /**
    * Sets the angular velocity for the game object.
    * @param velocity The angular velocity to set on each axis.

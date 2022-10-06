@@ -86,8 +86,6 @@ export function Rigidbody(options?: Partial<RigidbodyOptions>) {
 
 /**
  * Creates a rigidbody that works in two dimensional space.
- *
- * **Note:**
  * * Automatically sets the `z` `linearLock` to `0`.
  * * Automatically sets the `x, y` `angularLock` to `0`.
  * @param options Options that describe how the rigidbody should work.

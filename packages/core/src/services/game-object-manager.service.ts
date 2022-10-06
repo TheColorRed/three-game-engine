@@ -5,12 +5,12 @@ import { Injectable, Injector, Newable } from '../di';
 export class GameObjectManager {
   gameObjects: GameObject[] = [];
 
-  instantiate<T>(item: Newable<T>): T {
+  instantiate(item: Newable<GameObject>) {
     const injector = Injector.create(item);
     const gameObject = injector.get(item) as GameObject;
 
     this.gameObjects.push(gameObject);
-    return gameObject as unknown as T;
+    return gameObject;
   }
 
   static isGameObject(type: GameObject): type is GameObject {

@@ -1,24 +1,37 @@
-import { GameConfiguration, Gizmos } from '../decorators';
+import { GameScene } from '../classes';
+import { GameModule, GameOptions, Gizmos } from '../decorators';
 import { Injectable, Newable } from '../di';
+import { Three } from '../three';
 
-export interface GameOptions {
-  main: Newable<object>;
+export interface GameConfiguration {
+  registeredScenes: Newable<GameScene>[];
+  mainScene: new (activate?: boolean) => GameScene;
+  aspect: number;
+  fixedSize: boolean;
   production: boolean;
-  scenes?: Newable<object>[];
-  aspect?: number | `${number}x${number}`;
+  width: number;
+  height: number;
+  gizmos: Gizmos;
   stats?: boolean;
-  gizmos?: Gizmos;
+  options: GameOptions;
+  renderer: Three.WebGLRenderer;
+  canvas: HTMLCanvasElement;
 }
 
 @Injectable({ providedIn: 'game' })
 export class GameConfig {
   #options: Partial<GameConfiguration> = {};
+  imports: Newable<GameModule>[] = [];
   /**
    * Set the initial game options.
    * @internal
    */
   set(options: GameConfiguration) {
     this.#options = options;
+  }
+  /** @internal */
+  setImports(imports: Newable<GameModule>[]) {
+    this.imports = imports;
   }
   /**
    * The configuration to get from the loaded config.

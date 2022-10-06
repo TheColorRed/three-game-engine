@@ -1,9 +1,15 @@
 import { GameObject, GameScene } from '../classes';
-import { Injectable, Type } from '../di';
+import { Injectable, Newable } from '../di';
 import { Three } from '../three';
 import { Euler, Vector3 } from '../transforms';
 import { CameraManager } from './camera-manager.service';
 import { GameObjectManager } from './game-object-manager.service';
+
+export interface GameObjectInitOptions {
+  position?: Vector3;
+  rotation?: Euler;
+  scene?: GameScene;
+}
 
 /**
  * The scene service is a singleton service that manges the game scenes.
@@ -41,29 +47,28 @@ export class SceneManager {
     scene.isActive = true;
   }
   /**
-   * Adds a three.js game object to the scene.
-   * @internal
-   */
-  add(item: Three.Object3D) {
-    this.activeScene?.addGameObject(item);
-  }
-  /**
    * Creates a game object in the current scene.
    * @param object The game object to instantiate.
    * @param position The position of the newly created object.
    * @param rotation The rotation of the newly created object.
    */
-  instantiate<T>(object: Type<T>, position?: Vector3, rotation?: Euler): T {
-    const item = this.gameObjectManager.instantiate(object) as GameObject;
+  instantiate(object: Newable<GameObject>, options?: GameObjectInitOptions) {
+    const item = this.gameObjectManager.instantiate(object);
     if (CameraManager.isCamera(item) && item.isMainCamera) {
       if (typeof this.camera.main === 'undefined') {
         this.camera.main = item;
         this.camera.activeCamera = item;
       }
     }
-    if (position) item.position = position;
-    if (rotation) item.rotation = rotation;
-    item.object3d && this.add(item.object3d);
-    return item as T;
+
+    // Set the position and rotation if needed.
+    if (options?.position) item.position = options.position;
+    if (options?.rotation) item.rotation = options.rotation;
+
+    // Add the item to the three.js world
+    if (options?.scene) options.scene.addThreeObject(item.object3d);
+    else this.activeScene?.addThreeObject(item.object3d);
+
+    return item;
   }
 }

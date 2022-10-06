@@ -99,8 +99,14 @@ export class Vector3 {
 
 // @ts-ignore
 export class Vector2 extends Vector3 {
-  constructor(x: number, y: number) {
-    super(x, y, 0);
+  constructor();
+  constructor(x: number, y: number);
+  constructor(...args: [] | [x: number, y: number]) {
+    if (args.length === 0) {
+      super(0, 0, 0);
+    } else if (args.length === 2) {
+      super(args[0], args[1], 0);
+    }
   }
 
   static override get zero() { return new Vector2(0, 0); }

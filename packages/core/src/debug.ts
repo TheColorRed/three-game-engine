@@ -1,4 +1,5 @@
-import { Injector } from './di';
+import { GameObject } from './classes/game-object';
+import { Injector } from './di/injector';
 import { GameConfig, SceneManager } from './services';
 import { Three } from './three';
 
@@ -11,6 +12,12 @@ export class Debug {
     const isProduction = this.config.get('production') ?? true;
     if (isProduction === false) {
       console.log(...message);
+    }
+  }
+
+  static getName(value: any) {
+    if (value instanceof GameObject) {
+      return value.instance.constructor.name;
     }
   }
 

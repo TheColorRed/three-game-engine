@@ -1,12 +1,13 @@
 import { Subscription } from 'rxjs';
 import { GameObjectOptions } from '../decorators/prefab';
-import { Injector } from '../di';
+import { Newable } from '../di';
+import { Injector } from '../di/injector';
 import { OnDestroy, OnStart, OnUpdate } from '../interfaces';
 import { ObjectList } from '../object-list';
 import { GameObjectRef } from '../services/game-object-ref.service';
 import { Three } from '../three';
-import { Quaternion } from '../transforms';
 import { Euler } from '../transforms/euler';
+import { Quaternion } from '../transforms/quaternion';
 import { Vector3 } from '../transforms/vector';
 
 export abstract class GameObject<T extends { new(...args: any[]): any; } = any> implements OnStart, OnUpdate, OnDestroy {
@@ -64,13 +65,18 @@ export abstract class GameObject<T extends { new(...args: any[]): any; } = any> 
     this.object3d = options?.object?.object?.clone(true) ?? new Three.Object3D();
     this.position = options?.position ?? Vector3.zero;
 
-    this.rotation = (typeof options?.rotation === 'number' ? new Euler(0, 0, options.rotation) : options?.rotation) ?? Euler.zero;
+    this.rotation = (typeof options?.rotation === 'number' ? new Euler(0, 0, options.rotation * Math.PI / 180) : options?.rotation) ?? Euler.zero;
 
     const p = this.position;
     this.startPosition.set(p?.x ?? 0, p?.y ?? 0, p?.z ?? 0);
     // console.log(this.name, p);
 
     this.#setGameObjects(this.injector);
+  }
+
+  static isNewableGameObject(item: any): item is Newable<GameObject> {
+    const namedClasses = ['GameObjectComponent', 'GameCameraComponent'];
+    return namedClasses.includes(item.name);
   }
 
   #updateSprite() {

@@ -1,4 +1,4 @@
-import { TIME_AUTO_BURST, TIME_BURST } from '../../tokens';
+import { TIME_AUTO_BURST, TIME_BURST } from '../../tokens/timing-tokens';
 
 /**
  * Executes a method for a defined duration then stops for a defined duration.

@@ -1,4 +1,4 @@
-import { TIME_CHOICE } from '../../tokens';
+import { TIME_CHOICE } from '../../tokens/timing-tokens';
 
 /**
  * Randomly chooses a given number to wait until it calls the next choice.

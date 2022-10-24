@@ -1,4 +1,4 @@
-import { TOKEN_INJECTABLE, TOKEN_INJECTION } from '../tokens';
+import { TOKEN_INJECTABLE, TOKEN_INJECTION } from '../tokens/tokens';
 import { Type } from './types';
 
 export type ProvidedIn = 'game' | 'local';
@@ -59,10 +59,17 @@ export class Injector<T> {
     return (this.injections.find(i => i.instance instanceof item)?.instance as T) ?? Injector.get(item);
   }
 
-  getAll<T>(item: Type<T>): T[] {
+  getLocal() {
+    return this.injections.filter((i) => Reflect.getMetadata(TOKEN_INJECTABLE, i.constructor) !== 'game');
+  }
+
+  getAll<T>(item?: Type<T>): T[] {
+    if (typeof item === 'undefined') {
+      return this.injections;
+    }
     const found: T[] = [];
     function find(instance: any) {
-      if (instance instanceof item) found.push(instance);
+      if (instance instanceof item!) found.push(instance);
       const keys = Object.entries<object>(instance);
       for (let [key, obj] of keys) {
         if (typeof obj === 'object') {

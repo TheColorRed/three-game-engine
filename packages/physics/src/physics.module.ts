@@ -2,7 +2,7 @@ import { Injector, Module } from '@engine/core';
 import { World } from './services';
 
 @Module({
-  bootstrap: () => {
+  startup: () => {
     const world = Injector.get(World)!;
     return world.create();
   }

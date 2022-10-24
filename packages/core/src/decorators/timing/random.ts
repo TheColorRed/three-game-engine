@@ -1,4 +1,4 @@
-import { TIME_RANDOMLY } from '../../tokens';
+import { TIME_RANDOMLY } from '../../tokens/timing-tokens';
 
 /**
  * Randomly calls a method between a min and max interval.

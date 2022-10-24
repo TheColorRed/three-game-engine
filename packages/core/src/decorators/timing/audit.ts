@@ -1,4 +1,4 @@
-import { TIME_AUDIT } from '../../tokens';
+import { TIME_AUDIT } from '../../tokens/timing-tokens';
 
 /**
  * Stops a method from getting called too frequently.

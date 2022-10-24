@@ -1,4 +1,4 @@
-import { TIME_REPEAT } from '../../tokens';
+import { TIME_REPEAT } from '../../tokens/timing-tokens';
 /**
  * Repeats a function indefinitely or until the function returns false or the number of times has been reached.
  * @param interval How often the function should be called.

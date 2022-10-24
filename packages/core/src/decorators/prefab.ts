@@ -1,17 +1,20 @@
-import { auditTime, map, take, takeWhile, tap, timer } from 'rxjs';
-import { Sprite } from '../2d';
-import { Spacial } from '../3d';
-import { GameObject } from '../classes';
-import { Injector, Reflection } from '../di';
-import { Engine } from '../engine';
-import { ObjectList } from '../object-list';
+import { auditTime, forkJoin, map, Observable, take, takeWhile, tap, timer } from 'rxjs';
+import { GameObject } from '../classes/game-object';
+import { ObjectList } from '../classes/object-list';
+import { Injector } from '../di/injector';
+import { Reflection } from '../di/reflection';
+import { Destroyable } from '../di/types';
+import { Resource } from '../resource/resource';
 import { GameLoop } from '../services/game-loop.service';
-import { GAME_OBJECT, GAME_OBJECT_CHILDREN, TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN } from '../tokens';
-import { Euler, Vector3 } from '../transforms';
+import { Three } from '../three';
+import { GAME_OBJECT, GAME_OBJECT_CHILDREN } from '../tokens/game-object-tokens';
+import { TIME_AUTO_BURST, TIME_CHOICE, TIME_ONCE, TIME_RANDOMLY, TIME_REPEAT, TIME_ROUND_ROBIN } from '../tokens/timing-tokens';
+import { Euler } from '../transforms/euler';
+import { Vector3 } from '../transforms/vector';
 
 export interface GameObjectOptions {
   name?: string;
-  object?: Sprite | Spacial;
+  object?: Resource | (() => Three.Object3D);
   position?: Vector3;
   rotation?: Euler | number;
   tag?: string;
@@ -28,22 +31,22 @@ export function Prefab(options?: GameObjectOptions) {
       constructor() {
         super(target, options);
         this.methods = Reflect.ownKeys(this.target.prototype) as string[];
-        // const sceneManger = Injector.get(SceneManager)
-        // sceneManger?.add(this.object3d);
-        // this.position = options?.position ?? Vector3.zero;
       }
       /**
        * Run the GameObject's start.
        */
       override onStart() {
-        super.onStart();
-        this.#addPhysicsBodies();
-        this.#invokeRepeat();
-        this.#invokeOnce();
-        this.#watchChildren();
-        this.#startAutoBurst();
-        this.#startTimers();
-        typeof this.instance.onStart === 'function' && this.instance.onStart();
+        forkJoin([this.#addPhysics3D(), this.#addPhysics2D()]).pipe(
+          tap(() => {
+            this.#invokeRepeat();
+            this.#invokeOnce();
+            this.#watchChildren();
+            this.#startAutoBurst();
+            this.#startTimers();
+            super.onStart();
+            typeof this.instance.onStart === 'function' && this.instance.onStart();
+          })
+        ).subscribe();
       }
       /**
        * Run the GameObject's updates.
@@ -59,13 +62,37 @@ export function Prefab(options?: GameObjectOptions) {
         if (this.markedForDeletion === true) {
           this.children.forEach((child) => child.onDestroy?.());
           typeof this.instance.onDestroy === 'function' && this.instance.onDestroy();
-          this.object3d?.parent?.remove(this.object3d);
           // this.destroyServices(this);
-          Engine.destroyLocalService(this);
+          this.#removeBody2D();
+          this.#destroyLocalService(this.injector);
           this.#removeSubscriptions();
           return true;
         }
         return false;
+      }
+
+      #destroyLocalService(injector: Injector<any>) {
+        const injections = injector.getLocal() as Destroyable[];
+
+        for (let i of injections) {
+          if (typeof i.onDestroy === 'function') {
+            i.onDestroy();
+            // this.#destroyLocalService(i as unknown as Injector<any>);
+          }
+        }
+        // console.log(i);
+        // for (let [key, obj] of Object.entries(gameObject)) {
+        //   if (typeof obj === 'object') {
+        //     const isInjectable = Reflect.hasMetadata(TOKEN_INJECTABLE, obj.constructor);
+        //     const meta = Reflect.getMetadata(TOKEN_INJECTABLE, obj.constructor);
+        //     if (meta === 'local' && isInjectable && typeof gameObject[key].onDestroy === 'function') {
+        //       gameObject[key].onDestroy();
+        //     }
+        //     if (isInjectable) {
+        //       this.#destroyLocalService(obj);
+        //     }
+        //   }
+        // }
       }
 
       #removeSubscriptions() {
@@ -81,23 +108,20 @@ export function Prefab(options?: GameObjectOptions) {
 
       #invokeRepeat() {
         this.methods.forEach(method => {
-          Reflection.call<{ delay?: number; interval?: number; times?: number; }>(
-            i => typeof i.delay === 'number' && typeof i.interval === 'number' && typeof i.times === 'number' && typeof this.instance[method] === 'function',
-            i => {
-              const t = timer(i.delay! * 1000, i.interval! * 1000)
-                .pipe(map<number, boolean>(i => this.instance[method](i)));
+          const i = Reflect.getMetadata(TIME_REPEAT, target.prototype, method);
+          if (typeof i !== 'undefined') {
+            const t = timer(i.delay! * 1000, i.interval! * 1000)
+              .pipe(map<number, boolean>(i => this.instance[method](i)));
 
-              const sub = (
-                (i.times !== Infinity && i.times! > 0) ?
-                  // Run until repeat has hit its max.
-                  t.pipe(take(i.times!)) :
-                  // Run until the callback returns false.
-                  t.pipe(takeWhile(i => i !== false))
-              ).subscribe();
-              this.subscriptions.push(sub);
-            },
-            TIME_REPEAT, this.target.prototype, method
-          );
+            const sub = (
+              (i.times !== Infinity && i.times! > 0) ?
+                // Run until repeat has hit its max.
+                t.pipe(take(i.times!)) :
+                // Run until the callback returns false.
+                t.pipe(takeWhile(i => i !== false))
+            ).subscribe();
+            this.subscriptions.push(sub);
+          }
         });
       }
 
@@ -112,14 +136,43 @@ export function Prefab(options?: GameObjectOptions) {
         });
       }
 
-      #addPhysicsBodies() {
+      #addPhysics3D() {
+        return new Observable<void>(sub => {
+          sub.next();
+          try {
+            import('@engine/physics').then(physics => {
+              if (!physics) return sub.complete();
+              if (Reflect.hasMetadata(physics.PHYSICS_RIGIDBODY, this.target)) {
+                const world = Injector.get(physics.World);
+                world?.add(this);
+              }
+              return sub.complete();
+            }).catch(() => sub.complete());
+          } catch (e) { sub.complete(); }
+        });
+      }
+
+      #addPhysics2D() {
+        return new Observable<void>(sub => {
+          sub.next();
+          try {
+            import('@engine/physics2d').then(physics => {
+              if (!physics) return sub.complete();
+              if (Reflect.hasMetadata(physics.PHYSICS2D_RIGIDBODY, this.target)) {
+                const world = Injector.get(physics.World2D);
+                world?.add(this);
+              }
+              return sub.complete();
+            }).catch(() => sub.complete());
+          } catch (e) { sub.complete(); }
+        });
+      }
+
+      #removeBody2D() {
         try {
-          import('@engine/physics').then(physics => {
-            if (!physics) return;
-            if (Reflect.hasMetadata(physics.PHYSICS_RIGIDBODY, this.target)) {
-              const world = Injector.create(physics.World).get(physics.World)!;
-              world.add(this);
-            }
+          import('@engine/physics2d').then(physics => {
+            const world = Injector.get(physics.World2D)!;
+            world.remove(this);
           });
         } catch (e) { }
       }

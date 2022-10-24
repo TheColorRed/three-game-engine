@@ -1,4 +1,3 @@
-
 export interface OnStart {
   /** Executed one time after the object is created. */
   onStart(): void;

@@ -1,9 +1,8 @@
 import { Scene } from '@engine/core';
-import { Ground } from '../prefabs/ground.prefab';
 import { MainCamera } from '../prefabs/main-camera.prefab';
-import { PlayerModule } from '../prefabs/player/player.module';
+import { Fire } from '../prefabs/particles/fire.prefab';
 
 @Scene({
-  hierarchy: [MainCamera, Ground, PlayerModule]
+  hierarchy: [MainCamera, Fire]
 })
 export class MainScene { }

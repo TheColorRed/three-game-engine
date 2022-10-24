@@ -1,7 +1,7 @@
 import { tap, timer } from 'rxjs';
-import { GameObject } from '../classes';
-import { Injectable } from '../di';
-import { Vector3 } from '../transforms';
+import { GameObject } from '../classes/game-object';
+import { Injectable } from '../di/injectable';
+import { Vector3 } from '../transforms/vector';
 
 @Injectable()
 export class GameObjectRef {
@@ -24,7 +24,6 @@ export class GameObjectRef {
    */
   destroy(time: number): void;
   destroy(time = 0) {
-    console.log('here', this.reference);
     timer(time * 1000)
       .pipe(
         tap(() => this.reference.markedForDeletion = true),

@@ -1,7 +1,7 @@
-import { Debug, GameConfig, GameObject, Injectable, Injector, Quaternion, Three, Vector3 } from '@engine/core';
+import { Debug, GameConfig, GameObject, Injectable, Injector, Quaternion, Vector3 } from '@engine/core';
 import Ammo from 'ammojs-typed';
 import { filter, from, Observable, of, switchMap, tap, timer } from 'rxjs';
-import { PhysicsMaterialOptions, RigidbodyOptions, RigidbodyOptions2D } from '../decorators';
+import { PhysicsMaterialOptions, RigidbodyOptions } from '../decorators';
 import { PHYSICS_MATERIAL, PHYSICS_RIGIDBODY } from '../tokens';
 
 @Injectable({ providedIn: 'game' })
@@ -17,17 +17,15 @@ export class World {
   bodies: [gameObject: GameObject, rigidbody: Ammo.btRigidBody][] = [];
   transform!: Ammo.btTransform;
 
-  worldSteps$ = timer(1 / 60, 0)
+  worldSteps$ = timer(200, 0)
     .pipe(
-      tap(() => this.dynamicWorld.stepSimulation(1 / 60, 1)),
-      // auditTime(50),
+      tap(() => this.dynamicWorld.stepSimulation(1, 1)),
       switchMap(() => from(this.bodies).pipe(
         filter(([, body]) => body.isActive()),
         tap(([obj, body]) => {
           const state = body.getMotionState();
           if (state) {
             state.getWorldTransform(this.transform);
-            // this.dynamicWorld.debugDrawObject(this.transform, body.getCollisionShape(), new this.Ammo.btVector3(255, 0, 0));
             const pos = this.transform.getOrigin();
             const rot = this.transform.getRotation();
             const px = pos.x(), py = pos.y(), pz = pos.z();
@@ -48,6 +46,7 @@ export class World {
     if (idx > -1) {
       const body = this.bodies[idx][1];
       this.dynamicWorld.removeRigidBody(body);
+      this.Ammo.destroy(body);
       this.bodies.splice(idx, 1);
     }
   }
@@ -57,7 +56,7 @@ export class World {
    * @param gameObject The game object to add.
    */
   add(gameObject: GameObject) {
-    const opts = Reflect.getMetadata(PHYSICS_RIGIDBODY, gameObject.instance.constructor) as RigidbodyOptions | RigidbodyOptions2D | undefined;
+    const opts = Reflect.getMetadata(PHYSICS_RIGIDBODY, gameObject.instance.constructor) as RigidbodyOptions | undefined;
     if (typeof opts === 'undefined') throw new Error(`"${gameObject.name}" does not have a rigidbody.`);
     const mat = Reflect.getMetadata(PHYSICS_MATERIAL, opts.material || {}) as PhysicsMaterialOptions | undefined;
     const goPos = gameObject.position;
@@ -71,9 +70,7 @@ export class World {
 
     const motionState = new this.Ammo.btDefaultMotionState(transform);
     // Create the collider shape for the rigidbody.
-    const shape = opts.twoDimensional ?
-      this.createShape2D(opts as RigidbodyOptions2D, gameObject) :
-      this.createShape(opts as RigidbodyOptions, gameObject);
+    const shape = this.createShape(opts as RigidbodyOptions, gameObject);
     // Create the initial inertia for the rigidbody.
     const inertia = new this.Ammo.btVector3(1, 1, 1);
 
@@ -166,26 +163,6 @@ export class World {
         var { radius, height } = options.shape.size;
         return new this.Ammo.btCapsuleShape(radius, height);
       case 'none': // Use the default shape
-      default:
-        return new this.Ammo.btEmptyShape();
-    }
-  }
-
-  createShape2D(options: RigidbodyOptions2D, gameObject: GameObject) {
-    let depth = 1;
-    switch (options.shape?.type) {
-      case 'box':
-        var { width, height } = options.shape.size;
-        if (gameObject.object3d instanceof Three.Sprite) {
-          width = gameObject.object3d.scale.x * options.shape.size.width;
-          height = gameObject.object3d.scale.y * options.shape.size.height;
-        }
-        return new this.Ammo.btBoxShape(new this.Ammo.btVector3(width * 0.5, height * 0.5, depth * 0.5));
-      case 'circle':
-        return new this.Ammo.btSphereShape(options.shape.radius);
-      case 'capsule':
-        var { radius, height } = options.shape.size;
-        return new this.Ammo.btCapsuleShape(radius, height);
       default:
         return new this.Ammo.btEmptyShape();
     }

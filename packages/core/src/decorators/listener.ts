@@ -1,4 +1,5 @@
-import { EventToken, LISTENER_GLOBAL, LISTENER_LOCAL } from '../tokens';
+import { EventToken } from '../tokens/event-token';
+import { LISTENER_GLOBAL, LISTENER_LOCAL } from '../tokens/listener-tokens';
 
 export interface ListenerRef {
   name: string, target: any; prop: string;

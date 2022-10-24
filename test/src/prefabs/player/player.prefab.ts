@@ -1,8 +1,9 @@
-import { GameObjectRef, OnStart, OnUpdate, Prefab, SceneManager, Sprite, Time, Vector2, Vector3 } from '@engine/core';
+import { GameObjectRef, OnStart, OnUpdate, Prefab, Random, Repeat, SceneManager, Sprite, Time, Vector2, Vector3 } from '@engine/core';
 import { ButtonUp, Key, KeyPress, MouseButton } from '@engine/input';
 import { Transform } from '@engine/objects';
-import { Rigidbody2D, RigidbodyRef } from '@engine/physics';
+import { Rigidbody2D, Rigidbody2DRef } from '@engine/physics2d';
 import { HalfBounce } from '../../physics-materials/bouncy.material';
+import { Bullet } from '../bullet.prefab';
 import Paddle from './sprites/paddleBlue.png';
 // import Paddle from '../sprites/ballBlue.png';
 // import { Bullet } from '../bullet.prefab';
@@ -14,9 +15,10 @@ import Paddle from './sprites/paddleBlue.png';
   rotation: 45
 })
 @Rigidbody2D({
+  mass: 10,
   shape: { type: 'box', size: { width: 1, height: 1 } },
   material: HalfBounce,
-  gravity: new Vector3(0, 0, 0)
+  gravity: new Vector2(0, 0)
 })
 export class Player implements OnUpdate, OnStart {
 
@@ -34,32 +36,33 @@ export class Player implements OnUpdate, OnStart {
     private readonly time: Time,
     private readonly gameObject: GameObjectRef,
     private readonly transform: Transform,
-    private readonly rigidbody: RigidbodyRef<'cube'>,
+    private readonly rigidbody: Rigidbody2DRef<'box'>,
   ) { }
 
   @ButtonUp(MouseButton.Left)
   leftMouseButton() {
-    this.rigidbody.setVelocity(new Vector3(0, 20, 0));
+    // this.rigidbody.setVelocity(new Vector3(0, 20, 0));
     // this.rigidbody.setAngularVelocity(new Vector3(0, 100, 0));
   }
 
   @ButtonUp(MouseButton.Right)
   rightMouseButton() {
     const rotation = Math.round(Math.random()) === 1 ? 1 : -1;
-    this.rigidbody.applyTorque(new Vector3(0, 0, rotation * 15));
+    // this.rigidbody.applyTorque(new Vector3(0, 0, rotation * 15));
   }
 
-  @KeyPress(Key.Space, Key.B)
+  // @KeyDown(Key.Space, Key.B)
   // @Debounce(0.5)
   // @AutoBurst(2, 2, 0.05)
   // @Debounce(0.05)
   // @RoundRobin(1, 2, 3)
-  // @Repeat(1)
+  @Repeat(0.25)
   createBullet() {
-    // let bullet1!: Bullet, bullet2!: Bullet, bullet3!: Bullet;
-    // bullet1 = this.scene.instantiate(Bullet, this.gameObject.position);
-    // this.shots > 1 && (bullet2 = this.scene.instantiate(Bullet, this.gameObject.position));
-    // this.shots > 2 && (bullet3 = this.scene.instantiate(Bullet, this.gameObject.position));
+    let bullet1!: Bullet, bullet2!: Bullet, bullet3!: Bullet;
+    let create = this.gameObject.position.addY(10);
+    bullet1 = this.scene.instantiate(Bullet, { position: create });
+    this.shots > 1 && (bullet2 = this.scene.instantiate(Bullet, { position: create }));
+    this.shots > 2 && (bullet3 = this.scene.instantiate(Bullet, { position: create }));
 
     // bullet1.endPoint = new Vector2(0, 20);
     // if (this.shots === 2) {
@@ -72,6 +75,9 @@ export class Player implements OnUpdate, OnStart {
   }
 
   onStart() {
+    const items = ['a', 'b', 'c', 'd'];
+    Random.shuffle(items);
+    console.log(items);
     // this.gameObject.destroy(1);
     // Debug.drawBox(
     //   this.transform.position.x,
@@ -82,7 +88,7 @@ export class Player implements OnUpdate, OnStart {
   }
 
   @KeyPress(Key.Left, Key.A)
-  onLeft() { this.transform.translate(Vector2.left, this.time.delta * this.hSpeed); }
+  onLeft() { this.transform.translate(Vector2.left, this.time.deltaTime * this.hSpeed); }
 
   onUpdate() {
     // if (this.keyboard.isKeyPressed(Key.Left) || this.keyboard.isKeyPressed(Key.A)) {

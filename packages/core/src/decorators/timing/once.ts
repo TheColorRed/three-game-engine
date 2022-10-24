@@ -1,4 +1,4 @@
-import { TIME_ONCE } from '../../tokens';
+import { TIME_ONCE } from '../../tokens/timing-tokens';
 
 /**
  * Runs a function once after it has been created.

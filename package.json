@@ -9,7 +9,9 @@
     "packages/core",
     "packages/input",
     "packages/objects",
-    "packages/physics"
+    "packages/physics",
+    "packages/physics2d",
+    "packages/particles"
   ],
   "devDependencies": {
     "typescript": "^4.9.1-beta",

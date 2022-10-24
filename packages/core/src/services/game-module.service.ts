@@ -1,10 +1,10 @@
 import { concatMap, finalize, forkJoin, Observable, of } from 'rxjs';
-import { GameScene } from '../classes';
+import { GameScene } from '../classes/game-scene';
 import { Debug } from '../debug';
 import { GameModule, ModuleOptions } from '../decorators/module';
 import { Injectable } from '../di/injectable';
 import { Newable } from '../di/types';
-import { GAME_MODULE } from '../tokens';
+import { GAME_MODULE } from '../tokens/game-object-tokens';
 
 @Injectable({ providedIn: 'game' })
 export class GameModuleService {
@@ -34,12 +34,12 @@ export class GameModuleService {
       root.pipe(
         // Once the child modules have loaded, bootstrap the current module.
         concatMap(() => {
-          let b: Observable<unknown> | Promise<unknown> = of({});
-          if (typeof options.bootstrap === 'function') b = options.bootstrap() ?? of({});
-          else if (Array.isArray(options.bootstrap))
+          let startup: Observable<unknown> | Promise<unknown> = of({});
+          if (typeof options.startup === 'function') startup = options.startup() ?? startup;
+          if (Array.isArray(options.bootstrap))
             options.bootstrap.forEach(itm => scene?.instantiate(itm));
 
-          return b instanceof Promise ? of(b) : b;
+          return startup instanceof Promise ? of(startup) : startup;
         }),
         // Complete the initialization of the current module.
         finalize(() => sub.complete())

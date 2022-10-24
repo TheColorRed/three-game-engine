@@ -1,6 +1,6 @@
 import { Game } from '@engine/core';
 import { InputModule } from '@engine/input';
-import { PhysicsModule } from '@engine/physics';
+import { Physics2DModule } from '@engine/physics2d';
 import { environment } from './environments/environment';
 import { MainScene } from './scenes/main.scene';
 
@@ -12,7 +12,7 @@ import { MainScene } from './scenes/main.scene';
   gizmos: { colliders: true },
   imports: [
     InputModule,
-    PhysicsModule
+    Physics2DModule
   ]
 })
 export class MainGame { }

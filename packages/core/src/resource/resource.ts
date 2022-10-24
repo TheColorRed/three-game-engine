@@ -1,16 +1,8 @@
-import { Observable } from 'rxjs';
+import { Three } from '../three';
+export abstract class Resource<T extends Three.Object3D = Three.Object3D> {
 
+  abstract destroy(): void;
 
-export abstract class Resource<T, U = any> {
-
-  loaded = false;
-
-  constructor(
-    protected readonly resource: T
-  ) { }
-
-  abstract loadResource(): Observable<U>;
-
-  static resources = new Map<string, Resource<any>>();
+  object!: T;
 
 }

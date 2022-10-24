@@ -1,7 +1,8 @@
 import { BehaviorSubject, filter, from, switchMap, tap } from 'rxjs';
-import { ListenerRef } from '../decorators';
-import { Injectable } from '../di';
-import { EventToken, LISTENER_GLOBAL } from '../tokens';
+import { ListenerRef } from '../decorators/listener';
+import { Injectable } from '../di/injectable';
+import { EventToken } from '../tokens/event-token';
+import { LISTENER_GLOBAL } from '../tokens/listener-tokens';
 import { GameObjectManager } from './game-object-manager.service';
 
 @Injectable({ providedIn: 'game' })

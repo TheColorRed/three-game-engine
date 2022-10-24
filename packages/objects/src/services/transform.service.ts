@@ -1,4 +1,4 @@
-import { GameObject, GameObjectRef, GAME_OBJECT_CHILDREN, Injectable, ObjectList, Three, Vector3 } from '@engine/core';
+import { GameObject, GameObjectRef, GAME_OBJECT_CHILDREN, Injectable, ObjectList, Three, Vector2, Vector3 } from '@engine/core';
 
 export enum Direction {
   North, South, East, West,
@@ -57,9 +57,15 @@ export class Transform {
    *   this.transform.translate(Vector2.up, 50 * this.time.delta);
    * }
    */
-  translate(direction: Vector3, speed = 1) {
-    const { x, y, z } = direction;
-    const vec = new Three.Vector3(x, y, z);
+  translate(direction: Vector3 | Vector2, speed = 1) {
+    const vec = new Three.Vector3();
+    var x = 0, y = 0, z = 0;
+    if (direction instanceof Vector3) {
+      var { x, y, z } = direction;
+    } else {
+      var { x, y } = direction;
+    }
+    vec.set(x, y, z);
 
     const speedM = vec.multiplyScalar(speed);
     const v = vec.addVectors(this.object3d.position, speedM);

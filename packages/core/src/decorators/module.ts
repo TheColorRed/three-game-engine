@@ -2,13 +2,21 @@ import { forkJoin, Observable } from 'rxjs';
 import { Injector } from '../di/injector';
 import { Newable } from '../di/types';
 import { GameModuleService } from '../services/game-module.service';
-import { GAME_MODULE } from '../tokens';
+import { GAME_MODULE } from '../tokens/game-object-tokens';
 
 export interface ModuleOptions {
   /**
+   * The set of game objects that will be created upon startup.
+   */
+  bootstrap?: Newable<any>[];
+  /**
    * Initializes the startup of the module such initializing services.
    */
-  bootstrap?: Newable<any>[] | (() => void | Observable<unknown> | Promise<unknown>);
+  startup?: () => void | Observable<unknown> | Promise<unknown>;
+  /**
+   * Triggered on game object destruction.
+   */
+  destroy?: () => void;
   /**
    * Additional modules that this module requires.
    */

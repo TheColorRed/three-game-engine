@@ -1,16 +1,17 @@
 import { Subscription } from 'rxjs';
 import { GameObjectOptions } from '../decorators/prefab';
-import { Newable } from '../di';
 import { Injector } from '../di/injector';
-import { OnDestroy, OnStart, OnUpdate } from '../interfaces';
-import { ObjectList } from '../object-list';
+import { Newable } from '../di/types';
+import { OnDestroy, OnStart, OnUpdate } from '../interfaces/event-loop';
+import { Resource } from '../resource/resource';
 import { GameObjectRef } from '../services/game-object-ref.service';
 import { Three } from '../three';
 import { Euler } from '../transforms/euler';
 import { Quaternion } from '../transforms/quaternion';
 import { Vector3 } from '../transforms/vector';
+import { ObjectList } from './object-list';
 
-export abstract class GameObject<T extends { new(...args: any[]): any; } = any> implements OnStart, OnUpdate, OnDestroy {
+export abstract class GameObject<T extends Newable<T> = any> implements OnStart, OnUpdate, OnDestroy {
 
   injector: Injector<any>;
   instance: any;
@@ -48,7 +49,10 @@ export abstract class GameObject<T extends { new(...args: any[]): any; } = any> 
   }
 
   tag: string = '';
+  /** The reference to the Three.js object. */
   object3d?: Three.Object3D;
+  /** The resource for the object. */
+  resource?: Resource | (() => Three.Object3D);
   /** @internal */
   started = false;
   /** @internal */
@@ -58,25 +62,27 @@ export abstract class GameObject<T extends { new(...args: any[]): any; } = any> 
   /** @internal */
   children: ObjectList<GameObject> = new ObjectList(this);
 
-  constructor(readonly target: T, options?: GameObjectOptions) {
+  constructor(readonly target: T, protected options?: GameObjectOptions) {
     this.injector = Injector.create(this.target);
     this.instance = this.injector.get(this.target);
     this.name = options?.name ?? 'GameObject';
-    this.object3d = options?.object?.object?.clone(true) ?? new Three.Object3D();
+    this.resource = options?.object;
+    this.object3d = this.#getObject();
     this.position = options?.position ?? Vector3.zero;
 
     this.rotation = (typeof options?.rotation === 'number' ? new Euler(0, 0, options.rotation * Math.PI / 180) : options?.rotation) ?? Euler.zero;
 
     const p = this.position;
     this.startPosition.set(p?.x ?? 0, p?.y ?? 0, p?.z ?? 0);
-    // console.log(this.name, p);
 
     this.#setGameObjects(this.injector);
   }
 
-  static isNewableGameObject(item: any): item is Newable<GameObject> {
-    const namedClasses = ['GameObjectComponent', 'GameCameraComponent'];
-    return namedClasses.includes(item.name);
+  #getObject() {
+    if (typeof this.resource === 'function') {
+      return this.resource();
+    }
+    return this.resource?.object.clone() ?? new Three.Object3D();
   }
 
   #updateSprite() {

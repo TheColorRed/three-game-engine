@@ -1,4 +1,4 @@
-import { GameConfig, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Reflection } from '@engine/core';
+import { GameConfig, GameObject, GameObjectManager, Injectable, Injector, OnDestroy } from '@engine/core';
 import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, filter, from, fromEvent, Subscription, switchMap, tap } from 'rxjs';
 import { Key } from '../enums';
@@ -105,11 +105,17 @@ export class Keyboard implements OnDestroy {
       state === 'up' ? TOKEN_KEYUP :
         state === 'press' ? TOKEN_KEYPRESS :
           undefined;
-    Reflection.call<Key>(
-      action => typeof obj[method] === 'function' &&
-        this.getKey(action)?.toString().toLocaleLowerCase() === key?.toString().toLocaleLowerCase(),
-      keyToken ?? '', obj, method
-    );
+
+    const i = Reflect.getMetadata(keyToken, obj.target.prototype, method) as Key[];
+    if (Array.isArray(i) && i.includes(key) && typeof obj.instance[method] === 'function') {
+      obj.instance[method]();
+    }
+
+    // Reflection.call<Key>(
+    //   action => typeof obj[method] === 'function' &&
+    //     this.getKey(action)?.toString().toLocaleLowerCase() === key?.toString().toLocaleLowerCase(),
+    //   keyToken ?? '', obj, method
+    // );
   }
 
   private getKey(e: KeyboardEvent | Key) {

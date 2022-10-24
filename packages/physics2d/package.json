@@ -1,0 +1,21 @@
+{
+  "name": "@engine/physics2d",
+  "main": "./src/index",
+  "dependencies": {
+    "@engine/core": "1.0.0",
+    "matter-js": "^0.18.0",
+    "planck": "^1.0.0-alpha.4",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.5.6"
+  },
+  "devDependencies": {
+    "@types/matter-js": "^0.18.2",
+    "ammo-debug-drawer": "^1.0.1",
+    "browserify-fs": "1.0.0",
+    "buffer": "6.0.3",
+    "path-browserify": "1.0.1",
+    "stream-browserify": "3.0.0",
+    "util": "0.12.4"
+  },
+  "version": "1.0.0"
+}

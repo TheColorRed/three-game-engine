@@ -4,3 +4,4 @@ export interface Type<T> {
 }
 
 export type Newable<T> = new (...args: any[]) => T;
+export type Destroyable = { onDestroy: () => void; };

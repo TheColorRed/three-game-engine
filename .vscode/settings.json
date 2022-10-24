@@ -1,7 +1,11 @@
 {
   "typescript.preferences.importModuleSpecifier": "relative",
   "cSpell.words": [
-    "ammojs"
+    "ammojs",
+    "glsl",
+    "glslify",
+    "seedrandom",
+    "threejs"
   ],
-  "typescript.tsdk": "node_modules\\typescript\\lib"
+  "typescript.tsdk": "node_modules\\typescript\\lib",
 }

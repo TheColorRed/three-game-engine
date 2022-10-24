@@ -4,12 +4,14 @@ import { GameModule } from '../decorators/module';
 import { SceneOptions } from '../decorators/scene';
 import { Injector } from '../di/injector';
 import { Newable, Type } from '../di/types';
-import { Resource } from '../resource/resource';
-import { GameObjectManager } from '../services';
+import { CameraManager } from '../services/camera-manager.service';
 import { GameModuleService } from '../services/game-module.service';
+import { GameObjectManager } from '../services/game-object-manager.service';
 import { SceneManager } from '../services/scene-manager.service';
+import { Source } from '../source/source';
 import { Three } from '../three';
-import { Euler, Vector3 } from '../transforms';
+import { Euler } from '../transforms/euler';
+import { Vector3 } from '../transforms/vector';
 import { GameCamera } from './game-camera';
 import { GameObject } from './game-object';
 
@@ -27,7 +29,8 @@ export abstract class GameScene<T extends object = object> {
    * @internal
    */
   instance: T;
-  sceneManager: SceneManager;
+  sceneManager = Injector.get(SceneManager)!;
+  cameraManager = Injector.get(CameraManager)!;
   gameObjectManager: GameObjectManager;
   moduleService = Injector.get(GameModuleService)!;
 
@@ -37,33 +40,29 @@ export abstract class GameScene<T extends object = object> {
     this.registeredGameObjects = options?.hierarchy ?? [];
     this.registeredCameras = options?.cameras ?? [];
     this.isActive = true;
-    this.sceneManager = Injector.get(SceneManager) as SceneManager;
     this.sceneManager.scenes.push(this);
     this.#initializeGameObjects().subscribe();
   }
 
   #initializeGameObjects() {
     return timer(100, 0).pipe(
-      first(() => Array.from(Resource.resources.values()).every(i => i.loaded === true)),
+      first(() => Array.from(Source.sources.values()).every(i => i.loaded === true)),
       tap(() => {
         Debug.log('Loading Game Objects...');
         this.#loadGameObjects(this.registeredGameObjects ?? []);
-
-        // this.#updateRendererSize();
-        // window.addEventListener('resize', this.#updateRendererSize.bind(this));
       })
     );
   }
 
   #loadGameObjects(item: Newable<GameObject | GameModule> | Newable<GameObject>[] = []) {
-    if (GameObject.isNewableGameObject(item)) {
+    if (Array.isArray(item)) {
+      for (let i of item) this.#loadGameObjects(i);
+    } else if (GameObjectManager.isNewableGameObject(item)) {
       this.sceneManager.instantiate(item, { scene: this });
+    } else if (CameraManager.isNewableGameCamera(item)) {
+      this.cameraManager.instantiate(item);
     } else if (GameModule.isNewableGameModule(item)) {
-      this.instantiateGameModule(item);
-    } else if (Array.isArray(item)) {
-      for (let i of item) {
-        this.#loadGameObjects(i);
-      }
+      this.#instantiateGameModule(item);
     }
   }
 
@@ -71,11 +70,11 @@ export abstract class GameScene<T extends object = object> {
     this.sceneManager.instantiate(object, { position, rotation, scene: this });
   }
 
-  private instantiateGameModule(object: Newable<GameModule>) {
+  #instantiateGameModule(object: Newable<GameModule>) {
     this.moduleService.initModule(object, this).subscribe();
   }
 
-  addThreeObject(gameObject?: Three.Object3D | Three.Sprite) {
+  addThreeObject(gameObject?: Three.Object3D) {
     if (typeof gameObject === 'undefined') return;
     if (gameObject instanceof Three.Sprite) {
       if (gameObject) return this.scene.add(gameObject);

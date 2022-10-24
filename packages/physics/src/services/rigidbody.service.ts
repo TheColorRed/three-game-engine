@@ -1,26 +1,26 @@
-import { Debug, GameConfig, GameObjectRef, Injectable, Injector, OnStart, Three, Vector3 } from '@engine/core';
+import { GameConfig, GameObjectRef, Injectable, Injector, OnStart, Three, Vector3 } from '@engine/core';
 import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, tap } from 'rxjs';
-import { RigidbodyOptions, RigidbodyOptions2D, RigidbodyShape, RigidbodyShape2D } from '../decorators';
+import { RigidbodyOptions, RigidbodyShape } from '../decorators';
 import { PHYSICS_RIGIDBODY } from '../tokens';
 import { World } from './world.service';
 
-export type Shapes = (RigidbodyShape | RigidbodyShape2D)['type'];
+export type Shapes = RigidbodyShape['type'];
 
 @Injectable()
 export class RigidbodyRef<T extends Shapes> implements OnStart {
 
-  private readonly config = Injector.get(GameConfig);
-  private readonly gameLoop = Injector.get(GameLoop);
+  private readonly config = Injector.get(GameConfig)!;
+  private readonly gameLoop = Injector.get(GameLoop)!;
   private debugObject?: Three.Object3D;
 
-  loop$ = this.gameLoop?.loop$
+  loop$ = this.gameLoop.updated$
     .pipe(
       auditTime(1 / 60),
       tap(() => this.drawGizmo())
     );
 
-  get options(): { shape: Extract<RigidbodyShape | RigidbodyShape2D, { type: T; }>; } & (RigidbodyOptions | RigidbodyOptions2D) {
+  get options(): { shape: Extract<RigidbodyShape, { type: T; }>; } & RigidbodyOptions {
     const ctr = this.gameObject.reference.instance.constructor;
     return Reflect.getMetadata(PHYSICS_RIGIDBODY, ctr);
   }
@@ -29,8 +29,8 @@ export class RigidbodyRef<T extends Shapes> implements OnStart {
     private readonly gameObject: GameObjectRef,
     private readonly world: World
   ) {
-    if (this.config?.get('production') === false && this.config.isPhysicsGizmos) {
-      this.loop$?.subscribe();
+    if (this.config.get('production') === false && this.config.isPhysicsGizmos) {
+      this.loop$.subscribe();
     }
   }
   onStart(): void {
@@ -86,26 +86,6 @@ export class RigidbodyRef<T extends Shapes> implements OnStart {
 
   drawGizmo() {
     if (this.debugObject) return;
-    if (this.options.shape.type === 'box') {
-      this.drawBox();
-    }
   }
 
-  private drawBox() {
-    const go = this.gameObject.reference;
-    if (
-      go.object3d &&
-      'size' in this.options.shape &&
-      'width' in this.options.shape.size &&
-      'height' in this.options.shape.size
-    ) {
-      this.debugObject = Debug.drawBox(
-        (this.options.shape.size.width / 2) - this.options.shape.size.width,
-        this.options.shape.size.height / 2,
-        this.options.shape.size.width,
-        this.options.shape.size.height
-      );
-      this.gameObject.reference.object3d?.add(this.debugObject);
-    }
-  }
 }

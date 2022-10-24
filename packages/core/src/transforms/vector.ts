@@ -1,13 +1,9 @@
 import { Three } from '../three';
 
-/**
- * A vector containing 3 dimensions.
- */
-export class Vector3 {
-
-  readonly x: number;
-  readonly y: number;
-  readonly z: number;
+export abstract class Vector {
+  protected _x: number;
+  protected _y: number;
+  protected _z: number;
 
   /**
    * @param x The horizontal point.
@@ -24,40 +20,51 @@ export class Vector3 {
     [threeVector: Three.Vector3]
   ) {
     if (args.length === 0) {
-      this.x = 0;
-      this.y = 0;
-      this.z = 0;
+      this._x = 0;
+      this._y = 0;
+      this._z = 0;
     } else if (args.length === 3) {
-      this.x = args[0];
-      this.y = args[1];
-      this.z = args[2];
+      this._x = args[0];
+      this._y = args[1];
+      this._z = args[2];
     } else {
-      this.x = args[0].x;
-      this.y = args[0].y;
-      this.z = args[0].z;
+      this._x = args[0].x;
+      this._y = args[0].y;
+      this._z = args[0].z;
     }
   }
-  static get zero() { return new Vector3(0, 0, 0); }
-  static get one() { return new Vector3(1, 1, 1); }
-  static get left() { return new Vector3(-1, 0, 0); }
-  static get right() { return new Vector3(1, 0, 0); }
-  static get up() { return new Vector3(0, -1, 0); }
-  static get down() { return new Vector3(0, 1, 0); }
-  static get forward() { return new Vector3(0, 0, -1); }
-  static get backward() { return new Vector3(0, 0, 1); }
 
   normalize() {
-    var { x, y, z } = this;
-    var { x, y, z } = new Three.Vector3(x, y, z).normalize();
+    let { _x, _y, _z } = this;
+    let { x, y, z } = new Three.Vector3(_x, _y, _z).normalize();
     return new Vector3(x, y, z);
   }
 
   three() {
-    return new Three.Vector3(this.x, this.y, this.z);
+    return new Three.Vector3(this._x, this._y, this._z);
   }
+}
 
-  toArray(): [x: number, y: number, z: number] {
-    return [this.x, this.y, this.z];
+/**
+ * A vector containing 3 dimensions.
+ */
+export class Vector3 extends Vector {
+
+  get x() { return this._x; }
+  get y() { return this._y; }
+  get z() { return this._z; }
+
+  static get zero() { return new Vector3(0, 0, 0); }
+  static get one() { return new Vector3(1, 1, 1); }
+  static get left() { return new Vector3(-1, 0, 0); }
+  static get right() { return new Vector3(1, 0, 0); }
+  static get up() { return new Vector3(0, 1, 0); }
+  static get down() { return new Vector3(0, -1, 0); }
+  static get forward() { return new Vector3(0, 0, -1); }
+  static get backward() { return new Vector3(0, 0, 1); }
+
+  toVec2() {
+    return new Vector2(this.x, this.y);
   }
 
   static fromThree(vector?: Three.Vector3) {
@@ -95,28 +102,65 @@ export class Vector3 {
     const otherVec = new Three.Vector3(...other.toArray());
     return currentVec.distanceTo(otherVec);
   }
+
+  toArray(): [x: number, y: number, z: number] {
+    return [this.x, this.y, this.z];
+  }
+
+  add(amount: number) { return new Vector3(this.x + amount, this.y + amount, this.z + amount); }
+  sub(amount: number) { return new Vector3(this.x - amount, this.y - amount, this.z - amount); }
+  mul(amount: number) { return new Vector3(this.x * amount, this.y * amount, this.z * amount); }
+  div(amount: number) { return new Vector3(this.x / amount, this.y / amount, this.z / amount); }
+  addX(amount: number) { return new Vector3(this.x + amount, this.y, this.z); }
+  addY(amount: number) { return new Vector3(this.x, this.y + amount, this.z); }
+  addZ(amount: number) { return new Vector3(this.x, this.y, this.z + amount); }
+  subX(amount: number) { return new Vector3(this.x - amount, this.y, this.z); }
+  subY(amount: number) { return new Vector3(this.x, this.y - amount, this.z); }
+  subZ(amount: number) { return new Vector3(this.x, this.y, this.z - amount); }
+  mulX(amount: number) { return new Vector3(this.x * amount, this.y, this.z); }
+  mulY(amount: number) { return new Vector3(this.x, this.y * amount, this.z); }
+  mulZ(amount: number) { return new Vector3(this.x, this.y, this.z * amount); }
+  divX(amount: number) { return new Vector3(this.x / amount, this.y, this.z); }
+  divY(amount: number) { return new Vector3(this.x, this.y / amount, this.z); }
+  divZ(amount: number) { return new Vector3(this.x, this.y, this.z / amount); }
 }
 
-// @ts-ignore
-export class Vector2 extends Vector3 {
+export class Vector2 extends Vector {
+
+  get x() { return this._x; }
+  get y() { return this._y; }
+
   constructor();
   constructor(x: number, y: number);
   constructor(...args: [] | [x: number, y: number]) {
-    if (args.length === 0) {
-      super(0, 0, 0);
-    } else if (args.length === 2) {
+    if (args.length === 2) {
       super(args[0], args[1], 0);
+      return this;
     }
+    super(0, 0, 0);
   }
 
-  static override get zero() { return new Vector2(0, 0); }
-  static override get one() { return new Vector2(1, 1); }
-  static override get left() { return new Vector2(-1, 0); }
-  static override get right() { return new Vector2(1, 0); }
-  static override get up() { return new Vector2(0, 1); }
-  static override get down() { return new Vector2(0, -1); }
+  static get zero() { return new Vector2(0, 0); }
+  static get one() { return new Vector2(1, 1); }
+  static get left() { return new Vector2(-1, 0); }
+  static get right() { return new Vector2(1, 0); }
+  static get up() { return new Vector2(0, 1); }
+  static get down() { return new Vector2(0, -1); }
 
-  static override rotate(degrees: number, axis: 'x' | 'y' | 'z' = 'z') {
+  add(amount: number) { return new Vector2(this.x + amount, this.y + amount); }
+  sub(amount: number) { return new Vector2(this.x - amount, this.y - amount); }
+  mul(amount: number) { return new Vector2(this.x * amount, this.y * amount); }
+  div(amount: number) { return new Vector2(this.x / amount, this.y / amount); }
+  addX(amount: number) { return new Vector2(this.x + amount, this.y); }
+  addY(amount: number) { return new Vector2(this.x, this.y + amount); }
+  subX(amount: number) { return new Vector2(this.x - amount, this.y); }
+  subY(amount: number) { return new Vector2(this.x, this.y - amount); }
+  mulX(amount: number) { return new Vector2(this.x * amount, this.y); }
+  mulY(amount: number) { return new Vector2(this.x, this.y * amount); }
+  divX(amount: number) { return new Vector2(this.x / amount, this.y); }
+  divY(amount: number) { return new Vector2(this.x, this.y / amount); }
+
+  static rotate(degrees: number, axis: 'x' | 'y' | 'z' = 'z') {
     const vec = new Three.Vector3(1, 0, 0);
     var axisVec = new Three.Vector3(
       axis === 'x' ? 1 : 0,
@@ -126,5 +170,13 @@ export class Vector2 extends Vector3 {
     var angle = degrees * (Math.PI / 180);
     vec.applyAxisAngle(axisVec, angle);
     return new Vector2(vec.x, vec.y).normalize();
+  }
+
+  toArray(): [x: number, y: number] {
+    return [this.x, this.y];
+  }
+
+  static fromThree(v: Three.Vector2) {
+    return new Vector2(v.x, v.y);
   }
 }

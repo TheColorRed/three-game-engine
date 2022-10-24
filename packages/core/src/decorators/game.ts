@@ -1,8 +1,9 @@
 import { GameScene } from '../classes/game-scene';
-import { Injector, Newable } from '../di';
-import { GameConfig, GameConfiguration } from '../services';
+import { Injector } from '../di/injector';
+import { Newable } from '../di/types';
+import { GameConfig, GameConfiguration } from '../services/game-config.service';
 import { Three } from '../three';
-import { GAME } from '../tokens';
+import { GAME } from '../tokens/game-object-tokens';
 import { GameModule } from './module';
 
 export interface Gizmos {
@@ -35,6 +36,10 @@ export function Game(options: GameOptions) {
       alpha: true,
       antialias: true
     });
+    renderer.shadowMap.enabled = true;
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
     const gizmosDefaults: Gizmos = {
       colliders: false
     };

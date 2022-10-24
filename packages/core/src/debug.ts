@@ -1,6 +1,7 @@
 import { GameObject } from './classes/game-object';
 import { Injector } from './di/injector';
-import { GameConfig, SceneManager } from './services';
+import { GameConfig } from './services/game-config.service';
+import { SceneManager } from './services/scene-manager.service';
 import { Three } from './three';
 
 export class Debug {

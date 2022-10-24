@@ -1,28 +1,27 @@
-import { GameObjectRef, Once, Prefab, Sprite, Time, Vector2 } from '@engine/core';
+import { GameObjectRef, OnStart, Prefab, Random, Sprite, Time, Vector2 } from '@engine/core';
 import { Transform } from '@engine/objects';
+import { Rigidbody2D, Rigidbody2DRef } from '@engine/physics2d';
 import bullet from '../sprites/ballBlue.png';
 
 @Prefab({
   name: 'Bullet',
   object: new Sprite(bullet)
 })
-export class Bullet {
+@Rigidbody2D({ shape: { type: 'circle', radius: 1 } })
+export class Bullet implements OnStart {
 
   endPoint = Vector2.up;
 
   constructor(
     private readonly gameObject: GameObjectRef,
     private readonly transform: Transform,
-    private readonly time: Time
+    private readonly time: Time,
+    private readonly rigidbody: Rigidbody2DRef<'circle'>
   ) { }
 
-  @Once(3)
-  once() {
-    this.gameObject.destroy();
-  }
-
-  onUpdate() {
-    this.transform.moveTowards(this.endPoint, this.time.delta * 30);
-    // this.transform.translate(this.direction, this.time.delta * 30);
+  onStart(): void {
+    const impulse = new Vector2(Random.range(-10, 10), Random.range(-10, 10));
+    this.rigidbody.applyImpulse(impulse);
+    this.gameObject.destroy(3);
   }
 }

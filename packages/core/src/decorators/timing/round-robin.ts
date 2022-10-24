@@ -1,4 +1,4 @@
-import { TIME_ROUND_ROBIN } from '../../tokens';
+import { TIME_ROUND_ROBIN } from '../../tokens/timing-tokens';
 
 /**
  * Calls each item from left to right, and once the last item is called starts over.

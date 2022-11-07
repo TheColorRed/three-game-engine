@@ -1,10 +1,11 @@
+import { Euler } from '../classes/transforms/euler';
+import { Vector3 } from '../classes/transforms/vector';
 import { CameraOptions } from '../decorators/camera';
 import { Injector } from '../di/injector';
-import { Newable } from '../di/types';
 import { GameConfig } from '../services/game-config.service';
 import { Three } from '../three';
-import { Euler } from '../transforms/euler';
-import { Vector3 } from '../transforms/vector';
+import { Newable } from '../types';
+import { Color } from './color/color';
 
 
 export abstract class GameCamera<T = object> {
@@ -20,9 +21,10 @@ export abstract class GameCamera<T = object> {
   #size = 0;
   #width = 0;
   #height = 0;
-  get aspect() {
-    return this.#aspectRatio;
-  }
+  /** The camera's aspect ratio. */
+  get aspect() { return this.#aspectRatio; }
+  /** The background color that the camera should render. */
+  get background() { return this.options?.background ?? new Color(0xffffff); }
 
   constructor(
     private readonly target: Newable<T>,

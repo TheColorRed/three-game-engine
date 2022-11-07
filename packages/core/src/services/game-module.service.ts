@@ -3,8 +3,8 @@ import { GameScene } from '../classes/game-scene';
 import { Debug } from '../debug';
 import { GameModule, ModuleOptions } from '../decorators/module';
 import { Injectable } from '../di/injectable';
-import { Newable } from '../di/types';
 import { GAME_MODULE } from '../tokens/game-object-tokens';
+import { Newable } from '../types';
 
 @Injectable({ providedIn: 'game' })
 export class GameModuleService {

@@ -2,7 +2,7 @@
 
 import { GameCamera } from '../classes/game-camera';
 import { GameScene } from '../classes/game-scene';
-import { Newable, Type } from '../di/types';
+import { Newable, Type } from '../types';
 
 export interface SceneOptions {
   hierarchy: Newable<any>[];

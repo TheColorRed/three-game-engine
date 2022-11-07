@@ -1,5 +1,5 @@
 export enum Key {
-  None, // Default state
+  None = '_None_', // Default state
   // Letters
   A = 'KeyA', B = 'KeyB', C = 'KeyC', D = 'KeyD', E = 'KeyE', F = 'KeyF', G = 'KeyG', H = 'KeyH', I = 'KeyI', J = 'KeyJ', K = 'KeyK', L = 'KeyL', M = 'KeyM', N = 'KeyN', O = 'KeyO', P = 'KeyP', Q = 'KeyQ', R = 'KeyR', S = 'KeyS', T = 'KeyT', U = 'KeyU', V = 'KeyV', W = 'KeyW', X = 'KeyX', Y = 'KeyY', Z = 'KeyZ',
   // Numbers

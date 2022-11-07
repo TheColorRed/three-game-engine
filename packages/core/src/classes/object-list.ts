@@ -3,12 +3,12 @@ import { ObjectChildrenOptions } from '../decorators/object-child';
 import { Injector } from '../di/injector';
 import { GameLoop } from '../services/game-loop.service';
 import { GameObjectManager } from '../services/game-object-manager.service';
-import { GameObject } from './game-object';
+import { GameObjectBase } from './game-object';
 
 /**
  * A list of game objects.
  */
-export class ObjectList<T = GameObject> {
+export class ObjectList<T = GameObjectBase> {
 
   private _items: T[] = [];
   private dirty = false;
@@ -22,7 +22,7 @@ export class ObjectList<T = GameObject> {
   gameLoop = Injector.get(GameLoop)!;
 
   constructor(
-    private readonly gameObject: GameObject,
+    private readonly gameObject: GameObjectBase,
     private readonly searchCriteria?: ObjectChildrenOptions<T>,
   ) {
     this._watcher = this.gameLoop.updated$.pipe(

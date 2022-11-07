@@ -1,23 +1,23 @@
 import { first, tap, timer } from 'rxjs';
+import { Euler } from '../classes/transforms/euler';
+import { Vector3 } from '../classes/transforms/vector';
 import { Debug } from '../debug';
 import { GameModule } from '../decorators/module';
 import { SceneOptions } from '../decorators/scene';
 import { Injector } from '../di/injector';
-import { Newable, Type } from '../di/types';
 import { CameraManager } from '../services/camera-manager.service';
 import { GameModuleService } from '../services/game-module.service';
 import { GameObjectManager } from '../services/game-object-manager.service';
 import { SceneManager } from '../services/scene-manager.service';
 import { Source } from '../source/source';
 import { Three } from '../three';
-import { Euler } from '../transforms/euler';
-import { Vector3 } from '../transforms/vector';
+import { Newable, Type } from '../types';
 import { GameCamera } from './game-camera';
-import { GameObject } from './game-object';
+import { GameObjectBase } from './game-object';
 
 export abstract class GameScene<T extends object = object> {
   /** @internal */
-  registeredGameObjects: Newable<GameObject>[];
+  registeredGameObjects: Newable<GameObjectBase>[];
   /** @internal */
   registeredCameras: Type<GameCamera>[];
   /** @internal */
@@ -54,7 +54,7 @@ export abstract class GameScene<T extends object = object> {
     );
   }
 
-  #loadGameObjects(item: Newable<GameObject | GameModule> | Newable<GameObject>[] = []) {
+  #loadGameObjects(item: Newable<GameObjectBase | GameModule> | Newable<GameObjectBase>[] = []) {
     if (Array.isArray(item)) {
       for (let i of item) this.#loadGameObjects(i);
     } else if (GameObjectManager.isNewableGameObject(item)) {
@@ -66,7 +66,7 @@ export abstract class GameScene<T extends object = object> {
     }
   }
 
-  instantiate(object: Newable<GameObject>, position?: Vector3, rotation?: Euler) {
+  instantiate(object: Newable<GameObjectBase>, position?: Vector3, rotation?: Euler) {
     this.sceneManager.instantiate(object, { position, rotation, scene: this });
   }
 

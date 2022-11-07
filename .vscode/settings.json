@@ -8,4 +8,12 @@
     "threejs"
   ],
   "typescript.tsdk": "node_modules\\typescript\\lib",
+  // "typescript.preferences.autoImportFileExcludePatterns": [
+  //   "./packages/core/src/public",
+  //   "./packages/core/src/public.ts"
+  // ],
+  "glsllint.additionalStageAssociations": {
+    ".frag.glsl": "frag",
+    ".vert.glsl": "vert"
+  }
 }

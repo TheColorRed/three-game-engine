@@ -1,7 +1,7 @@
-import { Prefab, Three } from '@engine/core';
+import { GameObject, Three } from '@engine/core';
 
 
-@Prefab({
+@GameObject({
   object: () => {
     const geometry = new Three.BoxGeometry(1, 1, 1);
     const material = new Three.MeshBasicMaterial({ color: 0x00ff00 });

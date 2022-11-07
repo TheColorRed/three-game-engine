@@ -11,9 +11,10 @@
     "sourceMap": true,
   },
   "files": [
-    "./global.d.ts"
+    "./src/index.ts",
+    "./global.d.ts",
   ],
   "include": [
-    "./src/**/*.ts"
+    "./**/*.ts"
   ]
 }

@@ -1,7 +1,7 @@
 import { tap, timer } from 'rxjs';
-import { GameObject } from '../classes/game-object';
+import { GameObjectBase } from '../classes/game-object';
+import { Vector3 } from '../classes/transforms/vector';
 import { Injectable } from '../di/injectable';
-import { Vector3 } from '../transforms/vector';
 
 @Injectable()
 export class GameObjectRef {
@@ -9,7 +9,7 @@ export class GameObjectRef {
    * The game object reference.
    * @internal
    */
-  reference!: GameObject;
+  reference!: GameObjectBase;
   get isActive() { return this.reference.isActive; }
   get position() { return this.reference.position; }
   set position(value: Vector3) { this.reference.position = value; }

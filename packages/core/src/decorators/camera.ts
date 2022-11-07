@@ -1,8 +1,9 @@
+import { Color } from '../classes/color/color';
 import { GameCamera } from '../classes/game-camera';
-import { Newable } from '../di/types';
+import { Vector2, Vector3 } from '../classes/transforms/vector';
 import { GAME_CAMERA } from '../tokens/game-object-tokens';
-import { Vector2, Vector3 } from '../transforms/vector';
-import { GameObjectOptions } from './prefab';
+import { Newable } from '../types';
+import { GameObjectOptions } from './game-object';
 
 export type CameraType = 'orthographic' | 'perspective';
 
@@ -14,6 +15,7 @@ export interface CameraOptions extends GameObjectOptions {
   far?: number;
   fov?: number;
   lookAt?: Vector3;
+  background?: Color;
 }
 
 export function Camera(options?: CameraOptions) {

@@ -1,9 +1,9 @@
-import { GameObjectRef, Prefab, Sprite, Vector3 } from '@engine/core';
+import { GameObject, GameObjectRef, Sprite, Vector3 } from '@engine/core';
 import { Transform } from '@engine/objects';
 import { Rigidbody2D, Rigidbody2DRef } from '@engine/physics2d';
 import ground from '../sprites/paddleRed.png';
 
-@Prefab({
+@GameObject({
   name: 'Ground',
   object: new Sprite(ground),
   position: new Vector3(0, -10, 0),

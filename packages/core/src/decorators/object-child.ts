@@ -1,5 +1,5 @@
-import { Type } from '../di/types';
 import { GAME_OBJECT_CHILD, GAME_OBJECT_CHILDREN } from '../tokens/game-object-tokens';
+import { Type } from '../types';
 
 export interface ObjectChildOptions<T> {
   /** The game objects type. */

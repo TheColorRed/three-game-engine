@@ -1,10 +1,12 @@
+import { Vector2 } from '@engine/core';
 import { Subject } from 'rxjs';
 import { GameCamera } from '../classes/game-camera';
+import { Vector3 } from '../classes/transforms/vector';
 import { Injectable } from '../di/injectable';
 import { Injector } from '../di/injector';
-import { Newable } from '../di/types';
+import { GameConfig } from '../services/game-config.service';
 import { Three } from '../three';
-import { Vector3 } from '../transforms/vector';
+import { Newable } from '../types';
 
 /**
  * The camera service is a singleton service that provides features for accessing, managing, and manipulating game cameras.
@@ -17,7 +19,7 @@ import { Vector3 } from '../transforms/vector';
 @Injectable({ providedIn: 'game' })
 export class CameraManager {
   /** The main camera. */
-  main?: GameCamera;
+  get main() { return this.#gameCameras.find(o => o.isMainCamera) as GameCamera; }
   /** A list of camera instances. */
   #gameCameras: GameCamera[] = [];
   /** All of the current cameras. */
@@ -27,6 +29,8 @@ export class CameraManager {
 
   private cameraChange = new Subject<GameCamera>();
   cameraChange$ = this.cameraChange.asObservable();
+
+  private config = Injector.get(GameConfig)!;
 
   instantiate(item: Newable<GameCamera>, makeActive: boolean = false) {
     const injector = Injector.create(item);
@@ -65,26 +69,44 @@ export class CameraManager {
    * @param point The position of a point on the canvas.
    * @returns
    */
-  canvasToWorldPoint(point: Vector3, camera: GameCamera) {
+  canvasToWorldPoint(point: Vector2, camera?: GameCamera) {
+    camera = typeof camera === 'undefined' ? this.main : camera;
+    if (!camera?.camera) return Vector3.zero;
     const vec = new Three.Vector3();
+    const pos = new Three.Vector3();
     // const camera = this.activeCamera.camera;
     var x = 0, y = 0, z = 0;
 
     // Calculations using an orthographic camera
-    if (camera instanceof Three.OrthographicCamera) {
+    if (camera.camera instanceof Three.OrthographicCamera) {
       // vec.set(
       //   (point.x / Engine.canvas.width) * 2 - 1,
       //   - (point.y / Engine.canvas.height) * 2 + 1,
       //   0.5
       // );
-      var { x, y, z } = vec.unproject(camera);
+      var { x, y, z } = vec.unproject(camera.camera);
     }
     // Calculations using a perspective camera
     else {
-      const pos = new Three.Vector3();
-      vec.sub(camera.camera.position).normalize();
+      const canvas = this.config.get('canvas');
+      vec.set(
+        (point.x / canvas.width) * 2 - 1,
+        -(point.y / canvas.height) * 2 + 1,
+        0.5
+      );
+
+
+      vec.unproject(camera.camera);
+      vec.sub(camera.camera.position);
       const distance = - camera.camera.position.z / vec.z;
-      var { x, y, z } = pos.copy(camera.camera.position).add(vec.multiplyScalar(distance));
+      return Vector3.fromThree(pos.copy(camera.camera.position).add(vec.multiplyScalar(distance)));
+
+
+      // const pos = new Three.Vector3();
+      // vec.sub(camera.camera.position).normalize();
+      // const distance = - camera.camera.position.z / vec.z;
+      // var { x, y, z } = pos.copy(camera.camera.position).add(vec.multiplyScalar(distance));
+      // console.log(x, y, z);
     }
     return new Vector3(x, y, z);
     // return Vector3.zero;

@@ -1,4 +1,4 @@
-import { GameObjectRef, OnStart, OnUpdate, Prefab, Random, Repeat, SceneManager, Sprite, Time, Vector2, Vector3 } from '@engine/core';
+import { GameObject, GameObjectRef, OnStart, OnUpdate, Random, Repeat, SceneManager, Sprite, Time, Vector2, Vector3 } from '@engine/core';
 import { ButtonUp, Key, KeyPress, MouseButton } from '@engine/input';
 import { Transform } from '@engine/objects';
 import { Rigidbody2D, Rigidbody2DRef } from '@engine/physics2d';
@@ -8,7 +8,7 @@ import Paddle from './sprites/paddleBlue.png';
 // import Paddle from '../sprites/ballBlue.png';
 // import { Bullet } from '../bullet.prefab';
 
-@Prefab({
+@GameObject({
   name: 'Player',
   object: new Sprite(Paddle),
   position: new Vector3(0, 10, 0),

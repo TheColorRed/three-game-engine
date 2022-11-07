@@ -1,37 +1,37 @@
-import { GameObject } from '../classes/game-object';
+import { GameObjectBase } from '../classes/game-object';
 import { Injectable } from '../di/injectable';
 import { Injector } from '../di/injector';
-import { Newable } from '../di/types';
 import { Resource } from '../resource/resource';
 import { GAME_OBJECT_CHILDREN } from '../tokens/game-object-tokens';
+import { Newable } from '../types';
 
 @Injectable({ providedIn: 'game' })
 export class GameObjectManager {
-  gameObjects: GameObject[] = [];
+  gameObjects: GameObjectBase[] = [];
 
   constructor() {
     // @ts-ignore
     window.gameObjectManager = this;
   }
 
-  instantiate(item: Newable<GameObject>) {
+  instantiate(item: Newable<GameObjectBase>) {
     const injector = Injector.create(item);
-    const gameObject = injector.get(item) as GameObject;
+    const gameObject = injector.get(item) as GameObjectBase;
 
     this.gameObjects.push(gameObject);
     return gameObject;
   }
 
-  static isGameObject(type: GameObject): type is GameObject {
+  static isGameObject(type: GameObjectBase): type is GameObjectBase {
     return type.gameObjectType === 'gameObject';
   }
 
-  static isNewableGameObject(item: Newable<any>): item is Newable<GameObject> {
-    const namedClasses = ['GameObjectComponent', 'ParticleSystemComponent'];
+  static isNewableGameObject(item: Newable<any>): item is Newable<GameObjectBase> {
+    const namedClasses = ['GameObjectComponent', 'ParticleSystemComponent', 'GameLightComponent'];
     return namedClasses.includes(item.name);
   }
 
-  destroy(obj: GameObject) {
+  destroy(obj: GameObjectBase) {
     // try {
     //   import('@engine/physics').then(physics => {
     //     const p = Reflect.getMetadata(physics.PHYSICS_RIGIDBODY, obj.instance.constructor);
@@ -47,7 +47,7 @@ export class GameObjectManager {
     idx > -1 && this.gameObjects.splice(idx, 1);
   }
 
-  removeThreeObject(gameObject?: GameObject) {
+  removeThreeObject(gameObject?: GameObjectBase) {
     if (typeof gameObject === 'undefined') return;
     const obj = this.gameObjects.find(go => go === gameObject);
     if (typeof obj === 'undefined') return;
@@ -55,10 +55,10 @@ export class GameObjectManager {
       obj.resource.destroy();
     }
     obj.object3d?.parent?.remove(obj.object3d);
-    obj.object3d = undefined;
+    // obj.object3d = undefined;
   }
 
-  #deleteAllGameObjectRefs(obj: GameObject) {
+  #deleteAllGameObjectRefs(obj: GameObjectBase) {
     for (let gameObject of this.gameObjects) {
       gameObject.children.setDirty();
       for (let method in gameObject) {

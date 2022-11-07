@@ -3,8 +3,12 @@ export interface OnStart {
   onStart(): void;
 };
 export interface OnUpdate {
-  /** Executed on once per frame. */
+  /** Executed once per tick. */
   onUpdate(): void;
+};
+export interface OnFrame {
+  /** Executed once per animation frame (About 60 times per second). */
+  onFrame(): void;
 };
 export interface OnEnable {
   /** Executed when the object becomes enabled. */

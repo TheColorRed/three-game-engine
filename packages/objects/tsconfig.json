@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "."
   },
-  "include": [
-    "./src/**/*.ts"
+  "files": [
+    "./src/index.ts"
   ]
 }

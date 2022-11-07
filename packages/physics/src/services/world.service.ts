@@ -1,4 +1,4 @@
-import { Debug, GameConfig, GameObject, Injectable, Injector, Quaternion, Vector3 } from '@engine/core';
+import { Debug, GameConfig, GameObjectBase, Injectable, Injector, Quaternion, Vector3 } from '@engine/core';
 import Ammo from 'ammojs-typed';
 import { filter, from, Observable, of, switchMap, tap, timer } from 'rxjs';
 import { PhysicsMaterialOptions, RigidbodyOptions } from '../decorators';
@@ -14,7 +14,7 @@ export class World {
   private _created = false;
   private Ammo!: typeof Ammo;
   private dynamicWorld!: Ammo.btDiscreteDynamicsWorld;
-  bodies: [gameObject: GameObject, rigidbody: Ammo.btRigidBody][] = [];
+  bodies: [gameObject: GameObjectBase, rigidbody: Ammo.btRigidBody][] = [];
   transform!: Ammo.btTransform;
 
   worldSteps$ = timer(200, 0)
@@ -41,7 +41,7 @@ export class World {
    * Removes a game object from the physics world.
    * @param gameObject The game object to remove.
    */
-  remove(gameObject: GameObject) {
+  remove(gameObject: GameObjectBase) {
     const idx = this.bodies.findIndex(([go]) => go === gameObject);
     if (idx > -1) {
       const body = this.bodies[idx][1];
@@ -55,7 +55,7 @@ export class World {
    * Adds a game object into the physics world.
    * @param gameObject The game object to add.
    */
-  add(gameObject: GameObject) {
+  add(gameObject: GameObjectBase) {
     const opts = Reflect.getMetadata(PHYSICS_RIGIDBODY, gameObject.instance.constructor) as RigidbodyOptions | undefined;
     if (typeof opts === 'undefined') throw new Error(`"${gameObject.name}" does not have a rigidbody.`);
     const mat = Reflect.getMetadata(PHYSICS_MATERIAL, opts.material || {}) as PhysicsMaterialOptions | undefined;
@@ -97,7 +97,7 @@ export class World {
     this.bodies.push([gameObject, body]);
   }
 
-  applyForce(gameObject: GameObject, force: Vector3) {
+  applyForce(gameObject: GameObjectBase, force: Vector3) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.activate(true);
@@ -105,7 +105,7 @@ export class World {
     }
   }
 
-  applyImpulse(gameObject: GameObject, force: Vector3) {
+  applyImpulse(gameObject: GameObjectBase, force: Vector3) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.activate(true);
@@ -113,7 +113,7 @@ export class World {
     }
   }
 
-  applyTorque(gameObject: GameObject, force: Vector3) {
+  applyTorque(gameObject: GameObjectBase, force: Vector3) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.activate(true);
@@ -121,7 +121,7 @@ export class World {
     }
   }
 
-  applyTorqueImpulse(gameObject: GameObject, force: Vector3) {
+  applyTorqueImpulse(gameObject: GameObjectBase, force: Vector3) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.activate(true);
@@ -129,7 +129,7 @@ export class World {
     }
   }
 
-  setVelocity(gameObject: GameObject, velocity: Vector3) {
+  setVelocity(gameObject: GameObjectBase, velocity: Vector3) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.activate(true);
@@ -137,7 +137,7 @@ export class World {
     }
   }
 
-  setAngularVelocity(gameObject: GameObject, velocity: Vector3) {
+  setAngularVelocity(gameObject: GameObjectBase, velocity: Vector3) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.activate(true);
@@ -145,7 +145,7 @@ export class World {
     }
   }
 
-  createShape(options: RigidbodyOptions, gameObject: GameObject) {
+  createShape(options: RigidbodyOptions, gameObject: GameObjectBase) {
     switch (options.shape?.type) {
       case 'sphere':
         return new this.Ammo.btSphereShape(options.shape.radius);

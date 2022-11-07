@@ -1,5 +1,5 @@
-import { animationFrames, concatMap, from, share, Subject, tap, timer, toArray } from 'rxjs';
-import { GameObject } from '../classes/game-object';
+import { animationFrames, concatMap, filter, from, map, share, Subject, tap, timer, toArray } from 'rxjs';
+import { GameObjectBase } from '../classes/game-object';
 import { Injectable } from '../di/injectable';
 import { Injector } from '../di/injector';
 import { Three } from '../three';
@@ -38,6 +38,8 @@ export class GameLoop {
   get delta() { return this.#delta; }
   get frames() { return this.#totalFrames; }
 
+  private lastUpdate = Date.now();
+
   private get gameObjects() { return this.gameObjectManager.gameObjects; }
 
   /**
@@ -46,12 +48,14 @@ export class GameLoop {
    * This is the main game loop. It is subscribed to within the engine, and engine only.
    * @internal
    */
-  // loop$ = animationFrames()
   loop$ = timer(0, 0)
     // loop$ = of(1)
     .pipe(
       // tap(() => console.log(this.sceneManager.activeScene)),
       // tap(() => this.#updateTiming()),
+      map(() => Date.now()),
+      filter(time => (time - this.lastUpdate) / 1000 >= 1 / 60),
+      tap(time => this.lastUpdate = time),
       // Start all the game objects that haven't been started.
       concatMap(() => from(this.gameObjects).pipe(
         tap(i => this.#startGameObject(i)),
@@ -77,6 +81,10 @@ export class GameLoop {
   animate$ = animationFrames().pipe(
     tap(() => this.#stats?.begin()),
     tap(() => this.#updateTiming()),
+    concatMap(() => from(this.gameObjects).pipe(
+      tap(i => this.#updateAnimationFrame(i)),
+      toArray()
+    )),
     tap(() => this.#renderGame()),
     tap(() => this.#stats?.end()),
   );
@@ -104,19 +112,25 @@ export class GameLoop {
     this.#totalFrames++;
   }
 
-  #startGameObject(obj: GameObject) {
+  #startGameObject(obj: GameObjectBase) {
     if (obj.started === false) {
       obj.onStart();
     }
   }
 
-  #updateGameObject(obj: GameObject) {
+  #updateGameObject(obj: GameObjectBase) {
     if (obj.started === true) {
       obj.onUpdate();
     }
   }
 
-  #destroyGameObject(obj: GameObject) {
+  #updateAnimationFrame(obj: GameObjectBase) {
+    if (obj.started === true) {
+      obj.onFrame();
+    }
+  }
+
+  #destroyGameObject(obj: GameObjectBase) {
     if (obj.onDestroy?.()) {
       this.gameObjectManager.destroy(obj);
     }
@@ -137,6 +151,7 @@ export class GameLoop {
 
     for (let camera of activeCameras) {
       const renderer = this.gameConfig.get('renderer');
+      renderer.setClearColor(camera.background.threeColor, camera.background.alpha);
       renderer.render(this.sceneManager.rootScene, camera.camera);
     }
   }

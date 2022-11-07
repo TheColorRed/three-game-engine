@@ -1,5 +1,5 @@
 import { TOKEN_INJECTABLE, TOKEN_INJECTION } from '../tokens/tokens';
-import { Type } from './types';
+import { Type } from '../types';
 
 export type ProvidedIn = 'game' | 'local';
 

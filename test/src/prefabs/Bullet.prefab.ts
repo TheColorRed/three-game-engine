@@ -1,9 +1,9 @@
-import { GameObjectRef, OnStart, Prefab, Random, Sprite, Time, Vector2 } from '@engine/core';
+import { GameObject, GameObjectRef, OnStart, Random, Sprite, Time, Vector2 } from '@engine/core';
 import { Transform } from '@engine/objects';
 import { Rigidbody2D, Rigidbody2DRef } from '@engine/physics2d';
 import bullet from '../sprites/ballBlue.png';
 
-@Prefab({
+@GameObject({
   name: 'Bullet',
   object: new Sprite(bullet)
 })

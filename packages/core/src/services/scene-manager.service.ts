@@ -1,11 +1,11 @@
 import { GameCamera } from '../classes/game-camera';
-import { GameObject } from '../classes/game-object';
+import { GameObjectBase } from '../classes/game-object';
 import { GameScene } from '../classes/game-scene';
+import { Euler } from '../classes/transforms/euler';
+import { Vector3 } from '../classes/transforms/vector';
 import { Injectable } from '../di/injectable';
-import { Newable } from '../di/types';
 import { Three } from '../three';
-import { Euler } from '../transforms/euler';
-import { Vector3 } from '../transforms/vector';
+import { Newable } from '../types';
 import { CameraManager } from './camera-manager.service';
 import { GameObjectManager } from './game-object-manager.service';
 
@@ -60,7 +60,7 @@ export class SceneManager {
    * @param options
    */
   instantiate<T>(object: Newable<any>, options?: GameObjectInitOptions): T {
-    let item: GameObject | GameCamera;
+    let item: GameObjectBase | GameCamera;
     if (GameObjectManager.isNewableGameObject(object)) {
       item = this.#createGameObject(object, options);
     } else {
@@ -69,7 +69,7 @@ export class SceneManager {
     return item as T;
   }
 
-  #createGameObject(object: Newable<GameObject>, options?: GameObjectInitOptions) {
+  #createGameObject(object: Newable<GameObjectBase>, options?: GameObjectInitOptions) {
     const item = this.gameObjectManager.instantiate(object);
 
     // Set the position and rotation if provided. Otherwise use the defaults.
@@ -92,7 +92,7 @@ export class SceneManager {
       }
 
       if (typeof this.camera.main === 'undefined') {
-        this.camera.main = item;
+        // this.camera.main = item;
         // this.camera.activeCamera = item;
         this.camera.setActiveCamera(item);
       }

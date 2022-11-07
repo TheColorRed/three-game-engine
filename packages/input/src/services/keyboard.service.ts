@@ -1,4 +1,4 @@
-import { GameConfig, GameObject, GameObjectManager, Injectable, Injector, OnDestroy } from '@engine/core';
+import { GameConfig, GameObjectAndComponentMethodInfo, GameObjectManager, Injectable, Injector, OnDestroy } from '@engine/core';
 import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, filter, from, fromEvent, Subscription, switchMap, tap } from 'rxjs';
 import { Key } from '../enums';
@@ -58,7 +58,7 @@ export class Keyboard implements OnDestroy {
     auditTime(1),
     switchMap(() => this.keyState.entries()),
     filter(([, state]) => state === 'press'),
-    // tap(([key, state]) => console.log('p', key, state.state)),
+    // tap(([key, state]) => console.log('p', key, state)),
     tap(([key]) => this.triggerKey(key))
   );
 
@@ -92,13 +92,17 @@ export class Keyboard implements OnDestroy {
 
   triggerKey(key: Key) {
     for (let obj of this.gom.gameObjects) {
-      for (let method of obj.methods || []) {
-        this.execKeyboardEvent(key, obj, method);
+      const methods = obj.getMethodList();
+      for (let method of methods || []) {
+        for (let prop of method.props) {
+          this.execKeyboardEvent(key, method, prop);
+        }
       }
     }
   }
 
-  private execKeyboardEvent(key: Key, obj: GameObject & { [key: string]: any; }, method: string) {
+  private execKeyboardEvent(key: Key, obj: GameObjectAndComponentMethodInfo, method: string) {
+    // private execKeyboardEvent(key: Key, obj: GameObjectBase & { [key: string]: any; }, method: string) {
     const state = this.keyState.get(key);
     if (typeof state === 'undefined') return;
     const keyToken = state === 'down' ? TOKEN_KEYDOWN :
@@ -106,21 +110,16 @@ export class Keyboard implements OnDestroy {
         state === 'press' ? TOKEN_KEYPRESS :
           undefined;
 
-    const i = Reflect.getMetadata(keyToken, obj.target.prototype, method) as Key[];
-    if (Array.isArray(i) && i.includes(key) && typeof obj.instance[method] === 'function') {
-      obj.instance[method]();
+    const i = Reflect.getMetadata(keyToken, obj.prototype, method) as Key[];
+    if (Array.isArray(i) && i.includes(this.getKey(key)) && typeof obj.instance[method] === 'function') {
+      obj.instance[method](key);
     }
-
-    // Reflection.call<Key>(
-    //   action => typeof obj[method] === 'function' &&
-    //     this.getKey(action)?.toString().toLocaleLowerCase() === key?.toString().toLocaleLowerCase(),
-    //   keyToken ?? '', obj, method
-    // );
   }
 
   private getKey(e: KeyboardEvent | Key) {
     const v = e instanceof KeyboardEvent ? e.code : e;
     const indexOfS = Object.values(Key).indexOf(v as unknown as Key);
-    return Object.keys(Key)[indexOfS] as Key;
+    return Key[v as keyof typeof Key] ??
+      Object.keys(Key)[indexOfS] as Key;
   }
 }

@@ -1,4 +1,4 @@
-import { GameObject, GameObjectRef, GAME_OBJECT_CHILDREN, Injectable, ObjectList, Three, Vector2, Vector3 } from '@engine/core';
+import { GameObjectBase, GameObjectRef, GAME_OBJECT_CHILDREN, Injectable, ObjectList, Three, Vector2, Vector3 } from '@engine/core';
 
 export enum Direction {
   North, South, East, West,
@@ -8,14 +8,10 @@ export enum Direction {
 
 @Injectable()
 export class Transform {
-
-  get position() {
-    return this.gameObject.reference.position;
-  }
-
-  private get object3d() {
-    return this.gameObject.reference.object3d as Three.Object3D;
-  }
+  /** The current position of the game object. */
+  get position() { return this.gameObject.reference.position; }
+  /** A reference to the threejs game object. */
+  private get object3d() { return this.gameObject.reference.object3d as Three.Object3D; }
 
   constructor(
     private readonly gameObject: GameObjectRef
@@ -24,14 +20,14 @@ export class Transform {
    * Sets the object as a child to another object.
    * @param parent The parent object.
    */
-  setParent(parent: GameObject) {
+  setParent(parent: GameObjectBase) {
     parent.object3d?.add(this.object3d);
   }
   /**
    * Adds an item as a child of the current object.
    * @param child The item to add as a child.
    */
-  addChild(child: GameObject) {
+  addChild(child: GameObjectBase) {
     if (!child.object3d) return;
     const ref = this.gameObject.reference;
 
@@ -92,10 +88,17 @@ export class Transform {
     }
   }
   /**
-   * Moves the object back to where it was first created.
+   * Moves the object to where it was first created.
    */
   jumpToStart() {
     const start = new Vector3(this.gameObject.reference.startPosition);
     this.gameObject.reference.position = start;
+  }
+  /**
+   * Moves the object to the specified position.
+   * @param position The position to move to.
+   */
+  jumpToPosition(position: Vector3) {
+    this.gameObject.reference.position = position;
   }
 }

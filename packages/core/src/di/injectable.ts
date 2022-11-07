@@ -1,5 +1,5 @@
 import { TOKEN_INJECTABLE } from '../tokens/tokens';
-import { Newable } from './types';
+import { Newable } from '../types';
 
 export interface InjectableOptions {
   providedIn: 'game' | 'local';

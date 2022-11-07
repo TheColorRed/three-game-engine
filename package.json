@@ -6,15 +6,16 @@
   },
   "workspaces": [
     "test",
+    "packages/animation",
     "packages/core",
     "packages/input",
     "packages/objects",
+    "packages/particles",
     "packages/physics",
-    "packages/physics2d",
-    "packages/particles"
+    "packages/physics2d"
   ],
   "devDependencies": {
-    "typescript": "^4.9.1-beta",
+    "typescript": "^4.9.2-rc",
     "webidl2ts": "^1.0.4"
   }
 }

@@ -13,10 +13,16 @@ export class Smoke { }
   texture: fire,
   // duration: 0.15,
   // sizeOverLifetime: QuadraticBezierCurve.arch(Vector2.zero, new Vector2(10, 0.5)),
-  sizeOverLifetime: [1, 2],
-  lifetime: 3,// new Range(1, 2),
+  particle: {
+    lifetime: 3,// new Range(1, 2),
+    size: {
+      sizeOverLifetime: [1, 2],
+    },
+    speed: {
+      speedOverLifetime: [Vector3.zero.sub(2), Vector3.zero.add(2)],
+    }
+  },
   // sizeOverLifetime: Curve.arch(0, 2, 0, 1),
-  speedOverLifetime: [Vector3.zero.sub(1), Vector3.zero.add(2)],
   // speedOverLifetime: [undefined, Curve.sCurve(0, 0, 4, -2), undefined],
   subSystems: [Smoke]
 })

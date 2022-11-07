@@ -1,4 +1,4 @@
-import { GameConfig, GameObject, GameObjectManager, Injectable, Injector, OnDestroy, Vector2 } from '@engine/core';
+import { GameConfig, GameObjectBase, GameObjectManager, Injectable, Injector, OnDestroy, Vector2 } from '@engine/core';
 import { GameLoop } from '@engine/core/src/services/game-loop.service';
 import { auditTime, fromEvent, of, switchMap, tap } from 'rxjs';
 import { MouseButton } from '../enums';
@@ -86,7 +86,7 @@ export class Mouse implements OnDestroy {
     }
   }
 
-  private execMouseEvent(key: MouseButton, type: ButtonState, obj: GameObject & { [key: string]: any; }, method: string) {
+  private execMouseEvent(key: MouseButton, type: ButtonState, obj: GameObjectBase & { [key: string]: any; }, method: string) {
     const keyToken = type === 'down' ? MOUSE_DOWN :
       type === 'up' ? MOUSE_UP :
         type === 'press' ? MOUSE_PRESS :

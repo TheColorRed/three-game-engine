@@ -1,4 +1,4 @@
-import { GameObject } from './classes/game-object';
+import { GameObjectBase } from './classes/game-object';
 import { Injector } from './di/injector';
 import { GameConfig } from './services/game-config.service';
 import { SceneManager } from './services/scene-manager.service';
@@ -17,7 +17,7 @@ export class Debug {
   }
 
   static getName(value: any) {
-    if (value instanceof GameObject) {
+    if (value instanceof GameObjectBase) {
       return value.instance.constructor.name;
     }
   }

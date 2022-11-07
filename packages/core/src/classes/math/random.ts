@@ -1,12 +1,21 @@
 import seedrandom from 'seedrandom';
 
-export class Random {
+export interface Rand<T> {
+  random(): T;
+}
+
+export class Random implements Rand<number> {
   /** Reference to the pseudorandom number generator. */
   private readonly prng: seedrandom.PRNG;
 
   constructor(seed: string) {
     this.prng = seedrandom(seed);
   }
+
+  random() {
+    return this.nextDouble();
+  }
+
   /**
    * Gets the next number as a double
    */
@@ -25,8 +34,12 @@ export class Random {
    * @param max The maximum number inclusive.
    */
   static range(min: number, max: number, round = true) {
-    const number = Math.random() * (max - min + 1) + min;
-    return round ? Math.floor(number) : number;
+    if (min === max) return min;
+    const number = Math.random() * (max - min) + min;
+    return round ? Math.round(number) : number;
+  }
+  static rangeFloat(min: number, max: number) {
+    return this.range(min, max, false);
   }
   /**
    * Gets a random value from a list of items.
@@ -66,5 +79,13 @@ export class Random {
         array[randomIndex], array[currentIndex]];
     }
     return array;
+  }
+
+  static isInt(value: number) {
+    return !value.toString().includes('.');
+  }
+
+  static isFloat(value: number) {
+    return !this.isInt(value);
   }
 }

@@ -1,4 +1,4 @@
-import { Euler, GameObject, Injectable, Three, Vector2, Vector3 } from '@engine/core';
+import { Euler, GameObjectBase, Injectable, Three, Vector2, Vector3 } from '@engine/core';
 import { Body, Box, Circle, Vec2, World } from 'planck';
 import { concatMap, filter, from, tap, timer, toArray } from 'rxjs';
 import { Physics2DMaterialOptions } from '../decorators';
@@ -18,7 +18,7 @@ export class World2D {
   velocityIterations = 8;
   positionIterations = 6;
 
-  bodies: [gameObject: GameObject, rigidbody: Body][] = [];
+  bodies: [gameObject: GameObjectBase, rigidbody: Body][] = [];
 
   #worldSteps$ = timer(0, this.timeStep)
     .pipe(
@@ -42,7 +42,7 @@ export class World2D {
         ))
     );
 
-  add(gameObject: GameObject) {
+  add(gameObject: GameObjectBase) {
     const opts = Reflect.getMetadata(PHYSICS2D_RIGIDBODY, gameObject.instance.constructor) as RigidbodyOptions2D | undefined;
     if (typeof opts === 'undefined') throw new Error(`"${gameObject.name}" does not have a rigidbody.`);
     const mat = Reflect.getMetadata(PHYSICS2D_MATERIAL, opts.material || {}) as Physics2DMaterialOptions | undefined;
@@ -61,7 +61,7 @@ export class World2D {
     this.bodies.push([gameObject, body]);
   }
 
-  remove(gameObject: GameObject) {
+  remove(gameObject: GameObjectBase) {
     const idx = this.bodies.findIndex(([go]) => go === gameObject);
     if (idx > -1) {
       const [, body] = this.bodies[idx];
@@ -92,49 +92,49 @@ export class World2D {
     // this.worldSteps$.subscribe();
   }
 
-  applyForce(gameObject: GameObject, force: Vector2) {
+  applyForce(gameObject: GameObjectBase, force: Vector2) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.applyForceToCenter(Vec2(...force.toArray()));
     }
   }
 
-  applyImpulse(gameObject: GameObject, force: Vector2) {
+  applyImpulse(gameObject: GameObjectBase, force: Vector2) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.applyLinearImpulse(Vec2(...force.toArray()), Vec2(0, 0));
     }
   }
 
-  applyTorque(gameObject: GameObject, force: number) {
+  applyTorque(gameObject: GameObjectBase, force: number) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.applyTorque(force);
     }
   }
 
-  applyTorqueImpulse(gameObject: GameObject, force: number) {
+  applyTorqueImpulse(gameObject: GameObjectBase, force: number) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.applyAngularImpulse(force);
     }
   }
 
-  setVelocity(gameObject: GameObject, velocity: Vector2) {
+  setVelocity(gameObject: GameObjectBase, velocity: Vector2) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.setLinearVelocity(Vec2(...velocity.toArray()));
     }
   }
 
-  setAngularVelocity(gameObject: GameObject, velocity: number) {
+  setAngularVelocity(gameObject: GameObjectBase, velocity: number) {
     const [go, body] = this.bodies.find(i => i[0] === gameObject) ?? [];
     if (go && body) {
       body.setAngularVelocity(velocity);
     }
   }
 
-  createShape2D(options: RigidbodyOptions2D, gameObject: GameObject) {
+  createShape2D(options: RigidbodyOptions2D, gameObject: GameObjectBase) {
     const { x, y } = gameObject.position;
     var width = 0, height = 0;
     switch (options.shape?.type) {

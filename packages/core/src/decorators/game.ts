@@ -1,9 +1,9 @@
 import { GameScene } from '../classes/game-scene';
 import { Injector } from '../di/injector';
-import { Newable } from '../di/types';
 import { GameConfig, GameConfiguration } from '../services/game-config.service';
 import { Three } from '../three';
 import { GAME } from '../tokens/game-object-tokens';
+import { Newable } from '../types';
 import { GameModule } from './module';
 
 export interface Gizmos {

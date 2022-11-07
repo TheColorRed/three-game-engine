@@ -1,8 +1,8 @@
 import { forkJoin, Observable } from 'rxjs';
 import { Injector } from '../di/injector';
-import { Newable } from '../di/types';
 import { GameModuleService } from '../services/game-module.service';
 import { GAME_MODULE } from '../tokens/game-object-tokens';
+import { Newable } from '../types';
 
 export interface ModuleOptions {
   /**

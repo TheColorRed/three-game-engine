@@ -2,8 +2,8 @@ import { GameScene } from '../classes/game-scene';
 import { GameOptions, Gizmos } from '../decorators/game';
 import { GameModule } from '../decorators/module';
 import { Injectable } from '../di/injectable';
-import { Newable } from '../di/types';
 import { Three } from '../three';
+import { Newable } from '../types';
 
 export interface GameConfiguration {
   registeredScenes: Newable<GameScene>[];

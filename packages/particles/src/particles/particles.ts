@@ -1,9 +1,11 @@
-import { CameraManager, Curve, GameObject, Injector, LinearSpline, Newable, OnUpdate, Range, Three, Time, Vector3 } from '@engine/core';
+import { CameraManager, Curve, GameObjectBase, Gradient, Injector, Mathf, Newable, OnDestroy, OnUpdate, Random, Range, Space, Three, Time, Vector3 } from '@engine/core';
+import basicParticle from '../assets/basic-particle.png';
 import { ParticleSystemOptions } from '../decorators/particles';
-import fragmentShader from '../glsl/fragment-shader.glsl';
-import vertexShader from '../glsl/vertex-shader.glsl';
-import { getLifetimeSize, setLifetimeSize } from './helpers/lifetime-size';
-import { getLifetimeSpeed, setLifetimeSpeed } from './helpers/lifetime-speed';
+import fragmentShader from '../glsl/particle.frag.glsl';
+import vertexShader from '../glsl/particle.vert.glsl';
+import { getLifetimeColor, setLifetimeColor } from './helpers/color-lifetime';
+import { getLifetimeSize, setLifetimeSize } from './helpers/size-lifetime';
+import { getLifetimeSpeed, setLifetimeSpeed } from './helpers/speed-lifetime';
 
 export interface Particle {
   // velocity: Vector3;
@@ -19,18 +21,20 @@ export interface Particle {
   currentRotation: number;
 
   lifetime?: {
-    speed: [Curve, Curve, Curve] | Curve;
+    speed: [x: Curve, y: Curve, z: Curve] | Curve;
     size: Curve;
-    // rotation: [Curve, Curve, Curve] | Curve;
-    // color: Curve;
+    // rotation: [x: Curve, y: Curve, z: Curve] | Curve;
+    color: Gradient;
     // alpha: Curve;
   };
 }
 
-export class Particles extends GameObject implements OnUpdate {
+export enum MaterialBlend { None, Normal, Add, Multiply, Subtract }
+export class Particles extends GameObjectBase implements OnUpdate, OnDestroy {
 
   material: Three.ShaderMaterial;
   geometry: Three.BufferGeometry;
+  points: Three.Points;
   particles: Particle[] = [];
   camera = Injector.get(CameraManager)!;
   time = Injector.get(Time)!;
@@ -38,30 +42,38 @@ export class Particles extends GameObject implements OnUpdate {
   runTime = 0;
   startTime = Date.now();
 
+  /** The number of seconds in one full loop of the particle system. */
+  duration: number;
+  /** THe number of particles that should be emitted in on loop of the particle system. */
+  rateOverTime: number;
+  maxParticles: number;
+  space: Space;
+  lastAdd = 0;
+
+  currentLoopDuration = 0;
+  emit = false;
+
   #setLifetimeSpeed = setLifetimeSpeed;
   #getLifetimeSpeed = getLifetimeSpeed;
   #setLifetimeSize = setLifetimeSize;
   #getLifetimeSize = getLifetimeSize;
+  #getLifetimeColor = getLifetimeColor;
+  #setLifetimeColor = setLifetimeColor;
 
-  alphaSpline = new LinearSpline<number>((t, a, b) => a + t * (b - a))
-    .addPoint(0.0, 0.0)
-    .addPoint(0.1, 1.0)
-    .addPoint(0.6, 1.0)
-    .addPoint(1.0, 0.0);
-  colorSpline = new LinearSpline<Three.Color>((t, a, b) => a.clone().lerp(b, t))
-    .addPoint(0, new Three.Color(0xFFFF80))
-    .addPoint(1, new Three.Color(0xFF8080));
-  sizeSpline = new LinearSpline<number>((t, a, b) => a + t * (b - a))
-    .addPoint(0.0, 1.0)
-    .addPoint(0.5, 5.0)
-    .addPoint(1.0, 1.0);
+  emissionRate = 0.1;
 
-  constructor(target: Newable<object>, protected readonly options: ParticleSystemOptions) {
+  constructor(target: Newable<object>, protected override readonly options: ParticleSystemOptions) {
     super(target, options);
+
+    this.duration = options.duration ?? 5;
+    this.rateOverTime = options.particle?.emission?.rateOverTime ?? 10;
+    this.maxParticles = options.maxParticles ?? 100;
+    this.space = options.space ?? Space.World;
+
     this.material = new Three.ShaderMaterial({
       uniforms: {
         diffuseTexture: {
-          value: new Three.TextureLoader().load(this.options.texture)
+          value: new Three.TextureLoader().load(this.options.texture ?? basicParticle)
         },
         pointMultiplier: {
           value: window.innerHeight / (2.0 * Math.tan(0.5 * 60.0 * Math.PI / 180.0))
@@ -69,7 +81,7 @@ export class Particles extends GameObject implements OnUpdate {
       },
       vertexShader,
       fragmentShader,
-      blending: Three.NormalBlending,
+      blending: this.getBlend(this.options.blending),
       depthTest: true,
       depthWrite: false,
       transparent: true,
@@ -82,55 +94,148 @@ export class Particles extends GameObject implements OnUpdate {
     this.applyAttribute('color', [], 4, false);
     this.applyAttribute('angle', [], 1, false);
 
-    // this.object3d = CubicBezierCurve.quarterPipe(0, 0, 5, 5).drawLine();
-    // this.object3d = options.sizeOverLifetime?.drawLine();
-    this.object3d = new Three.Points(this.geometry, this.material);
+    this.points = new Three.Points(this.geometry, this.material);
+    if (this.space === Space.Local) {
+      // this.object3d = this.points;
+      this.object3d = new Three.Group();
+      this.object3d.add(this.points);
+    } else {
+      const root = this.sceneManager.rootScene;
+      root.attach(this.points);
+    }
+    // console.log(this.duration / this.rateOverTime);
   }
 
-  onUpdate(): void {
-    this.addParticles();
+  override onDestroy() {
+    const destroyed = super.onDestroy();
+    if (destroyed) {
+      this.material.dispose();
+      this.geometry.dispose();
+      this.points.parent?.remove(this.points);
+    }
+    return destroyed;
+  }
+
+  /**
+   * Manages the life of a particle per time frame.
+   */
+  override onUpdate() {
+    super.onUpdate();
+    const now = Date.now();
+
+    // If this is a static system and the particles have already been created exit the function.
+    if (this.options.static && this.particles.length > 0) return;
+
+    this.currentLoopDuration += this.time.deltaTime;
+    if (this.currentLoopDuration >= this.duration) {
+      this.currentLoopDuration = 0;
+    }
+
+    // Reduce the life of the particle by the amount of time that has passed.
+    for (let p of this.particles) {
+      p.currentLife -= this.time.deltaTime;
+    }
+    // Remove any particles that have reached their end of life.
+    this.particles = this.particles.filter(p => p.currentLife > 0.0);
+    // Update the emission rate if changes have been made to the timing.
+    this.emissionRate = this.duration / this.rateOverTime;
+
+    // Add new particles and update the existing ones.
+    if ((now - this.lastAdd) / 1000 >= this.emissionRate) {
+      this.addParticles();
+    }
     this.updateParticles();
     this.updateGeometry();
+    // console.log(this.particles.length, this.emissionRate);
   }
-
+  /**
+   * Adds particles to the particle system.
+   */
   addParticles() {
-    this.runTime = (Date.now() - this.startTime) / 1000;
-    if (this.runTime >= (this.options.duration ?? Infinity)) {
+    if (this.particles.length >= this.maxParticles) {
       return;
     }
-    this.timeElapsed += this.time.deltaTime;
-    const count = Math.floor(this.timeElapsed * 75);
-    this.timeElapsed -= count / 75;
+
+    const count = Mathf.clamp(1, 10, this.maxParticles - this.particles.length);
+    // const count = 1;
+    this.lastAdd = Date.now();
 
     for (let i = 0; i < count; i++) {
-      const lifetime = this.options.lifetime;
-      const life = lifetime instanceof Range ? lifetime.random() : lifetime ?? 1;
-      // const life = (Math.random() * 0.75 + 0.25) * 10.0;
+      const lifetime = this.options.particle?.lifetime;
+      const life = (lifetime instanceof Range ? lifetime.randomFloat : lifetime) ?? 1;
       this.particles.push({
-        currentPosition: new Three.Vector3(
-          (Math.random() * 2 - 1) * 1.0,
-          (Math.random() * 2 - 1) * 1.0,
-          (Math.random() * 2 - 1) * 1.0
-        ),
+        currentPosition: this.#createParticlePosition(),
         currentRotation: Math.random() * 2.0 * Math.PI,
-        // velocity: this.#getStartSpeed(),
-        // size: this.#getStartSize(),
         currentColor: new Three.Color(),
         currentAlpha: 0,
-        currentLife: life,
+        currentLife: !this.options.static ? life : Random.rangeFloat(0.5, 1),
         maxLife: life,
         currentSize: 0,
         currentSpeed: Vector3.zero,
         lifetime: {
           speed: this.#setLifetimeSpeed(),
-          size: this.#setLifetimeSize()
+          size: this.#setLifetimeSize(),
+          color: this.#setLifetimeColor()
         }
       });
     }
   }
+  /**
+   * Updates the particles' properties within the particle array.
+   */
+  updateParticles() {
+    for (let p of this.particles) {
+      const t = 1 - p.currentLife / p.maxLife;
 
+      p.currentSize = this.#getLifetimeSize(p, t);
+      p.currentSpeed = this.#getLifetimeSpeed(p, t);
+
+      const color = this.#getLifetimeColor(p, t);
+      p.currentAlpha = color.alpha;
+      p.currentColor = color.threeColor;
+
+      p.currentRotation += this.time.deltaTime * 0.5;
+      // if (this.options.space === Space.World) {
+      p.currentPosition.add(p.currentSpeed.three().clone().multiplyScalar(this.time.deltaTime));
+      // } else {
+      //   const pos = this.object3d.position;
+      //   p.currentPosition.add(p.currentSpeed.three().clone().multiplyScalar(this.time.deltaTime));
+      // }
+
+
+      // const drag = p.currentSpeed.three().clone();
+      // drag.multiplyScalar(this.time.deltaTime);
+      // drag.x = Math.sign(p.currentSpeed.x) * Math.min(Math.abs(drag.x), Math.abs(p.currentSpeed.x));
+      // drag.y = Math.sign(p.currentSpeed.y) * Math.min(Math.abs(drag.y), Math.abs(p.currentSpeed.y));
+      // drag.z = Math.sign(p.currentSpeed.z) * Math.min(Math.abs(drag.z), Math.abs(p.currentSpeed.z));
+      // p.currentSpeed.three().sub(drag);
+    }
+    // const camera = this.camera.activeCameras[0];
+    // if (!camera) return;
+    // this.particles.sort((a, b) => {
+    //   const d1 = camera.camera.position.distanceTo(a.currentPosition);
+    //   const d2 = camera.camera.position.distanceTo(b.currentPosition);
+
+    //   if (d1 > d2) return -1;
+    //   if (d1 < d2) return 1;
+    //   return 0;
+    // });
+  }
+  /**
+   * Updates the geometry for based on the settings of the particles' array.
+   */
   updateGeometry() {
-    const positions = this.particles.map(p => [p.currentPosition.x, p.currentPosition.y, p.currentPosition.z]).flat();
+    const positions = this.particles.map(p => {
+      if (this.space === Space.World) {
+        return [p.currentPosition.x, p.currentPosition.y, p.currentPosition.z];
+      }
+      const pos = this.object3d.position;
+      return [
+        p.currentPosition.x + pos.x,
+        p.currentPosition.y + pos.y,
+        p.currentPosition.z + pos.z
+      ];
+    }).flat();
     const sizes = this.particles.map(p => p.currentSize);
     // const colors = this.particles.map(p => [255, 255, 255, 1]).flat();
     const colors = this.particles.map(p => [p.currentColor.r, p.currentColor.g, p.currentColor.b, p.currentAlpha]).flat();
@@ -149,44 +254,59 @@ export class Particles extends GameObject implements OnUpdate {
     }
   }
 
-  updateParticles() {
-    for (let p of this.particles) {
-      p.currentLife -= this.time.deltaTime;
+  #createParticlePosition() {
+    const shape = this.options.shape;
+    // The object's current position.
+    const x = this.object3d?.position.x ?? 0,
+      y = this.object3d?.position.y ?? 0,
+      z = this.object3d?.position.z ?? 0;
+
+    if (shape?.type === 'sphere') {
+      const randomRadius = Math.random() * shape.radius;
+      const randomVec = new Three.Vector3();
+      randomVec.randomDirection();
+      const position = randomVec.multiplyScalar(randomRadius);
+      return new Three.Vector3(x, y, z).add(position);
+    } else if (shape?.type === 'box') {
+      if (shape.emitFrom === 'volume') {
+        return new Three.Vector3(
+          ((Math.random() * shape.scale.x - (shape.scale.x / 2)) * 1.0) + x,
+          ((Math.random() * shape.scale.y - (shape.scale.y / 2)) * 1.0) + y,
+          ((Math.random() * shape.scale.z - (shape.scale.z / 2)) * 1.0) + z
+        );
+      } else {
+        return new Three.Vector3(
+          (Math.random() * shape.scale.x) + x,
+          (Math.random() * shape.scale.y) + y,
+          shape.scale.z + z,
+          // (Math.random() * shape.scale.x - (shape.scale.x / 2)) * 1.0,
+          // (Math.random() * shape.scale.y - (shape.scale.y / 2)) * 1.0,
+          // (Math.random() * shape.scale.z - (shape.scale.z / 2)) * 1.0
+        );
+      }
+    } else if (shape?.type === 'cone') {
+      return new Three.Vector3(
+        ((Math.random() * shape.radius - (shape.radius / 2)) * 1.0) + x,
+        ((Math.random() * this.position.y) * 1.0) + y,
+        ((Math.random() * shape.radius - (shape.radius / 2)) * 1.0) + z
+      );
     }
-
-    this.particles = this.particles.filter(p => p.currentLife > 0.0);
-    for (let p of this.particles) {
-      const t = 1 - p.currentLife / p.maxLife;
-
-      p.currentSize = this.#getLifetimeSize(p, t);
-      p.currentSpeed = this.#getLifetimeSpeed(p, t);
-
-      p.currentRotation += this.time.deltaTime * 0.5;
-      p.currentAlpha = this.alphaSpline.get(t);
-      p.currentColor.copy(this.colorSpline.get(t));
-
-      p.currentPosition.add(p.currentSpeed.three().clone().multiplyScalar(this.time.deltaTime));
-
-      const drag = p.currentSpeed.three().clone();
-      drag.multiplyScalar(this.time.deltaTime);
-      drag.x = Math.sign(p.currentSpeed.x) * Math.min(Math.abs(drag.x), Math.abs(p.currentSpeed.x));
-      drag.y = Math.sign(p.currentSpeed.y) * Math.min(Math.abs(drag.y), Math.abs(p.currentSpeed.y));
-      drag.z = Math.sign(p.currentSpeed.z) * Math.min(Math.abs(drag.z), Math.abs(p.currentSpeed.z));
-      p.currentSpeed.three().sub(drag);
-    }
-    // const camera = this.camera.activeCamera?.camera;
-    // if (!camera) return;
-    // this.particles.sort((a, b) => {
-    //   const d1 = camera.position.distanceTo(a.position);
-    //   const d2 = camera.position.distanceTo(b.position);
-
-    //   if (d1 > d2) return -1;
-    //   if (d1 < d2) return 1;
-    //   return 0;
-    // });
+    return new Three.Vector3(0, 0, 0);
   }
 
-  isCurveArray(items: any): items is [Curve?, Curve?, Curve?] {
+  getBlend(blend?: MaterialBlend) {
+    switch (blend) {
+      case MaterialBlend.None: return Three.NoBlending;
+      case MaterialBlend.Add: return Three.AdditiveBlending;
+      case MaterialBlend.Multiply: return Three.MultiplyBlending;
+      case MaterialBlend.Subtract: return Three.SubtractiveBlending;
+      case MaterialBlend.Normal:
+      default:
+        return Three.NormalBlending;
+    }
+  }
+
+  isCurveArray(items: any): items is Curve[] {
     return Array.isArray(items) && items.every((i: any) => i instanceof Curve || typeof i === 'undefined');
   }
 
@@ -194,7 +314,7 @@ export class Particles extends GameObject implements OnUpdate {
     return Array.isArray(items) && items.every((i: any) => i instanceof Vector3 || typeof i === 'undefined');
   }
 
-  isNumberArray(items: any): items is [number, number, number, number, number, number] | [number, number] {
+  isNumberArray(items: any): items is number[] {
     return Array.isArray(items) && items.every((i: any) => typeof i === 'number');
   }
 }

@@ -3,13 +3,13 @@ import { Debug } from './debug';
 import { Game } from './decorators/game';
 import { GameModule } from './decorators/module';
 import { Injector } from './di/injector';
-import { Newable } from './di/types';
 import { CameraManager } from './services/camera-manager.service';
 import { GameConfig } from './services/game-config.service';
 import { GameLoop } from './services/game-loop.service';
 import { GameObjectManager } from './services/game-object-manager.service';
 import { SceneManager } from './services/scene-manager.service';
 import { Three } from './three';
+import { Newable } from './types';
 
 export class Engine {
 

@@ -1,4 +1,4 @@
-import { Color, Curve, Gradient, Line, OnUpdate, Range, Time, WeightedRandom } from '@engine/core';
+import { Color, Curve, GameObjectRef, Gradient, Line, Once, OnUpdate, Range, Time, WeightedRandom } from '@engine/core';
 import { Transform } from '@engine/objects';
 import { MaterialBlend, ParticleSystem } from '@engine/particles';
 import { MoveComponent } from '../../components/move.component';
@@ -7,7 +7,7 @@ import { MoveComponent } from '../../components/move.component';
 @ParticleSystem({
   // static: true
   // texture: fire,
-  components: [MoveComponent],
+  // components: [MoveComponent],
   // shape: { type: 'box', scale: new Vector3(1, 0, 0), emitFrom: 'volume' },
   shape: { type: 'sphere', radius: 3, emitFrom: 'volume' },
   maxParticles: 1000,
@@ -53,11 +53,18 @@ export class Space implements OnUpdate {
 
   constructor(
     private readonly transform: Transform,
-    private readonly time: Time
+    private readonly time: Time,
+    private readonly ref: GameObjectRef,
   ) { }
 
-  onStart() {
+  @Once(0)
+  delayed() {
+    console.log('delayed');
+    console.log(this.ref.addComponent(MoveComponent));
     // console.log(this.transform);
+    // console.log(this.ref.components);
+    // const move = this.ref.getComponents(MoveComponent);
+    // console.log(move);
   }
 
   onUpdate() {

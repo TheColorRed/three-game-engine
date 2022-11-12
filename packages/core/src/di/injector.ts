@@ -64,11 +64,9 @@ export class Injector<T> {
   }
 
   getAll<T>(item?: Type<T>): T[] {
-    if (typeof item === 'undefined') {
-      return this.injections;
-    }
+    if (typeof item === 'undefined') return this.injections;
     const found: T[] = [];
-    function find(instance: any) {
+    const find = (instance: any) => {
       if (instance instanceof item!) found.push(instance);
       const keys = Object.entries<object>(instance);
       for (let [key, obj] of keys) {
@@ -77,7 +75,7 @@ export class Injector<T> {
           if (isInjectable) find(obj);
         }
       }
-    }
+    };
     this.injections.forEach(i => find(i));
     return found;
   }

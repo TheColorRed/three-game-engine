@@ -1,0 +1,21 @@
+.project-sections {
+  border-bottom: solid 1px var(--colors-primary-border);
+  background-color: var(--colors-primary-background);
+  > div {
+    padding: 8px 20px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    &:hover {
+      background-color: var(--colors-primary-background-hover);
+    }
+    &:not(:last-child) {
+      border-right: solid 1px var(--colors-primary-border);
+    }
+
+    span {
+      color: var(--colors-primary-font-light);
+      margin-left: 10px;
+    }
+  }
+}

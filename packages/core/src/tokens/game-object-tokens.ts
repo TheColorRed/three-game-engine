@@ -1,5 +1,6 @@
 export const GAME = 'game';
 export const GAME_OBJECT = 'game-object';
+export const GAME_OBJECT_COMPONENT = 'game-object-component';
 export const GAME_CAMERA = 'game-camera';
 export const GAME_LIGHT = 'game-light';
 export const GAME_MODULE = 'game-module';

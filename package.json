@@ -2,10 +2,12 @@
   "name": "game-engine",
   "version": "1.0.0",
   "scripts": {
-    "start": "npm run start --workspace=test"
+    "start": "npm run start --workspace=test",
+    "start:editor": "npm run start -w editor"
   },
   "workspaces": [
     "test",
+    "editor",
     "packages/animation",
     "packages/core",
     "packages/input",

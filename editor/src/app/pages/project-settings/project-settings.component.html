@@ -1,0 +1,24 @@
+<div fxLayout="row" class="project-settings">
+  <div fxFlex="250px">
+    <ui-nav>
+      <a ui-nav-item routerLink="./authoring">
+        <fa-icon size="lg" [fixedWidth]="true" [icon]="authoringIcon"></fa-icon> Authoring
+      </a>
+      <a ui-nav-item routerLink="./branding">
+        <fa-icon size="lg" [fixedWidth]="true" [icon]="brandingIcon"></fa-icon> Branding
+      </a>
+      <a ui-nav-item routerLink="./modules">
+        <fa-icon size="lg" [fixedWidth]="true" [icon]="modulesIcon"></fa-icon> Modules
+      </a>
+      <a ui-nav-item routerLink="./rendering">
+        <fa-icon size="lg" [fixedWidth]="true" [icon]="renderingIcon"></fa-icon> Rendering
+      </a>
+      <a ui-nav-item routerLink="./export">
+        <fa-icon size="lg" [fixedWidth]="true" [icon]="exportIcon"></fa-icon> Export
+      </a>
+    </ui-nav>
+  </div>
+  <div fxFlex="0 1" class="settings-output">
+    <router-outlet></router-outlet>
+  </div>
+</div>

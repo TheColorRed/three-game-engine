@@ -1,0 +1,8 @@
+<div class="tooltip">
+  <ng-container *ngIf="message; then inputMessage; else content"></ng-container>
+</div>
+
+<ng-template #content>
+  <ng-container [ngTemplateOutlet]="template ?? null"></ng-container>
+</ng-template>
+<ng-template #inputMessage>{{ message }}</ng-template>

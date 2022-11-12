@@ -1,4 +1,4 @@
-import { CameraManager, Component, OnUpdate, Time, Vector3 } from '@engine/core';
+import { CameraManager, Component, GameObjectRef, OnUpdate, Time, Vector3 } from '@engine/core';
 import { Key, Keyboard, Mouse } from '@engine/input';
 import { Transform } from '@engine/objects';
 
@@ -10,8 +10,13 @@ export class MoveComponent implements OnUpdate {
     private readonly keyboard: Keyboard,
     private readonly mouse: Mouse,
     private readonly camera: CameraManager,
-    private readonly time: Time
+    private readonly time: Time,
+    private readonly ref: GameObjectRef
   ) { }
+
+  onStart() {
+    console.log('start');
+  }
 
   // @KeyPress(Key.Left, Key.Right, Key.Up, Key.Down)
   onUpdate() {

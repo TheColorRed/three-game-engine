@@ -136,9 +136,7 @@ export abstract class GameObjectBase<T extends Newable<T> = any> implements OnSt
     forkJoin([this.#addPhysics3D(), this.#addPhysics2D()]).pipe(
       tap(() => {
         typeof this.instance.onStart === 'function' && this.instance.onStart();
-        for (let comp of this.components) {
-          typeof comp.instance.onStart === 'function' && comp.instance.onStart();
-        }
+        this.#startComponents();
         this.isActive = true;
         this.#invokeRepeat();
         this.#invokeOnce();
@@ -152,6 +150,7 @@ export abstract class GameObjectBase<T extends Newable<T> = any> implements OnSt
    * Run the GameObject's updates.
    */
   onUpdate() {
+    this.#startComponents();
     if (this.isActive === false || this.started === false) return;
     typeof this.instance.onUpdate === 'function' && this.instance.onUpdate();
     for (let comp of this.components) {
@@ -184,6 +183,23 @@ export abstract class GameObjectBase<T extends Newable<T> = any> implements OnSt
       return true;
     }
     return false;
+  }
+
+  addComponent(comp: Newable<object>) {
+    const injector = Injector.create(comp);
+    const component = injector.get(comp) as GameComponentBase;
+    this.#setGameObjectRefs(injector);
+    this.components.push(component);
+    return component.instance;
+  }
+
+  #startComponents() {
+    for (let comp of this.components) {
+      if (comp.started === false) {
+        comp.started = true;
+        typeof comp.instance.onStart === 'function' && comp.instance.onStart();
+      }
+    }
   }
 
   #destroyLocalService(injector: Injector<any>) {
@@ -252,11 +268,9 @@ export abstract class GameObjectBase<T extends Newable<T> = any> implements OnSt
       const instance = method.instance;
       method.props.forEach(prop => {
         const delay = Reflect.getMetadata(TIME_ONCE, prototype, prop);
-        Reflection.call(
-          v => typeof instance[prop] === 'function',
-          () => { timer(delay * 1000).subscribe(() => instance[prop]()); },
-          TIME_ONCE, prototype, prop
-        );
+        if (typeof delay === 'number' && typeof instance[prop] === 'function') {
+          timer(delay * 1000).subscribe(() => instance[prop]());
+        }
       });
     });
   }

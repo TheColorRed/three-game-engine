@@ -1,0 +1,19 @@
+:host {
+  text-decoration: none;
+  color: var(--colors-primary-font);
+  .ui-nav-item {
+    width: inherit;
+    padding: 10px 20px;
+    border: solid 1px var(--colors-primary-border);
+    border-bottom: 0;
+    background-color: var(--colors-main-background-light);
+    cursor: pointer;
+    &:hover {
+      filter: brightness(85%);
+    }
+    &.active {
+      // background-color: var(--colors-primary-foreground-hover);
+      color: var(--colors-primary-foreground);
+    }
+  }
+}

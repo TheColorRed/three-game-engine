@@ -17,7 +17,7 @@ export interface GameObjectOptions {
 }
 
 export function GameObject(options?: GameObjectOptions) {
-  return function <T extends { new(...args: any[]): any; }>(target: T): any {
+  return function (target: Newable<object>): any {
     Reflect.defineMetadata(GAME_OBJECT, options, target);
     return class GameObjectComponent extends GameObjectBase {
       constructor() {

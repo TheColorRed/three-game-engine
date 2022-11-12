@@ -1,0 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700&display=swap");
+@import "@angular/cdk/overlay-prebuilt.css";
+
+:root {
+  --colors-primary-border: rgba(255, 0, 55, 0.2);
+  --colors-primary-background: rgba(255, 0, 55, 0.1);
+  --colors-primary-background-hover: rgba(255, 0, 55, 0.2);
+  --colors-primary-foreground: rgba(255, 0, 117, 1);
+  --colors-primary-font: rgba(255, 255, 255, 0.8);
+  --colors-primary-font-light: rgba(255, 255, 255, 0.5);
+  --colors-secondary-font: rgba(255, 0, 55, 0.8);
+  --colors-dark-background: rgba(0, 0, 0, 1);
+  --colors-main-background: #121212;
+  --colors-main-background-light: #1d1d1d;
+
+  --radius-m: 5px;
+  --radius-s: 3px;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  background-color: var(--colors-main-background);
+  font-family: "Montserrat", sans-serif;
+  color: var(--colors-primary-font);
+  &:not(input):not(textarea) {
+    user-select: none;
+  }
+}
+* {
+  box-sizing: border-box;
+}

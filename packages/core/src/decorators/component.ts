@@ -1,9 +1,12 @@
 import { Injector } from '../di/injector';
+import { GAME_OBJECT_COMPONENT } from '../tokens/game-object-tokens';
 import { Newable } from '../types';
 
 export class GameComponentBase {
   instance: any;
   injector: Injector<any>;
+
+  started = false;
 
   constructor(readonly target: Newable<object>) {
     this.injector = Injector.create(target);
@@ -17,10 +20,12 @@ export class GameComponentBase {
 
 export function Component() {
   return function (target: Newable<object>): any {
-    return class GameComponent extends GameComponentBase {
+    const c = class GameComponent extends GameComponentBase {
       constructor() {
         super(target);
       }
     };
+    Reflect.defineMetadata(GAME_OBJECT_COMPONENT, target, c);
+    return c;
   };
 }

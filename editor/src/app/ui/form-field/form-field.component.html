@@ -1,8 +1,13 @@
-<div class="ui-form-field">
-  <div>
+<div class="ui-form-field flex flex-col gap-[var(--spacing-s)]">
+  <div class="label flex-grow" (click)="input.querySelector('input')?.focus()">
     <ng-content select="[ui-label]"></ng-content>
   </div>
-  <div>
-    <ng-content></ng-content>
+  <div class="flex flex-row gap-[var(--spacing-m)]">
+    <div class="flex-grow" #input>
+      <ng-content></ng-content>
+    </div>
+    <div *ngIf="actions">
+      <ng-content select="[ui-form-field-actions]"></ng-content>
+    </div>
   </div>
 </div>

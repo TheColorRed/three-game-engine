@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Input",
+    "description": "Adds input for usage with a mouse and keyboard.",
+    "moduleName": "@engine/input",
+    "category": "input"
+  },
+  {
+    "name": "Touch",
+    "description": "Adds input for usage with a users touch from touch screen supported devices.",
+    "moduleName": "@engine/touch",
+    "category": "input"
+  }
+]

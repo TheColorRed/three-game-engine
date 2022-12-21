@@ -1,0 +1,9 @@
+<div class="dialog-container flex flex-col gap-[var(--spacing-xl)]">
+  <div>
+    <ng-template dialog-outlet></ng-template>
+  </div>
+  <div *ngIf="confirm || reject" class="flex flex-row place-content-end gap-[var(--spacing-m)]">
+    <button ui-button [disabled]="!valid" *ngIf="confirm" (click)="close()">{{ confirm }}</button>
+    <button ui-button *ngIf="reject" (click)="close(false)">{{ reject }}</button>
+  </div>
+</div>

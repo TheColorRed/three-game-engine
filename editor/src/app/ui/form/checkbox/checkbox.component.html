@@ -1,0 +1,18 @@
+<label
+  class="flex flex-row place-content-start place-items-center gap-[var(--spacing-m)]"
+  [ngClass]="{ checked: input.checked }"
+>
+  <span class="check-mark flex flex-row place-content-center place-items-center">
+    <input type="checkbox" #input [(ngModel)]="value" />
+    <fa-icon
+      [ngClass]="{ invisible: !input.checked }"
+      class="flex"
+      [fixedWidth]="true"
+      size="xs"
+      [icon]="checkIcon"
+    ></fa-icon>
+  </span>
+  <span>
+    <ng-content></ng-content>
+  </span>
+</label>

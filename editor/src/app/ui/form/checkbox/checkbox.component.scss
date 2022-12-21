@@ -1,0 +1,24 @@
+:host {
+  display: inline-block;
+
+  input[type="checkbox"] {
+    display: none;
+  }
+
+  label {
+    height: 20px;
+    cursor: pointer;
+    .check-mark {
+      border: solid 1px var(--colors-primary-border-dark);
+
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-s);
+    }
+    &.checked {
+      .check-mark {
+        border: solid 1px var(--colors-secondary-border);
+      }
+    }
+  }
+}

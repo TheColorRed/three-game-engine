@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { faQuestionCircle } from '@fortawesome/free-regular-svg-icons';
 import {
   faAlien8bit,
   faBars,
@@ -18,6 +19,7 @@ import {
   styleUrls: ['./project-nav.component.scss'],
 })
 export class ProjectNavComponent {
+  @Output() openMenu = new EventEmitter<void>();
   menuIcon = faBars;
   saveIcon = faSave;
   resourcesIcon = faFiles;
@@ -28,4 +30,5 @@ export class ProjectNavComponent {
   fxIcon = faSparkles;
   soundsIcon = faWaveformLines;
   scenesIcon = faClapperboard;
+  helpIcon = faQuestionCircle;
 }

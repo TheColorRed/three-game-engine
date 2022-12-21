@@ -1,1 +1,42 @@
-<a routerLink="/project">Project</a>
+<div class="flex flex-col w-full h-full">
+  <div class="welcome-breadcrumbs flex-row place-content-start place-items-center">
+    <ui-breadcrumbs *ngIf="routeChanged$ | async">
+      <a ui-breadcrumb routerLink="/welcome">Welcome</a>
+      <a ui-breadcrumb *ngIf="breadcrumb.length > 0">{{ breadcrumb }}</a>
+    </ui-breadcrumbs>
+  </div>
+
+  <div class="flex place-content-center place-items-start">
+    <div class="welcome-content flex flex-row">
+      <div class="flex w-[300px]">
+        <ui-nav>
+          <a
+            ui-nav-item
+            [icon]="welcomeIcon"
+            routerLink="/welcome"
+            [routerLinkActiveOptions]="{ exact: true }"
+            routerLinkActive="active"
+          >
+            Welcome
+          </a>
+          <a
+            ui-nav-item
+            *ngIf="(currentProject$ | async)?.length ?? 0 > 0"
+            [icon]="projectIcon"
+            routerLink="/project/settings"
+          >
+            Current Project
+          </a>
+          <a ui-nav-item [icon]="projectsIcon" routerLink="./projects" routerLinkActive="active">Projects</a>
+          <a ui-nav-item [icon]="storeIcon">Asset Store</a>
+          <a ui-nav-item [icon]="editorSettingsIcon" routerLink="./settings" routerLinkActive="active">
+            Editor Settings
+          </a>
+        </ui-nav>
+      </div>
+      <div class="welcome-output flex-grow">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+:host {
+  display: block;
+  border-top: solid 1px var(--colors-primary-border);
+  padding: 15px 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--colors-main-background-light-hover);
+  }
+}

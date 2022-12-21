@@ -1,0 +1,21 @@
+:host {
+  text-decoration: none;
+  .text {
+    color: var(--colors-secondary-font);
+    &.last {
+      color: var(--colors-primary-font);
+      font-weight: bold;
+      cursor: default;
+      pointer-events: none;
+    }
+  }
+  .icon {
+    cursor: default;
+    color: var(--colors-primary-font);
+    padding: 0 10px;
+
+    &.last {
+      display: none;
+    }
+  }
+}

@@ -16,12 +16,24 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2020",
-    "module": "es2020",
+    "target": "esnext",
+    "module": "esnext",
     "lib": [
-      "es2020",
-      "dom"
-    ]
+      "esnext",
+      "dom",
+    ],
+    "paths": {
+      "@angular/*": [
+        "../node_modules/@angular/*"
+      ],
+      "@ui/*": [
+        "./src/app/ui/*"
+      ],
+      "path": [
+        "../node_modules/path-browserify"
+      ]
+    },
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -1,11 +1,24 @@
 {
-  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.importModuleSpecifier": "shortest",
   "cSpell.words": [
     "ammojs",
+    "Collada",
+    "dragbar",
     "glsl",
     "glslify",
+    "GLTF",
+    "prismjs",
     "seedrandom",
+    "tailwindcss",
     "threejs"
+  ],
+  "editor.rulers": [
+    120
+  ],
+  "css.styleSheets": [
+    "./node_modules/tailwindcss/base.css",
+    "./node_modules/tailwindcss/components.css",
+    "./node_modules/tailwindcss/utilities.css",
   ],
   "typescript.tsdk": "node_modules\\typescript\\lib",
   // "typescript.preferences.autoImportFileExcludePatterns": [

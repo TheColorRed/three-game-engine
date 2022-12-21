@@ -1,3 +1,12 @@
 <div class="ui-nav-item" routerLinkActive="active">
-  <ng-content></ng-content>
+  <div class="flex flex-row gap-[var(--spacing-m)] place-content-start place-items-center">
+    <div>
+      <ng-container *ngIf="icon" ngProjectAs="fa-icon">
+        <fa-icon [fixedWidth]="true" [icon]="icon"></fa-icon>
+      </ng-container>
+    </div>
+    <div class="content">
+      <ng-content></ng-content>
+    </div>
+  </div>
 </div>

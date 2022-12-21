@@ -1,0 +1,11 @@
+<ui-form-field *ngIf="home$ | async">
+  <label ui-label tooltip="The default location where new projects get created." [tooltip-width]="300">
+    Default Project Location
+  </label>
+  <input ui-input [(ngModel)]="home" (ngModelChange)="updatePath()" />
+  <div ui-form-field-actions>
+    <button ui-button-fab (click)="selectFolder()">
+      <fa-icon [icon]="browseFolderIcon"></fa-icon>
+    </button>
+  </div>
+</ui-form-field>

@@ -1,0 +1,21 @@
+.project-settings {
+  // padding: 2rem;
+  max-height: calc(100vh - 40px);
+  .active {
+    .content {
+      color: var(--colors-secondary-font);
+    }
+  }
+  .settings-nav ::ng-deep {
+    .ui-nav {
+      border-right: 0;
+    }
+  }
+  .settings-output {
+    padding: 1rem;
+    border: solid 1px var(--colors-primary-border);
+    background-color: var(--colors-main-background-light);
+    overflow: auto;
+    height: inherit;
+  }
+}

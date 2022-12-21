@@ -1,0 +1,14 @@
+:host {
+  height: 100vh;
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  z-index: 1000;
+  min-width: 400px;
+  background-color: var(--colors-main-background-light);
+  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.2);
+  padding: var(--spacing-l);
+  h2 {
+    margin: 0;
+  }
+}

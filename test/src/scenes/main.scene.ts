@@ -4,6 +4,7 @@ import { MainLight } from '../prefabs/main-light.prefab';
 import { Space } from '../prefabs/particles/space.prefab';
 
 @Scene({
-  hierarchy: [MainCamera, MainLight, Space]
+  name: 'Main',
+  hierarchy: [MainCamera, MainLight, Space],
 })
-export class MainScene { }
+export class MainScene {}

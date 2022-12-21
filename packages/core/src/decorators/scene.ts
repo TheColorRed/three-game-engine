@@ -7,10 +7,11 @@ import { Newable, Type } from '../types';
 export interface SceneOptions {
   hierarchy: Newable<any>[];
   cameras?: Type<GameCamera>[];
+  name: string;
 }
 
 export function Scene(options?: SceneOptions) {
-  return (target: Newable<object>) => {
+  return (target: Newable<object>): any => {
     return class GameSceneComponent extends GameScene<object> {
       constructor() {
         super(target, options);

@@ -1,0 +1,20 @@
+<div class="flex flex-col w-[400px]" *ngIf="manifest$ | async as manifest">
+  <div class="flex flex-col gap-[var(--spacing-l)]">
+    <ui-form-field>
+      <label ui-label>Game Name</label>
+      <input ui-input [(ngModel)]="manifest.name" (ngModelChange)="inputChanged(manifest)" />
+    </ui-form-field>
+    <ui-form-field>
+      <label ui-label>Developer Name</label>
+      <input ui-input [(ngModel)]="manifest.developer" (ngModelChange)="inputChanged(manifest)" />
+    </ui-form-field>
+    <ui-form-field>
+      <label ui-label>Homepage</label>
+      <input ui-input [(ngModel)]="manifest.homepage" (ngModelChange)="inputChanged(manifest)" />
+    </ui-form-field>
+    <ui-form-field>
+      <label ui-label>Version</label>
+      <input ui-input pattern="\d+\.\d+\.\d+" [(ngModel)]="manifest.version" (ngModelChange)="inputChanged(manifest)" />
+    </ui-form-field>
+  </div>
+</div>

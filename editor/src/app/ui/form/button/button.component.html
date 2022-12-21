@@ -1,0 +1,22 @@
+<!-- Fab Button -->
+<ng-container *ngIf="isFab">
+  <ng-container *ngTemplateOutlet="icon"></ng-container>
+</ng-container>
+
+<ng-container *ngIf="isIcon">
+  <ng-container *ngTemplateOutlet="icon"></ng-container>
+</ng-container>
+
+<ng-container *ngIf="isButton">
+  <div class="flex flex-row gap-[var(--spacing-m)]">
+    <div *ngIf="buttonIcon">
+      <ng-container *ngTemplateOutlet="icon"></ng-container>
+    </div>
+    <div>
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #content><ng-content></ng-content></ng-template>
+<ng-template #icon><ng-content select="fa-icon"></ng-content></ng-template>

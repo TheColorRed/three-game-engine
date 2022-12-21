@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Android",
+    "description": "Adds build support for Android devices.",
+    "moduleName": "@engine/android",
+    "category": "build"
+  },
+  {
+    "name": "iOS",
+    "description": "Adds build support for Apple mobile devices.",
+    "moduleName": "@engine/ios",
+    "category": "build"
+  },
+  {
+    "name": "Windows",
+    "description": "Adds build support for Windows desktop/Laptop computers.",
+    "moduleName": "@engine/windows",
+    "category": "build"
+  },
+  {
+    "name": "Linux",
+    "description": "Adds build support for Linux desktop/Laptop computers.",
+    "moduleName": "@engine/linux",
+    "category": "build"
+  },
+  {
+    "name": "MacOS",
+    "description": "Adds build support for MacOS desktop/Laptop computers.",
+    "moduleName": "@engine/macos",
+    "category": "build"
+  }
+]

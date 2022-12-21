@@ -1,0 +1,14 @@
+<div class="project-settings flex flex-row">
+  <div class="w-[300px] shrink-0">
+    <ui-nav class="settings-nav">
+      <a ui-nav-item [icon]="authoringIcon" routerLink="./authoring" routerLinkActive="active">Authoring</a>
+      <a ui-nav-item [icon]="brandingIcon" routerLink="./branding" routerLinkActive="active">Branding</a>
+      <a ui-nav-item [icon]="modulesIcon" routerLink="./modules" routerLinkActive="active">Modules</a>
+      <a ui-nav-item [icon]="renderingIcon" routerLink="./rendering" routerLinkActive="active">Rendering</a>
+      <a ui-nav-item [icon]="authoringIcon" routerLink="./export" routerLinkActive="active">Export</a>
+    </ui-nav>
+  </div>
+  <div class="settings-output flex-grow">
+    <router-outlet></router-outlet>
+  </div>
+</div>

@@ -1,0 +1,64 @@
+.module-search {
+  position: sticky;
+  top: -1rem;
+  z-index: 1;
+  padding: 1rem 1rem;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  margin-top: -2rem;
+  background-color: var(--colors-main-background-light);
+}
+
+h2 {
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-m);
+}
+
+.active-modules-header {
+  cursor: pointer;
+  h2 {
+    margin: 0;
+  }
+  margin-bottom: var(--spacing-m);
+  .header-state-icon {
+    transition: transform 0.3s ease-in-out;
+    transform: rotateZ(0deg);
+    &.close {
+      transform: rotateZ(540deg);
+    }
+  }
+}
+
+.active-modules {
+  height: 0;
+  transition: height 0.3s ease-in-out;
+  overflow: clip;
+  overflow-clip-margin: 10px;
+  &.hide {
+    height: 0;
+  }
+}
+
+.card {
+  margin-top: 12px;
+  cursor: pointer;
+  transition: transform 0.1s ease-in-out, border 0.1s ease-in-out;
+  border: solid 1px var(--colors-primary-border);
+  &:hover {
+    transform: scale(1.07);
+    border: solid 1px var(--colors-secondary-border);
+  }
+  &.required {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .card-content {
+    letter-spacing: 1px;
+  }
+  .add {
+    color: var(--colors-error);
+  }
+  .remove {
+    color: var(--colors-success);
+  }
+}

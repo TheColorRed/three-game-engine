@@ -1,32 +1,83 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400&display=swap");
 @import "@angular/cdk/overlay-prebuilt.css";
+@import "prismjs/plugins/line-numbers/prism-line-numbers.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --colors-primary-border: rgba(255, 0, 55, 0.2);
-  --colors-primary-background: rgba(255, 0, 55, 0.1);
-  --colors-primary-background-hover: rgba(255, 0, 55, 0.2);
-  --colors-primary-foreground: rgba(255, 0, 117, 1);
+  font-size: 16px;
+  // The variables for color
+  --colors-primary-border: #2e2e2e;
+  --colors-primary-border-dark: #4b4b4b;
+  --colors-primary-background: rgba(255, 0, 117, 0.1);
+  --colors-primary-background-hover: rgba(255, 0, 117, 0.2);
   --colors-primary-font: rgba(255, 255, 255, 0.8);
   --colors-primary-font-light: rgba(255, 255, 255, 0.5);
-  --colors-secondary-font: rgba(255, 0, 55, 0.8);
+  --colors-secondary-background: rgba(255, 0, 117, 1);
+  --colors-secondary-background-disabled: rgba(255, 0, 117, 0.2);
+  --colors-secondary-border: rgba(255, 0, 117, 1);
+  --colors-secondary-font: rgba(255, 0, 117, 1);
   --colors-dark-background: rgba(0, 0, 0, 1);
   --colors-main-background: #121212;
   --colors-main-background-light: #1d1d1d;
-
-  --radius-m: 5px;
+  --colors-main-background-light-hover: #252525;
+  --colors-main-background-light-active: var(--colors-secondary-background);
+  // --colors-main-background-light-active: #181818;
+  --colors-main-background-lighter: #2b2b2b;
+  --colors-main-background-lighter-hover: #313131;
+  --colors-success: rgb(80, 255, 80);
+  --colors-warning: rgb(255, 255, 80);
+  --colors-error: rgb(255, 80, 80);
+  --colors-info: rgb(80, 150, 255);
+  // The variables for radius
   --radius-s: 3px;
+  --radius-m: 5px;
+  --radius-l: 10px;
+  // The variables for padding and margin
+  --spacing-xs: 2px;
+  --spacing-s: 5px;
+  --spacing-m: 10px;
+  --spacing-l: 20px;
+  --spacing-xl: 40px;
+  --c: rgb(0, 0, 100);
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
   padding: 0;
   margin: 0;
   background-color: var(--colors-main-background);
-  font-family: "Montserrat", sans-serif;
+  letter-spacing: 1px;
   color: var(--colors-primary-font);
   &:not(input):not(textarea) {
     user-select: none;
   }
+  .ui-backdrop {
+    background: rgba(0, 0, 0, 0.9);
+  }
 }
-* {
+.cursor-text {
+  user-select: text;
+}
+*:not(pre span) {
   box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 18px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--colors-secondary-font);
+  border: solid 6px transparent;
+  background-clip: padding-box;
 }

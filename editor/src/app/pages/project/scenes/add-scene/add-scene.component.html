@@ -1,0 +1,9 @@
+<div [formGroup]="group" class="flex flex-col gap-xl">
+  <ui-form-field>
+    <label ui-label>Scene Name</label>
+    <input ui-input formControlName="scene" />
+  </ui-form-field>
+  <ui-form-field>
+    <ui-checkbox formControlName="isMain">Is Main Scene</ui-checkbox>
+  </ui-form-field>
+</div>

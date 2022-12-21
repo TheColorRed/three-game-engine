@@ -1,16 +1,12 @@
 :host ::ng-deep {
   width: 100%;
   .ui-nav {
-    & > ui-nav-item {
-      &:first-child > .ui-nav-item {
-        border-top-left-radius: var(--radius-m);
-        border-top-right-radius: var(--radius-m);
-      }
-      &:last-child > .ui-nav-item {
-        border-bottom-left-radius: var(--radius-m);
-        border-bottom-right-radius: var(--radius-m);
-        border-bottom: solid 1px var(--colors-primary-border);
-      }
+    border: solid 1px var(--colors-primary-border);
+    & > ui-nav-item:last-child > .ui-nav-item,
+    & > [ui-nav-item]:last-child > .ui-nav-item {
+      //   border-bottom-left-radius: var(--radius-m);
+      //   border-bottom-right-radius: var(--radius-m);
+      border-bottom: 0;
     }
   }
 }

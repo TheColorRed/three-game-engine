@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Animation",
+    "description": "Adds easy to use and create animations to your game.",
+    "moduleName": "@engine/animation",
+    "category": "fx"
+  },
+  {
+    "name": "Particles",
+    "description": "Adds easy to use and create particle systems to your game.",
+    "moduleName": "@engine/particles",
+    "category": "fx"
+  }
+]

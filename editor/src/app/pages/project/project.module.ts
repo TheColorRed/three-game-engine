@@ -13,7 +13,20 @@ import { ProjectComponent } from './project.component';
       {
         path: '',
         component: ProjectComponent,
-        loadChildren: () => import('../project-settings/project-settings.module').then(m => m.ProjectSettingsModule),
+        children: [
+          {
+            path: 'settings',
+            loadChildren: () => import('./settings/project-settings.module').then(m => m.ProjectSettingsModule),
+          },
+          {
+            path: 'resources',
+            loadChildren: () => import('./resources/resources.module').then(m => m.ResourcesModule),
+          },
+          {
+            path: 'scenes',
+            loadChildren: () => import('./scenes/scenes.module').then(m => m.ScenesModule),
+          },
+        ],
       },
     ]),
   ],

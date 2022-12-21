@@ -1,0 +1,12 @@
+.dialog-container {
+  background-color: var(--colors-main-background-light);
+  padding: 50px;
+  border-radius: var(--radius-l);
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2), 0px 5px 5px rgba(0, 0, 0, 0.2);
+
+  &::ng-deep {
+    h2 {
+      margin: 0;
+    }
+  }
+}

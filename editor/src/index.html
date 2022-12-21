@@ -2,11 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self';" />
+    <!-- <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' 'unsafe-inline' fonts.googleapis.com localhost:4200; font-src fonts.gstatic.com;"
+    /> -->
     <title>GameEditor</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <script type="module">
+      // window.ipcRenderer = require("electron").ipcRenderer;
+      // window.dialog = require("electron");
+      // console.log(window.dialog);
+    </script>
   </head>
   <body>
     <app-root></app-root>

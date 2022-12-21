@@ -1,0 +1,12 @@
+<ng-container *ngIf="projects$ | async as projects">
+  <ui-list *ngIf="projects.length > 0">
+    <ui-list-item (click)="openProject(proj)" *ngFor="let proj of projects">
+      <div class="flex flex-row place-content-between place-items-center">
+        <span>
+          {{ proj.name }}
+        </span>
+      </div>
+    </ui-list-item>
+  </ui-list>
+  <div *ngIf="projects.length === 0" class="place-content-center place-items-center">There are no other projects.</div>
+</ng-container>

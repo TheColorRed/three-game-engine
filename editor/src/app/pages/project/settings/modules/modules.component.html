@@ -1,0 +1,79 @@
+<div class="flex flex-col gap-[var(--spacing-xl)]">
+  <!-- Filter and search. -->
+  <div class="module-search flex flex-col gap-[var(--spacing-l)]">
+    <div>
+      <input placeholder="Find a module..." ui-input [(ngModel)]="searchString" (ngModelChange)="search()" />
+    </div>
+    <div class="flex flex-row flex-wrap gap-[var(--spacing-xl)]">
+      <ui-checkbox *ngFor="let i of categories" ngModel (ngModelChange)="filterCategory(i, $event)">{{
+        i | titlecase
+      }}</ui-checkbox>
+    </div>
+  </div>
+
+  <!-- Show active modules. -->
+  <div *ngIf="modules$ | async as modules" class="flex flex-col">
+    <div *ngIf="active$ | async as active">
+      <div
+        (click)="toggleHidden()"
+        class="active-modules-header flex flex-row place-content-between place-items-center"
+      >
+        <h2>Active ({{ active.length }})</h2>
+        <fa-icon
+          size="lg"
+          [icon]="expandCollapseIcon"
+          class="header-state-icon"
+          [ngClass]="{ close: !hideActive }"
+        ></fa-icon>
+      </div>
+      <div
+        #activeModules
+        [ngStyle]="{ height: activeModulesHeight }"
+        class="active-modules grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-m)]"
+        [ngClass]="{ hide: hideActive }"
+      >
+        <div *ngFor="let module of active">
+          <ng-container *ngTemplateOutlet="moduleCard; context: { $implicit: module }"></ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Show all modules (Active and inactive). -->
+    <div *ngFor="let cat of categories" class="flex flex-col">
+      <ng-container *ngIf="(modules | getModuleCategory: cat).length > 0">
+        <h2>{{ cat | titlecase }} ({{ (modules | getModuleCategory: cat).length }})</h2>
+        <div class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[var(--spacing-m)]">
+          <div *ngFor="let module of modules | getModuleCategory: cat">
+            <ng-container *ngTemplateOutlet="moduleCard; context: { $implicit: module }"></ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<ng-template #remove><fa-icon [icon]="moduleAddedIcon" size="xl"></fa-icon></ng-template>
+<ng-template #add><fa-icon [icon]="addModuleIcon" size="xl"></fa-icon></ng-template>
+
+<ng-template #moduleCard let-module>
+  <ui-card class="card h-full w-full" (click)="toggleModule(module)" [ngClass]="{ required: module.required }">
+    <div ui-card-title>{{ module.name }}</div>
+    <ng-container
+      *ngTemplateOutlet="cardAction; context: { $implicit: module }"
+      ngProjectAs="[ui-card-action]"
+    ></ng-container>
+    <div class="card-content" ui-card-content>{{ module.description }}</div>
+  </ui-card>
+</ng-template>
+
+<ng-template #cardAction let-module>
+  <!-- If the module isn't required show current state. -->
+  <div ui-card-action *ngIf="module.required !== true" [ngClass]="{ add: !module.added, remove: module.added }">
+    <ng-container *ngIf="module.added; then remove; else add"></ng-container>
+  </div>
+
+  <!-- If module is required force an activated state. -->
+  <div ui-card-action *ngIf="module.required === true" class="remove">
+    <ng-container [ngTemplateOutlet]="remove"></ng-container>
+  </div>
+</ng-template>

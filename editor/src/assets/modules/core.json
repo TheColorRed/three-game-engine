@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Core",
+    "description": "The Game Engine core where all the logic happens, this module is required.",
+    "moduleName": "@engine/core",
+    "required": true,
+    "added": true,
+    "category": "core"
+  },
+  {
+    "name": "Physics 3D",
+    "description": "Adds 3d physics for cubes, spheres, and many other types of 3d collision.",
+    "moduleName": "@engine/physics",
+    "category": "core"
+  },
+  {
+    "name": "Physics 2D",
+    "description": "Adds 2d physics for boxes, circles, and many other types of 2d collisions.",
+    "moduleName": "@engine/physics2d",
+    "category": "core"
+  }
+]

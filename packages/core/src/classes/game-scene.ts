@@ -34,7 +34,14 @@ export abstract class GameScene<T extends object = object> {
   gameObjectManager: GameObjectManager;
   moduleService = Injector.get(GameModuleService)!;
 
+  get name() {
+    return this.options?.name;
+  }
+
+  private options?: SceneOptions;
+
   constructor(target: Newable<T>, options?: SceneOptions) {
+    this.options = options;
     this.instance = Injector.create(target).get(target)!;
     this.gameObjectManager = Injector.get(GameObjectManager)!;
     this.registeredGameObjects = options?.hierarchy ?? [];
@@ -86,7 +93,7 @@ export abstract class GameScene<T extends object = object> {
    * Activates the scene and deactivates the others.
    */
   setActive() {
-    this.sceneManager.scenes.forEach(cam => cam.isActive = false);
+    this.sceneManager.scenes.forEach(cam => (cam.isActive = false));
     this.isActive = true;
   }
 

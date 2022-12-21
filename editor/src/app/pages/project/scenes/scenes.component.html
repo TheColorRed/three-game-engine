@@ -1,0 +1,24 @@
+<div
+  ui-layout-container
+  *ngIf="{
+    accepted: accepted$ | async,
+    scenes: scenes$ | async
+  } as $"
+>
+  <div ui-layout-sidebar>
+    <div class="flex flex-row place-content-end place-items-center">
+      <button ui-button-icon size="sm" (click)="refresh()">
+        <fa-icon [icon]="refreshIcon"></fa-icon>
+      </button>
+      <button ui-button-icon size="sm" (click)="addScene()">
+        <fa-icon [icon]="addIcon"></fa-icon>
+      </button>
+    </div>
+    <ui-tree>
+      <div ui-tree-item *ngFor="let scene of $.scenes" (click)="showFile(scene)">
+        {{ scene.name }}
+      </div>
+    </ui-tree>
+  </div>
+  <div ui-layout-content></div>
+</div>

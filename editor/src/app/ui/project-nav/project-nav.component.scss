@@ -1,11 +1,21 @@
 .project-sections {
   border-bottom: solid 1px var(--colors-primary-border);
   background-color: var(--colors-primary-background);
-  > div {
+  max-height: 40px;
+  & > div > a {
+    text-decoration: none;
+    color: var(--colors-primary-font);
     padding: 8px 20px;
     cursor: pointer;
     letter-spacing: 2px;
     white-space: nowrap;
+
+    &.active {
+      border-bottom: none;
+      // border-bottom: solid 2px var(--colors-secondary-border);
+      box-shadow: inset 0 -2px 0 var(--colors-secondary-border);
+    }
+
     &:hover {
       background-color: var(--colors-primary-background-hover);
     }

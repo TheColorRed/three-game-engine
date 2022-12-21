@@ -1,0 +1,20 @@
+<div class="flex flex-col gap-[var(--spacing-m)]">
+  <div class="flex flex-row gap-[var(--spacing-m)] place-content-end">
+    <button ui-button (click)="addProject()"><fa-icon [icon]="addProjectIcon"></fa-icon>Add</button>
+    <button ui-button (click)="newProject()"><fa-icon [icon]="newProjectIcon"></fa-icon>New</button>
+  </div>
+  <div>
+    <ui-list *ngFor="let proj of projects$ | async">
+      <ui-list-item (click)="openProject(proj)">
+        <div class="flex flex-row place-content-between place-items-center">
+          <span>
+            {{ proj.name }}
+          </span>
+          <button ui-button-fab (click)="deleteProject(proj, $event)">
+            <fa-icon [icon]="deleteProjectIcon"></fa-icon>
+          </button>
+        </div>
+      </ui-list-item>
+    </ui-list>
+  </div>
+</div>

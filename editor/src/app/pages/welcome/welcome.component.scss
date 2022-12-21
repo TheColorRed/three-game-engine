@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+
+  .welcome-breadcrumbs {
+    padding-left: 100px;
+  }
+
+  .welcome-content {
+    padding: 4rem;
+    border-radius: var(--radius-l);
+    background-color: var(--colors-main-background-light);
+    height: 80vh;
+    width: 80vw;
+
+    .card {
+      cursor: pointer;
+    }
+
+    .welcome-output {
+      padding: 1rem;
+      border: solid 1px var(--colors-primary-border);
+      background-color: var(--colors-main-background-light);
+      overflow: auto;
+      // height: inherit;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+<div class="flex flex-col gap-[var(--spacing-l)]">
+  <div class="flex flex-row place-content-between place-items-center" *ngIf="title || action">
+    <ng-content select="[ui-card-title]"></ng-content>
+    <ng-content select="[ui-card-action]"></ng-content>
+  </div>
+  <div>
+    <ng-content select="[ui-card-content]"></ng-content>
+  </div>
+</div>

@@ -1,0 +1,8 @@
+[
+  {
+    "name": "Networking",
+    "description": "Adds networking support to put your game online using http and/or network sockets.",
+    "moduleName": "@engine/networking",
+    "category": "networking"
+  }
+]

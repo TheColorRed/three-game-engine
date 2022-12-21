@@ -4,16 +4,18 @@
   .ui-nav-item {
     width: inherit;
     padding: 10px 20px;
-    border: solid 1px var(--colors-primary-border);
-    border-bottom: 0;
+    border-bottom: solid 1px var(--colors-primary-border);
     background-color: var(--colors-main-background-light);
     cursor: pointer;
     &:hover {
-      filter: brightness(85%);
+      // filter: brightness(85%);
+      background-color: var(--colors-main-background-light-hover);
     }
-    &.active {
+  }
+  &.active {
+    .content {
       // background-color: var(--colors-primary-foreground-hover);
-      color: var(--colors-primary-foreground);
+      color: var(--colors-secondary-font);
     }
   }
 }

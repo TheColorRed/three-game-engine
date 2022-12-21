@@ -1,0 +1,28 @@
+<div class="flex flex-col gap-xl">
+  <h2>New Project</h2>
+  <div
+    class="flex flex-col gap-[var(--spacing-l)]"
+    *ngIf="{ save: location$ | async, check: doChecks$ | async } as data"
+  >
+    <ui-form-field>
+      <label ui-label>Project Name</label>
+      <input ui-input [(ngModel)]="projectTitle" (ngModelChange)="projectCheck()" />
+    </ui-form-field>
+    <ui-form-field>
+      <label ui-label>Project Location</label>
+      <input ui-input [(ngModel)]="projectLocation" (ngModelChange)="projectCheck()" />
+      <div ui-form-field-actions>
+        <button ui-button-fab (click)="openFolder()">
+          <fa-icon [icon]="openFolderIcon"></fa-icon>
+        </button>
+      </div>
+    </ui-form-field>
+    <div>
+      Location: <span class="save-location">{{ projectLocation }}{{ sep$ | async }}{{ projectTitle }}</span>
+    </div>
+    <div *ngIf="fsExists || projectExists">
+      <div *ngIf="fsExists" class="error">This project already exists on disk.</div>
+      <div *ngIf="projectExists" class="error">This project has already been imported.</div>
+    </div>
+  </div>
+</div>

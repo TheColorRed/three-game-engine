@@ -1,0 +1,129 @@
+<div
+  ui-layout-container
+  *ngIf="{
+    params: fileParams$ | async,
+    file: fileContent$ | async,
+    resize: resize$ | async,
+    dblClick: dblclick$ | async
+  } as resource"
+>
+  <!-- Begin: Side Bar -->
+  <div dropzone ui-layout-sidebar (files)="copyFiles($event)" [style.display]="showSidebar ? 'block' : 'none'">
+    <!-- Begin: Filter -->
+    <div class="flex-grow-0">
+      <div class="flex flex-row place-content-between gap-[var(--spacing-s)]">
+        <div>
+          <button
+            ui-button-icon
+            [ui-button-toggle]="false"
+            (toggled)="filterType($event, 'models')"
+            size="sm"
+            tooltip="Toggle Models"
+          >
+            <fa-icon [fixedWidth]="true" [icon]="modelIcon"></fa-icon>
+          </button>
+          <button
+            ui-button-icon
+            [ui-button-toggle]="false"
+            (toggled)="filterType($event, 'images')"
+            size="sm"
+            tooltip="Toggle Images"
+          >
+            <fa-icon [fixedWidth]="true" [icon]="imageIcon"></fa-icon>
+          </button>
+          <button
+            ui-button-icon
+            [ui-button-toggle]="false"
+            (toggled)="filterType($event, 'audio')"
+            size="sm"
+            tooltip="Toggle Audio"
+          >
+            <fa-icon [fixedWidth]="true" [icon]="audioIcon"></fa-icon>
+          </button>
+          <button
+            ui-button-icon
+            [ui-button-toggle]="false"
+            (toggled)="filterType($event, 'video')"
+            size="sm"
+            tooltip="Toggle Video"
+          >
+            <fa-icon [fixedWidth]="true" [icon]="videoIcon"></fa-icon>
+          </button>
+          <button
+            ui-button-icon
+            [ui-button-toggle]="false"
+            (toggled)="filterType($event, 'documents')"
+            size="sm"
+            tooltip="Toggle Documents"
+          >
+            <fa-icon [fixedWidth]="true" [icon]="textIcon"></fa-icon>
+          </button>
+        </div>
+        <div>
+          <button ui-button-icon size="sm" (click)="addItem()" tooltip="Add Resource">
+            <fa-icon [icon]="addIcon"></fa-icon>
+          </button>
+        </div>
+      </div>
+      <div>
+        <input ui-input size="sm" #q (input)="filterText(q.value)" />
+      </div>
+    </div>
+    <!-- End: Filter -->
+    <!-- Begin: Tree -->
+    <div *ngIf="files$ | async as files" class="overflow-auto h-full flex-grow">
+      <ui-tree size="sm">
+        <div
+          (click)="open(file)"
+          ui-tree-item
+          *ngFor="let file of files"
+          [active]="resource.file?.path === file.path"
+          class="tree-item"
+        >
+          <div class="flex flex-row place-content-between place-items-center whitespace-nowrap">
+            <div class="flex flex-row gap-[var(--spacing-s)]">
+              <fa-icon [fixedWidth]="true" *ngIf="file.isModel" [icon]="modelIcon"></fa-icon>
+              <fa-icon [fixedWidth]="true" *ngIf="file.isImage" [icon]="imageIcon"></fa-icon>
+              <fa-icon [fixedWidth]="true" *ngIf="file.isAudio" [icon]="audioIcon"></fa-icon>
+              <fa-icon [fixedWidth]="true" *ngIf="file.isVideo" [icon]="videoIcon"></fa-icon>
+              <fa-icon [fixedWidth]="true" *ngIf="file.isText" [icon]="textIcon"></fa-icon>
+              <span>
+                {{ file.resourcePath }}
+              </span>
+              <!-- {{ file.name }} -->
+            </div>
+            <div class="actions">
+              <button ui-button-icon size="sm" (click)="removeItem($event, file)" tooltip="Remove Resource">
+                <fa-icon [icon]="removeIcon"></fa-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </ui-tree>
+    </div>
+    <!-- End: Tree -->
+  </div>
+  <!-- End: Side Bar -->
+  <div ui-dragbar></div>
+  <!-- Begin: Content -->
+  <div ui-layout-content>
+    <ng-container *ngIf="resource.file as file">
+      <ng-container *ngTemplateOutlet="file.isText ? text : null; context: { $implicit: file }"></ng-container>
+      <ng-container *ngTemplateOutlet="file.isImage ? image : null; context: { $implicit: file }"></ng-container>
+      <ng-container *ngTemplateOutlet="file.isModel ? model : null; context: { $implicit: file }"></ng-container>
+    </ng-container>
+  </div>
+  <!-- End: Content -->
+</div>
+
+<ng-template #text let-file>
+  <ui-prism class="flex w-full h-full" [language]="file.extension" [code]="file | fileContent"></ui-prism>
+</ng-template>
+
+<ng-template #image let-file>
+  <img [src]="file.safePath" class="object-scale-down h-full w-full" />
+</ng-template>
+
+<ng-template #model let-file>
+  <ui-three-viewer [file]="file"></ui-three-viewer>
+</ng-template>

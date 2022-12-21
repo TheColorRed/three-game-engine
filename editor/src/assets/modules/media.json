@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Audio",
+    "description": "Adds audio features to the game.",
+    "moduleName": "@engine/audio",
+    "category": "media"
+  },
+  {
+    "name": "Video",
+    "description": "Adds video features to the game.",
+    "moduleName": "@engine/video",
+    "category": "media"
+  }
+]

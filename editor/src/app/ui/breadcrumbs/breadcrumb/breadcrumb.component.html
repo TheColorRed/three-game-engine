@@ -1,0 +1,6 @@
+<div class="flex flex-row place-content-start place-items-center">
+  <div class="text" [ngClass]="{ last: isLast }">
+    <ng-content></ng-content>
+  </div>
+  <fa-icon *ngIf="!isLast" class="icon" [icon]="separatorIcon" size="sm"></fa-icon>
+</div>

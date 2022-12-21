@@ -1,0 +1,19 @@
+<div class="flex flex-col gap-[var(--spacing-l)]">
+  <div class="flex flex-row place-content-between place-items-center">
+    <div class="flex-grow">
+      <h2>Menu</h2>
+    </div>
+    <div>
+      <button ui-button-fab class="close-button" (click)="onClose()">
+        <fa-icon [icon]="closeIcon" size="xl"></fa-icon>
+      </button>
+    </div>
+  </div>
+  <div>
+    <ui-nav>
+      <a routerLink="/" ui-nav-item [icon]="homeIcon">Home</a>
+      <ui-nav-item [icon]="closeProjectIcon" (click)="closeProject()">Close Project</ui-nav-item>
+      <ui-nav-item [icon]="openProjectIcon" (click)="openProjectDialog()">Open Project</ui-nav-item>
+    </ui-nav>
+  </div>
+</div>

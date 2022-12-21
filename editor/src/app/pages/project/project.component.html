@@ -1,6 +1,8 @@
-<div fxFill>
-  <ui-project-nav></ui-project-nav>
+<div class="w-full">
+  <ui-project-nav (openMenu)="openMenu()"></ui-project-nav>
 </div>
-<div>
+<div class="p-4 h-full">
   <router-outlet></router-outlet>
 </div>
+
+<ui-menu (close)="closeMenu()"></ui-menu>

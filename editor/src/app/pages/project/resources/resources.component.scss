@@ -1,0 +1,26 @@
+:host {
+  display: block;
+  height: 100%;
+  .tree {
+    background-color: var(--colors-main-background-light);
+  }
+  .output {
+    background-color: var(--colors-main-background-lighter);
+  }
+  .tree-item {
+    .actions {
+      visibility: hidden;
+    }
+
+    &:hover .actions {
+      visibility: visible;
+    }
+  }
+  pre {
+    margin: 0;
+  }
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+}

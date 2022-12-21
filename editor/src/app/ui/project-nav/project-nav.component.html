@@ -1,12 +1,40 @@
-<div fxLayout="row" class="project-sections">
-  <div tooltip="Menu"><fa-icon [fixedWidth]="true" size="lg" [icon]="menuIcon"></fa-icon></div>
-  <div tooltip="Save Project"><fa-icon [fixedWidth]="true" size="lg" [icon]="saveIcon"></fa-icon></div>
-  <div tooltip="Launch Game"><fa-icon [fixedWidth]="true" size="lg" [icon]="runIcon"></fa-icon></div>
-  <div><fa-icon [fixedWidth]="true" size="lg" [icon]="projectIcon"></fa-icon> <span>Project</span></div>
-  <div><fa-icon [fixedWidth]="true" size="lg" [icon]="resourcesIcon"></fa-icon> <span>Resources</span></div>
-  <div><fa-icon [fixedWidth]="true" size="lg" [icon]="scenesIcon"></fa-icon> <span>Scenes</span></div>
-  <div><fa-icon [fixedWidth]="true" size="lg" [icon]="texturesIcon"></fa-icon> <span>Textures</span></div>
-  <div><fa-icon [fixedWidth]="true" size="lg" [icon]="gameObjectsIcon"></fa-icon> <span>Objects</span></div>
-  <div><fa-icon [fixedWidth]="true" size="lg" [icon]="soundsIcon"></fa-icon> <span>Sounds</span></div>
-  <div><fa-icon [fixedWidth]="true" size="lg" [icon]="fxIcon"></fa-icon> <span>Effects</span></div>
+<div class="project-sections flex flex-row place-content-between w-full">
+  <div class="flex flex-row flex-grow place-content-start place-items-center">
+    <a tooltip="Menu" (click)="openMenu.emit()"><fa-icon [fixedWidth]="true" size="lg" [icon]="menuIcon"></fa-icon></a>
+    <a tooltip="Save Project"><fa-icon [fixedWidth]="true" size="lg" [icon]="saveIcon"></fa-icon></a>
+    <a routerLink="./launch" routerLinkActive="active" tooltip="Launch Game">
+      <fa-icon [fixedWidth]="true" size="lg" [icon]="runIcon"></fa-icon>
+    </a>
+    <a routerLink="./settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
+      <ng-container *ngTemplateOutlet="content; context: { icon: projectIcon, text: 'Project' }"></ng-container>
+    </a>
+    <a routerLink="./resources" routerLinkActive="active">
+      <ng-container *ngTemplateOutlet="content; context: { icon: resourcesIcon, text: 'Resources' }"></ng-container>
+    </a>
+    <a routerLink="./scenes" routerLinkActive="active">
+      <ng-container *ngTemplateOutlet="content; context: { icon: scenesIcon, text: 'Scenes' }"></ng-container>
+    </a>
+    <a routerLink="./textures" routerLinkActive="active">
+      <ng-container *ngTemplateOutlet="content; context: { icon: texturesIcon, text: 'Textures' }"></ng-container>
+    </a>
+    <a routerLink="./objects" routerLinkActive="active">
+      <ng-container *ngTemplateOutlet="content; context: { icon: gameObjectsIcon, text: 'Objects' }"></ng-container>
+    </a>
+    <a routerLink="./sounds" routerLinkActive="active">
+      <ng-container *ngTemplateOutlet="content; context: { icon: soundsIcon, text: 'Sounds' }"></ng-container>
+    </a>
+    <a routerLink="/Effects" routerLinkActive="active">
+      <ng-container *ngTemplateOutlet="content; context: { icon: fxIcon, text: 'Effects' }"></ng-container>
+    </a>
+  </div>
+  <div class="flex-shrink flex flex-row place-content-start place-items-center">
+    <a routerLink="./launch" routerLinkActive="active" tooltip="Help">
+      <fa-icon [fixedWidth]="true" size="lg" [icon]="helpIcon"></fa-icon>
+    </a>
+  </div>
 </div>
+
+<ng-template #content let-icon="icon" let-text="text">
+  <fa-icon [fixedWidth]="true" size="lg" [icon]="icon"></fa-icon>
+  <span>{{ text }}</span>
+</ng-template>

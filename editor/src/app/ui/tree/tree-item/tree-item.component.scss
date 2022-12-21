@@ -1,0 +1,16 @@
+:host {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  &.tree-item-active {
+    background-color: var(--colors-main-background-light-active);
+  }
+
+  &:hover:not(.tree-item-active) {
+    background-color: var(--colors-main-background-light-hover);
+  }
+
+  .tree-item-content {
+    padding: var(--spacing-xs) var(--spacing-m);
+  }
+}

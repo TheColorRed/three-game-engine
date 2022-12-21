@@ -1,0 +1,19 @@
+:host {
+  padding: 6px 8px;
+  outline: none;
+  background-color: var(--colors-main-background);
+  // background-color: transparent;
+  border: solid 1px var(--colors-primary-border-dark);
+  color: var(--colors-primary-font-light);
+  font-size: 1rem;
+  width: 100%;
+
+  &.small {
+    padding: 4px 6px;
+    font-size: 0.8rem;
+  }
+
+  &:focus {
+    border: solid 1px var(--colors-secondary-border);
+  }
+}

@@ -6,11 +6,14 @@ import { Component, ElementRef, HostBinding, Input } from '@angular/core';
   styleUrls: ['./input.component.scss'],
 })
 export class InputComponent {
-  @Input() size: 'sm' | 'md' = 'md';
+  @Input() size: 'xs' | 'sm' | 'md' = 'md';
 
-  @HostBinding('class.small')
+  @HostBinding('class')
   get elementSize() {
-    return this.size === 'sm';
+    return {
+      small: this.size === 'sm',
+      'x-small': this.size === 'xs',
+    };
   }
 
   get value() {

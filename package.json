@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "scripts": {
     "start": "npm run start --workspace=test",
-    "start:editor": "npm run start -w editor"
+    "start:editor": "npm run start -w editor",
+    "tailwind:update": "npm run tailwind:update -w editor"
   },
   "workspaces": [
     "test",
     "editor",
     "packages/animation",
     "packages/core",
+    "packages/editor",
     "packages/input",
     "packages/objects",
     "packages/particles",
@@ -17,6 +19,6 @@
     "packages/physics2d"
   ],
   "devDependencies": {
-    "typescript": "^4.9.3"
+    "typescript": "4.9.4"
   }
 }

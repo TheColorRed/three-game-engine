@@ -1,7 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400&display=swap");
-@import "@angular/cdk/overlay-prebuilt.css";
-@import "prismjs/plugins/line-numbers/prism-line-numbers.css";
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400&display=swap');
+@import '@angular/cdk/overlay-prebuilt.css';
+@import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
 
 @tailwind base;
 @tailwind components;
@@ -42,7 +42,12 @@
   --spacing-m: 10px;
   --spacing-l: 20px;
   --spacing-xl: 40px;
-  --c: rgb(0, 0, 100);
+  // The variables for font size
+  --font-size-xs: 0.5rem;
+  --font-size-s: 0.7rem;
+  --font-size-m: 1rem;
+  --font-size-l: 1.5rem;
+  --font-size-xl: 2rem;
 }
 
 html,
@@ -68,7 +73,7 @@ body {
 }
 *:not(pre span) {
   box-sizing: border-box;
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 ::-webkit-scrollbar {

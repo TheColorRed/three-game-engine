@@ -5,7 +5,7 @@
     "outDir": "../dist"
   },
   "files": [
-    "index.ts",
-    "./preload.ts"
+    "./app/index.ts",
+    "./app/preload.ts"
   ]
 }

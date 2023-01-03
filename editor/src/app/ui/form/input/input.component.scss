@@ -13,6 +13,11 @@
     font-size: 0.8rem;
   }
 
+  &.x-small {
+    padding: 2px 3px;
+    font-size: 0.7rem;
+  }
+
   &:focus {
     border: solid 1px var(--colors-secondary-border);
   }

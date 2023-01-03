@@ -26,6 +26,9 @@
       "@angular/*": [
         "../node_modules/@angular/*"
       ],
+      "@editor/*": [
+        "../node_modules/@engine/editor"
+      ],
       "@ui/*": [
         "./src/app/ui/*"
       ],

@@ -1,22 +1,31 @@
 import { Injectable } from '@angular/core';
-import { map, of, switchMap } from 'rxjs';
+import { BehaviorSubject, filter, from, map, of, tap } from 'rxjs';
 import { File } from 'src/app/classes/file';
-import { TypescriptService } from '../typescript.service';
+import * as ts from 'typescript';
+import { ObjectConfig, TypescriptService } from '../typescript/typescript.service';
 
 @Injectable({ providedIn: 'root' })
 export class SceneEditorService {
-  constructor(private readonly ts: TypescriptService) {}
+  private scene = new BehaviorSubject<ts.Node | undefined>(undefined);
+  private readonly config = new BehaviorSubject<ObjectConfig | undefined>(undefined);
 
-  getFileName(file: File) {
-    return this.ts.getSource(file).pipe(
-      switchMap(src =>
-        of(src).pipe(
-          map(() => this.ts.getClassDecorator('Scene', src)),
-          map(dec => dec && this.ts.getDecoratorParam(dec, 0, src)),
-          map(obj => obj && this.ts.getObjectProp(obj, 'name', src)),
-          map(prop => prop && this.ts.setObjectPropValue(prop, "'Awesome'", src))
-        )
-      )
+  scene$ = this.scene.pipe(filter(val => typeof val !== 'undefined' && 'kind' in val && ts.isSourceFile(val as any)));
+  config$ = this.config.asObservable();
+
+  constructor(private readonly typescriptService: TypescriptService) {}
+
+  getSceneConfig(src: ts.SourceFile | File) {
+    const source = src instanceof File ? from(src.tsContent()) : of(src);
+    return source.pipe(
+      map(src => this.typescriptService.getDecoratorConfigValues('Scene', src)),
+      tap(cfg => this.config.next(cfg))
+    );
+  }
+
+  setSceneConfigProp(file: File, prop: string, value: string) {
+    return this.typescriptService.getSource(file).pipe(
+      map(src => this.typescriptService.setDecoratorConfigValue('Scene', prop, value, src)),
+      tap(src => this.typescriptService.saveSource(file, src))
     );
   }
 

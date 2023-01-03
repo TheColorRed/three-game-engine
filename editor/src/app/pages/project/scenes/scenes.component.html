@@ -2,7 +2,8 @@
   ui-layout-container
   *ngIf="{
     accepted: accepted$ | async,
-    scenes: scenes$ | async
+    scenes: scenes$ | async,
+    keyup: keyup$ | async
   } as $"
 >
   <div ui-layout-sidebar>
@@ -21,4 +22,19 @@
     </ui-tree>
   </div>
   <div ui-layout-content></div>
+  <div ui-layout-sidebar *ngIf="config$ | async as cfg">
+    <div *ngIf="currentFile" class="flex flex-col gap-md">
+      <ui-form-field direction="horizontal">
+        <label ui-label class="w-[50px] flex-grow-0 text-sm">Name</label>
+        <input ui-input [ngModel]="cfg['name'].value" (ngModelChange)="update(currentFile, 'name', $event)" size="xs" />
+      </ui-form-field>
+      <ui-form-field>
+        <label ui-label class="w-[100px] text-sm place-self-start">Hierarchy</label>
+        <ng-container *ngFor="let item of cfg['hierarchy'].value">
+          <input ui-input [ngModel]="item.value" size="xs" />
+        </ng-container>
+        <!-- <input ui-input [ngModel]="cfg['name'].value" (ngModelChange)="update(currentFile, 'name', $event)" /> -->
+      </ui-form-field>
+    </div>
+  </div>
 </div>

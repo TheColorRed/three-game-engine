@@ -1,0 +1,8 @@
+{
+  "name": "@engine/editor",
+  "main": "./src/index",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "typescript": "4.9.4"
+  }
+}

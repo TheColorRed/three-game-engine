@@ -1,5 +1,7 @@
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import * as nodePath from 'path';
+import { map } from 'rxjs';
+import * as ts from 'typescript';
 import { AppInjector } from '../app.module';
 import { FileSystemService } from '../services/fs.service';
 import { MimeService } from '../services/mime.service';
@@ -55,6 +57,16 @@ export class File {
 
   content() {
     return this.fs.read(this.path);
+  }
+
+  tsContent() {
+    return this.content().pipe(
+      map(content => ts.createSourceFile(this.path, content, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS))
+    );
+  }
+
+  save(content: string) {
+    return this.fs.write(this.path, content);
   }
 
   isParentDirectory(directory: string) {

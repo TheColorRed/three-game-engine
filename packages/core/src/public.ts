@@ -24,7 +24,7 @@ export * from './decorators/light';
 export * from './decorators/listener';
 export * from './decorators/module';
 export * from './decorators/object-child';
-export * from './decorators/scene';
+export * from './decorators/scene.decorator';
 export * from './decorators/timing/audit';
 export * from './decorators/timing/burst';
 export * from './decorators/timing/choice';

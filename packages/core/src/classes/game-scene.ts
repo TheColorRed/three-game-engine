@@ -3,7 +3,7 @@ import { Euler } from '../classes/transforms/euler';
 import { Vector3 } from '../classes/transforms/vector';
 import { Debug } from '../debug';
 import { GameModule } from '../decorators/module';
-import { SceneOptions } from '../decorators/scene';
+import { SceneOptions } from '../decorators/scene.decorator';
 import { Injector } from '../di/injector';
 import { CameraManager } from '../services/camera-manager.service';
 import { GameModuleService } from '../services/game-module.service';
